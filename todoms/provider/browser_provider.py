@@ -1,0 +1,92 @@
+import urllib.parse
+import webbrowser
+import wsgiref.simple_server
+import wsgiref.util
+
+from requests_oauthlib import OAuth2Session
+
+
+class WebBrowserProvider(object):
+    """An provider that can call webbrowser to open sign-in page"""
+
+    _SCOPES = "profile openid User.Read Calendars.Read Tasks.Read"
+
+    def __init__(
+        self,
+        app_id: str,
+        app_secret: str,
+        authority: str = "https://login.microsoftonline.com/common/",
+        authorize_endpoint: str = "oauth2/v2.0/authorize",
+        token_endpoint: str = "oauth2/v2.0/token",
+    ):
+        self._app_id = app_id
+        self._app_secret = app_secret
+        self._authority = authority
+        self._authorize_endpoint = authorize_endpoint
+        self._token_endpoint = token_endpoint
+
+        self._session = None
+
+    def authorize(self, local_port: int = 8888):
+        """Run authorization workflow. Call webbrowser login, get response and token
+
+        'local_port' - on this port we wait for redirection from sing-in page.
+        Address http://localhost:<local_port>/ must be allowed as redirect URL. """
+
+        redirect_url = f"http://localhost:{local_port}"
+
+        self._session = OAuth2Session(
+            self._app_id,
+            scope=self._SCOPES,
+            redirect_uri=self._replace_http_into_https(redirect_url),
+        )
+        # Workaround for InsecureTransportError from OAuthLib for http://localhost
+        self._session.redirect_uri = redirect_url
+
+        sign_in_url, state = self._session.authorization_url(
+            self._authorize_url, prompt="login"
+        )
+
+        response_app = _LocalRedirectHandlingApp()
+        response_server = wsgiref.simple_server.make_server(
+            "localhost", local_port, response_app
+        )
+
+        webbrowser.open(sign_in_url)
+        response_server.handle_request()
+
+        self._token = self._session.fetch_token(
+            self._token_url,
+            client_secret=self._app_secret,
+            authorization_response=self._replace_http_into_https(
+                response_app.callback_url
+            ),
+        )
+
+    @property
+    def _authorize_url(self):
+        return urllib.parse.urljoin(self._authority, self._authorize_endpoint)
+
+    @property
+    def _token_url(self):
+        return urllib.parse.urljoin(self._authority, self._token_endpoint)
+
+    def _replace_http_into_https(self, url: str):
+        """OAuthLib strictly expects HTTPS protocol, even for localhost"""
+        if url.startswith("http://"):
+            return url.replace("http", "https", 1)
+        return url
+
+
+class _LocalRedirectHandlingApp(object):
+    """A WSGI app handles redirection from sign-in service."""
+
+    _MESSAGE = "Authorization completed. You can close this page and return to the app"
+
+    def __init__(self):
+        self.callback_url = None
+
+    def __call__(self, environ, start_response):
+        start_response("200 OK", [("Content-type", "text/plain")])
+        self.callback_url = wsgiref.util.request_uri(environ)
+        return [self._MESSAGE.encode("utf-8")]
