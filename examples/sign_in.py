@@ -1,7 +1,7 @@
 import os
 
-from todoms.provider import WebBrowserProvider
 from todoms.client import ToDoClient
+from todoms.provider import WebBrowserProvider
 from todoms.resources import TaskList
 
 # Get app details from MS and register "http://localhost:8000" as redirect URI, see:

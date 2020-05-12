@@ -22,7 +22,7 @@ class ToDoClient(object):
         if response.status_code != codes.ok:
             raise ResponseError(response)
 
-        return [resource_type(element) for element in response.json()["value"]]
+        return [resource_type(self, **element) for element in response.json()["value"]]
 
 
 class ResponseError(Exception):
