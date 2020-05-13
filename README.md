@@ -1,4 +1,5 @@
 # ToDo-MS-client
+![](https://github.com/kam193/todo-ms-client/workflows/Push%20CI%20workflow/badge.svg)
 
 Unofficial Python library for MS ToDo API
 
