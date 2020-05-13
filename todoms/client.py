@@ -14,23 +14,50 @@ class ToDoClient(object):
         self._provider = provider
         self._url = f"{api_url}/{api_prefix}"  # TODO: safe concatenation
 
-    def list(self, resource_type: Resource):
-        url = f"{self._url}/{resource_type.ENDPOINT}"
+    def list(self, resource_class: Resource):
+        url = f"{self._url}/{resource_class.ENDPOINT}"
 
         response = self._provider.get(url)
 
-        if response.status_code != codes.ok:
-            raise ResponseError(response)
+        self._map_http_errors(response, codes.ok)
 
-        return [resource_type(self, **element) for element in response.json()["value"]]
+        return [resource_class(self, **element) for element in response.json()["value"]]
+
+    def get(self, resource_class, resource_id):
+        # TODO: safe concatenation
+        url = f"{self._url}/{resource_class.ENDPOINT}/{resource_id}"
+
+        response = self._provider.get(url)
+
+        self._map_http_errors(response, codes.ok)
+
+        return resource_class(self, **response.json())
+
+    def _map_http_errors(self, response, expected):
+        if response.status_code == codes.not_found:
+            raise ResourceNotFoundError(response)
+
+        if response.status_code != expected:
+            raise ResponseError(response)
 
 
 class ResponseError(Exception):
     """Response returned an error"""
 
+    MESSAGE = None
+
     def __init__(self, response):
         self.response = response
 
     def __str__(self):
+        if self.MESSAGE:
+            return self.MESSAGE
+
         details = f"{self.response.status_code} {self.response.reason}"
         return f"Server returned an error: {details}"
+
+
+class ResourceNotFoundError(ResponseError):
+    """Requested resource not exists"""
+
+    MESSAGE = "404 Resource not found"

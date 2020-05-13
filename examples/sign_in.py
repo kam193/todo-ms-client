@@ -17,3 +17,7 @@ client = ToDoClient(provider)
 task_lists = client.list(TaskList)
 
 print(task_lists)
+
+list_1 = client.get(TaskList, task_lists[0].id)
+
+print(list_1)
