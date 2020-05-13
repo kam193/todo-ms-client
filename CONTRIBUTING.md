@@ -9,4 +9,4 @@
 | **Changelog**        | Keep CHANGELOG.md up-to-date. Review it before release.                           |
 | **Style guide**      | We use `flake8`, `black` and obligatory `isort`.                                  |
 | **Pip requirements** | We use [pip-tools](https://github.com/jazzband/pip-tools) to manage requirements  |
-| **Python**           | Supported Python is 3.6+                                                          |
+| **Python**           | Supported Python is 3.7+                                                          |

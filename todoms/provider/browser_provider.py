@@ -5,8 +5,10 @@ import wsgiref.util
 
 from requests_oauthlib import OAuth2Session
 
+from .base import AbstractProvider
 
-class WebBrowserProvider(object):
+
+class WebBrowserProvider(AbstractProvider):
     """An provider that can call webbrowser to open sign-in page"""
 
     _SCOPES = "profile openid User.Read Calendars.Read Tasks.Read"
@@ -35,13 +37,7 @@ class WebBrowserProvider(object):
 
         redirect_url = f"http://localhost:{local_port}"
 
-        self._session = OAuth2Session(
-            self._app_id,
-            scope=self._SCOPES,
-            redirect_uri=self._replace_http_into_https(redirect_url),
-        )
-        # Workaround for InsecureTransportError from OAuthLib for http://localhost
-        self._session.redirect_uri = redirect_url
+        self._session = self._build_session(redirect_url)
 
         sign_in_url, state = self._session.authorization_url(
             self._authorize_url, prompt="login"
@@ -63,6 +59,12 @@ class WebBrowserProvider(object):
             ),
         )
 
+    def get(self, *args, **kwargs):
+        if not self._token:
+            raise RequestBeforeAuthenticatedError
+
+        return self._session.get(*args, **kwargs)
+
     @property
     def _authorize_url(self):
         return urllib.parse.urljoin(self._authority, self._authorize_endpoint)
@@ -70,6 +72,25 @@ class WebBrowserProvider(object):
     @property
     def _token_url(self):
         return urllib.parse.urljoin(self._authority, self._token_endpoint)
+
+    def _build_session(self, redirect_url: str):
+        refresh_params = {"client_id": self._app_id, "client_secret": self._app_secret}
+
+        session = OAuth2Session(
+            self._app_id,
+            scope=self._SCOPES,
+            redirect_uri=self._replace_http_into_https(redirect_url),
+            auto_refresh_url=self._token_url,
+            auto_refresh_kwargs=refresh_params,
+            token_updater=self._save_token,
+        )
+        # Workaround for InsecureTransportError from OAuthLib for http://localhost
+        session.redirect_uri = redirect_url
+
+        return session
+
+    def _save_token(self, token):
+        self._token = token
 
     def _replace_http_into_https(self, url: str):
         """OAuthLib strictly expects HTTPS protocol, even for localhost"""
@@ -90,3 +111,7 @@ class _LocalRedirectHandlingApp(object):
         start_response("200 OK", [("Content-type", "text/plain")])
         self.callback_url = wsgiref.util.request_uri(environ)
         return [self._MESSAGE.encode("utf-8")]
+
+
+class RequestBeforeAuthenticatedError(Exception):
+    """Try to execute request before authenticate"""
