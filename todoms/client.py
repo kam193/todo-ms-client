@@ -16,12 +16,16 @@ class ToDoClient(object):
 
     def list(self, resource_class: Resource):
         url = f"{self._url}/{resource_class.ENDPOINT}"
+        elements = []
 
-        response = self._provider.get(url)
+        while url:
+            response = self._provider.get(url)
+            self._map_http_errors(response, codes.ok)
+            data = response.json()
+            elements += data["value"]
+            url = data.get("@odata.nextLink", None)
 
-        self._map_http_errors(response, codes.ok)
-
-        return [resource_class(self, **element) for element in response.json()["value"]]
+        return [resource_class(self, **element) for element in elements]
 
     def get(self, resource_class, resource_id):
         # TODO: safe concatenation
