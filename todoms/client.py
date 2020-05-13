@@ -27,7 +27,7 @@ class ToDoClient(object):
 
         return [resource_class(self, **element) for element in elements]
 
-    def get(self, resource_class, resource_id):
+    def get(self, resource_class: Resource, resource_id: str):
         # TODO: safe concatenation
         url = f"{self._url}/{resource_class.ENDPOINT}/{resource_id}"
 
