@@ -54,3 +54,30 @@ jobs:
           name: pytest-results
           path: pytest_report.html
         if: ${{ always() }}
+
+  build:
+    name: Build package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+      - name: Cache pip
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install & upgrade building tools
+        run: pip install --upgrade setuptools wheel
+      - name: Build package
+        run: python setup.py sdist bdist_wheel
+      - name: Upload package
+        uses: actions/upload-artifact@master
+        with:
+          name: package-distributions
+          path: dist/*
+        if: ${{ always() }}
