@@ -47,4 +47,10 @@ jobs:
       - name: Install tox
         run: pip install tox
       - name: Run tox unittests
-        run: tox
+        run: tox -- --html=pytest_report.html --self-contained-html --cov=todoms
+      - name: Upload test results
+        uses: actions/upload-artifact@master
+        with:
+          name: pytest-results
+          path: pytest_report.html
+        if: ${{ always() }}

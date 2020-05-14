@@ -6,4 +6,6 @@ flake8
 isort
 tox
 pytest
+pytest-html
+pytest-cov
 requests-mock
