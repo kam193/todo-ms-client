@@ -1,4 +1,4 @@
-name: Push CI workflow
+name: Test and build
 
 on: push
 
@@ -23,3 +23,62 @@ jobs:
         run: pip install tox
       - name: Run tox linter, formatter and isort check
         run: tox -elint
+
+  unittests:
+    name: Run unittests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.7"
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+      - name: Cache pip
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install tox
+        run: pip install tox
+      - name: Run tox unittests
+        run: tox -- --html=pytest_report.html --self-contained-html --cov=todoms
+      - name: Upload test results
+        uses: actions/upload-artifact@master
+        with:
+          name: pytest-results
+          path: pytest_report.html
+        if: ${{ always() }}
+
+  build:
+    name: Build package
+    runs-on: ubuntu-latest
+    needs: [style_check, unittests]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+      - name: Cache pip
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install & upgrade building tools
+        run: pip install --upgrade setuptools wheel
+      - name: Build package
+        run: python setup.py sdist bdist_wheel
+      - name: Upload package as artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: package-distributions
+          path: dist/*
+        if: ${{ always() }}
