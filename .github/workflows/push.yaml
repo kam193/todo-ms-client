@@ -75,7 +75,7 @@ jobs:
         run: pip install --upgrade setuptools wheel
       - name: Build package
         run: python setup.py sdist bdist_wheel
-      - name: Upload package
+      - name: Upload package as artifacts
         uses: actions/upload-artifact@master
         with:
           name: package-distributions
