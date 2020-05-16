@@ -13,7 +13,7 @@ def requirements():
 
 setup(
     name="todo-ms-client",
-    version="0.0-dev",
+    version="0.0.0-dev",
     description="Unofficial Python library for MS ToDo API",
     long_description=readme(),
     install_requires=requirements(),
