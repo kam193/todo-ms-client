@@ -1,8 +1,9 @@
 import os
+from pprint import pprint
 
 from todoms.client import ToDoClient
 from todoms.provider import WebBrowserProvider
-from todoms.resources import TaskList
+from todoms.resources import Task, TaskList
 
 # Get app details from MS and register "http://localhost:8000" as redirect URI, see:
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app
@@ -21,3 +22,7 @@ print(task_lists)
 list_1 = client.get(TaskList, task_lists[0].id)
 
 print(list_1)
+pprint(list_1.get_tasks())
+
+all_tasks = client.list(Task)
+pprint(all_tasks)
