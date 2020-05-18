@@ -14,16 +14,18 @@ class ToDoClient(object):
         self._provider = provider
         self._url = f"{api_url}/{api_prefix}"  # TODO: safe concatenation
 
-    def list(self, resource_class: Resource):
-        url = f"{self._url}/{resource_class.ENDPOINT}"
-        elements = []
+    def list(self, resource_class: Resource, endpoint: str = None, **kwargs):
+        url = f"{self._url}/{endpoint or resource_class.ENDPOINT}"
+        params = resource_class.handle_list_filters(**kwargs)
 
+        elements = []
         while url:
-            response = self._provider.get(url)
+            response = self._provider.get(url, params=params)
             self._map_http_errors(response, codes.ok)
             data = response.json()
             elements += data["value"]
             url = data.get("@odata.nextLink", None)
+            params = {}
 
         return [resource_class(self, **element) for element in elements]
 
