@@ -14,6 +14,10 @@ def resource_class():
         ENDPOINT = "fake"
         ATTRIBUTES = ("name",)
 
+        @classmethod
+        def handle_list_filters(cls, **kwargs):
+            return {name: f"{value}-parsed" for name, value in kwargs.items()}
+
     return FakeResource
 
 
@@ -47,6 +51,30 @@ def test_list_resource_returns_all_when_parted(client, resource_class, requests_
     assert list(filter(lambda e: e.name == "res-1", results)) is not []
     assert list(filter(lambda e: e.name == "res-2", results)) is not []
     assert list(filter(lambda e: e.name == "res-3", results)) is not []
+
+
+def test_list_use_custom_endpoint(client, resource_class, requests_mock):
+    requests_mock.get(
+        f"{API_BASE}/my-endpoint/all", json={"value": [{"name": "res-1"}]},
+    )
+
+    results = client.list(resource_class, endpoint="my-endpoint/all")
+    assert len(results) == 1
+
+
+def test_list_resources_sends_filters(client, resource_class, requests_mock):
+    requests_mock.get(
+        f"{API_BASE}/{resource_class.ENDPOINT}?filter=test-parsed",
+        json={"value": [{"name": "res-1"}], "@odata.nextLink": "http://next/part/1"},
+    )
+    requests_mock.get(
+        "http://next/part/1", json={"value": [{"name": "res-2"}]},
+    )
+
+    results = client.list(resource_class, filter="test")
+    assert len(results) == 2
+    assert list(filter(lambda e: e.name == "res-1", results)) is not []
+    assert list(filter(lambda e: e.name == "res-2", results)) is not []
 
 
 @mark.parametrize("error_code,exception", EXPECTED_ERRORS)

@@ -25,7 +25,7 @@ class Resource(ABC):
 
     @classmethod
     def create(cls, client, **kwargs):
-        return cls.__new__(client, kwargs)
+        return cls(client, **kwargs)
 
     @classmethod
     def handle_list_filters(cls, **kwargs):
@@ -59,7 +59,7 @@ class Task(Resource):
     """Represent a task. Listing tasks without specific TaskList returns all tasks"""
 
     ENDPOINT = "outlook/tasks"
-    ATTRIBUTES = (  # TODO: translate & format datas
+    ATTRIBUTES = (  # TODO: translate & format dates
         "id",
         "body",
         "categories",
@@ -69,15 +69,15 @@ class Task(Resource):
         "owner",
         "recurrence",
         "importance",
-        "assignedTo",
-        "changeKey",
+        AttributeTranslator("assignedTo", "assigned_to"),
+        AttributeTranslator("hasAttachments", "has_attachments"),
+        AttributeTranslator("isReminderOn", "is_reminder_on"),
+        AttributeTranslator("parentFolderId", "task_list_id"),
+        AttributeTranslator("changeKey", "_change_key"),
         "completedDateTime",
         "createdDateTime",
         "dueDateTime",
-        "hasAttachments",
-        "isReminderOn",
         "lastModifiedDateTime",
-        "parentFolderId",
         "reminderDateTime",
         "startDateTime",
     )
