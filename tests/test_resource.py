@@ -1,7 +1,7 @@
 import urllib
+from datetime import datetime, timezone
 
 from pytest import mark
-from datetime import datetime, timezone
 
 from todoms.resources import AttributeConverter, Resource, Task, TaskList
 

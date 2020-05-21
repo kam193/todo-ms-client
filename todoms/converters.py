@@ -1,7 +1,7 @@
-from typing import Callable, Any
 from dataclasses import dataclass
-
 from datetime import datetime
+from typing import Any, Callable
+
 from dateutil import parser
 from dateutil.tz import gettz
 
