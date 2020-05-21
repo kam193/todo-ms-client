@@ -2,7 +2,7 @@
 insert_final_newline = true
 max_line_length = 88
 
-[isort]
+[*.py]
 multi_line_output = 3
 include_trailing_comma = True
 force_grid_wrap = 0
