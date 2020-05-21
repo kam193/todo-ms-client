@@ -1,11 +1,6 @@
 from abc import ABC
-from dataclasses import dataclass
 
-
-@dataclass
-class AttributeTranslator:
-    original_name: str
-    local_name: str
+from .converters import AttributeConverter
 
 
 class Resource(ABC):
@@ -17,9 +12,9 @@ class Resource(ABC):
     def __init__(self, client, **kwargs):
         self._client = client
         for attr in self.ATTRIBUTES:
-            if isinstance(attr, AttributeTranslator):
+            if isinstance(attr, AttributeConverter):
                 value = kwargs.get(attr.original_name) or kwargs.get(attr.local_name)
-                setattr(self, attr.local_name, value)
+                setattr(self, attr.local_name, attr.obj_converter(value))
             else:
                 setattr(self, attr, kwargs.get(attr))
 
@@ -39,9 +34,9 @@ class TaskList(Resource):
     ATTRIBUTES = (
         "id",
         "name",
-        AttributeTranslator("changeKey", "_change_key"),
-        AttributeTranslator("isDefaultFolder", "is_default"),
-        AttributeTranslator("parentGroupKey", "_parent_group_key"),
+        AttributeConverter("changeKey", "_change_key"),
+        AttributeConverter("isDefaultFolder", "is_default"),
+        AttributeConverter("parentGroupKey", "_parent_group_key"),
     )
 
     def get_tasks(self, status: str = "ne 'completed'"):
@@ -69,17 +64,17 @@ class Task(Resource):
         "owner",
         "recurrence",
         "importance",
-        AttributeTranslator("assignedTo", "assigned_to"),
-        AttributeTranslator("hasAttachments", "has_attachments"),
-        AttributeTranslator("isReminderOn", "is_reminder_on"),
-        AttributeTranslator("parentFolderId", "task_list_id"),
-        AttributeTranslator("changeKey", "_change_key"),
-        "completedDateTime",
-        "createdDateTime",
-        "dueDateTime",
-        "lastModifiedDateTime",
-        "reminderDateTime",
-        "startDateTime",
+        AttributeConverter("assignedTo", "assigned_to"),
+        AttributeConverter("hasAttachments", "has_attachments"),
+        AttributeConverter("isReminderOn", "is_reminder_on"),
+        AttributeConverter("parentFolderId", "task_list_id"),
+        AttributeConverter("changeKey", "_change_key"),
+        AttributeConverter("completedDateTime", "completed_datetime"),
+        AttributeConverter("createdDateTime", "created_datetime"),
+        AttributeConverter("dueDateTime", "due_datetime"),
+        AttributeConverter("lastModifiedDateTime", "last_modified_datetime"),
+        AttributeConverter("reminderDateTime", "reminder_datetime"),
+        AttributeConverter("startDateTime", "start_datetime"),
     )
 
     def __repr__(self):

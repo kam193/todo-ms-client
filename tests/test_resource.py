@@ -2,7 +2,7 @@ import urllib
 
 from pytest import mark
 
-from todoms.resources import AttributeTranslator, Resource, Task, TaskList
+from todoms.resources import AttributeConverter, Resource, Task, TaskList
 
 from .utils.constants import API_BASE
 
@@ -51,13 +51,22 @@ def test_default_resource_init_creates_obj_from_data():
 
 def test_default_resource_init_translate_attributes():
     class ComplexResource(Resource):
-        ATTRIBUTES = (AttributeTranslator("old", "new"),)
+        ATTRIBUTES = (AttributeConverter("old", "new"),)
 
     obj_1 = ComplexResource.create(None, old="data")
     obj_2 = ComplexResource.create(None, new="data")
 
     assert obj_1.new == "data"
     assert obj_2.new == "data"
+
+
+def test_default_resource_init_converts_attributes_format():
+    class ComplexResource(Resource):
+        ATTRIBUTES = (AttributeConverter("old", "new", lambda x: "converted"),)
+
+    obj_1 = ComplexResource.create(None, old="data")
+
+    assert obj_1.new == "converted"
 
 
 @mark.parametrize(
@@ -107,6 +116,12 @@ def test_create_task_object_from_data():
     assert task.is_reminder_on is True
     assert task.task_list_id == "id-1"
     assert task._change_key == "key-change-1"
+    # assert task.completed_datetime == None
+    # assert task.created_datetime == None
+    # assert task.due_datetime == None
+    # assert task.last_modified_datetime == None
+    # assert task.reminder_datetime == None
+    # assert task.start_datetime == None
 
 
 def test_task_handle_filters_default_completed():
