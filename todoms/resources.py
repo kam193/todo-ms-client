@@ -1,6 +1,7 @@
 from abc import ABC
 
-from .converters import AttributeConverter
+from dateutil import parser
+from .converters import AttributeConverter, datetime_dict_converter
 
 
 class Resource(ABC):
@@ -69,12 +70,18 @@ class Task(Resource):
         AttributeConverter("isReminderOn", "is_reminder_on"),
         AttributeConverter("parentFolderId", "task_list_id"),
         AttributeConverter("changeKey", "_change_key"),
-        AttributeConverter("completedDateTime", "completed_datetime"),
-        AttributeConverter("createdDateTime", "created_datetime"),
-        AttributeConverter("dueDateTime", "due_datetime"),
-        AttributeConverter("lastModifiedDateTime", "last_modified_datetime"),
-        AttributeConverter("reminderDateTime", "reminder_datetime"),
-        AttributeConverter("startDateTime", "start_datetime"),
+        AttributeConverter("createdDateTime", "created_datetime", parser.isoparse),
+        AttributeConverter("dueDateTime", "due_datetime", datetime_dict_converter),
+        AttributeConverter("startDateTime", "start_datetime", datetime_dict_converter),
+        AttributeConverter(
+            "completedDateTime", "completed_datetime", datetime_dict_converter
+        ),
+        AttributeConverter(
+            "lastModifiedDateTime", "last_modified_datetime", parser.isoparse
+        ),
+        AttributeConverter(
+            "reminderDateTime", "reminder_datetime", datetime_dict_converter
+        ),
     )
 
     def __repr__(self):

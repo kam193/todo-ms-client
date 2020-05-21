@@ -1,6 +1,7 @@
 import urllib
 
 from pytest import mark
+from datetime import datetime, timezone
 
 from todoms.resources import AttributeConverter, Resource, Task, TaskList
 
@@ -19,20 +20,20 @@ TASK_EXAMPLE_DATA = {
     "body": "task-body",
     "categories": ["category1"],
     "changeKey": "key-change-1",
-    "completedDateTime": {"@odata.type": "microsoft.graph.dateTimeTimeZone"},
-    "createdDateTime": "timestamp",
-    "dueDateTime": {"@odata.type": "microsoft.graph.dateTimeTimeZone"},
+    "completedDateTime": {"dateTime": "2020-05-01T00:00:00.0000000", "timeZone": "UTC"},
+    "createdDateTime": "2020-01-01T18:00:00Z",
+    "dueDateTime": {"dateTime": "2020-05-02T00:00:00.0000000", "timeZone": "UTC"},
     "hasAttachments": True,
     "id": "task-1",
     "importance": "urgent",
     "isReminderOn": True,
-    "lastModifiedDateTime": "timestamp",
+    "lastModifiedDateTime": "2021-01-01T18:00:00Z",
     "owner": "user-1",
     "parentFolderId": "id-1",
     "recurrence": {"@odata.type": "microsoft.graph.patternedRecurrence"},
-    "reminderDateTime": {"@odata.type": "microsoft.graph.dateTimeTimeZone"},
+    "reminderDateTime": {"dateTime": "2020-05-03T00:00:00.0000000", "timeZone": "UTC"},
     "sensitivity": "top-secret",
-    "startDateTime": {"@odata.type": "microsoft.graph.dateTimeTimeZone"},
+    "startDateTime": {"dateTime": "2020-05-04T00:00:00.0000000", "timeZone": "UTC"},
     "status": "status-1",
     "subject": "My new task",
 }
@@ -116,12 +117,12 @@ def test_create_task_object_from_data():
     assert task.is_reminder_on is True
     assert task.task_list_id == "id-1"
     assert task._change_key == "key-change-1"
-    # assert task.completed_datetime == None
-    # assert task.created_datetime == None
-    # assert task.due_datetime == None
-    # assert task.last_modified_datetime == None
-    # assert task.reminder_datetime == None
-    # assert task.start_datetime == None
+    assert task.last_modified_datetime == datetime(2021, 1, 1, 18, tzinfo=timezone.utc)
+    assert task.created_datetime == datetime(2020, 1, 1, 18, tzinfo=timezone.utc)
+    assert task.completed_datetime == datetime(2020, 5, 1, tzinfo=timezone.utc)
+    assert task.due_datetime == datetime(2020, 5, 2, tzinfo=timezone.utc)
+    assert task.reminder_datetime == datetime(2020, 5, 3, tzinfo=timezone.utc)
+    assert task.start_datetime == datetime(2020, 5, 4, tzinfo=timezone.utc)
 
 
 def test_task_handle_filters_default_completed():
