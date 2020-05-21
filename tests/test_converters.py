@@ -1,6 +1,11 @@
-from unittest.mock import Mock
-from todoms.converters import AttributeConverter, datetime_dict_converter
 from datetime import datetime, timezone
+from unittest.mock import Mock
+
+from todoms.converters import (
+    AttributeConverter,
+    content_converter,
+    datetime_dict_converter,
+)
 
 
 def test_default_converter_returns_input():
@@ -19,3 +24,8 @@ def test_datetime_from_dict_converter():
     result_utc = result.astimezone(timezone.utc)
 
     assert expected_utc == result_utc
+
+
+def test_content_converter():
+    data = {"content": "The description"}
+    assert content_converter(data) == "The description"

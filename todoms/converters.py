@@ -16,3 +16,7 @@ class AttributeConverter:
 def datetime_dict_converter(data: dict) -> datetime:
     date = parser.parse(data["dateTime"])
     return datetime.combine(date.date(), date.time(), gettz(data["timeZone"]))
+
+
+def content_converter(data: dict) -> str:
+    return data["content"]

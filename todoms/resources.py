@@ -1,7 +1,8 @@
 from abc import ABC
 
 from dateutil import parser
-from .converters import AttributeConverter, datetime_dict_converter
+
+from .converters import AttributeConverter, content_converter, datetime_dict_converter
 
 
 class Resource(ABC):
@@ -57,7 +58,7 @@ class Task(Resource):
     ENDPOINT = "outlook/tasks"
     ATTRIBUTES = (  # TODO: translate & format dates
         "id",
-        "body",
+        AttributeConverter("body", "body", content_converter),
         "categories",
         "status",
         "subject",

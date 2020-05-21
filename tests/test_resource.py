@@ -17,7 +17,7 @@ TASK_LIST_EXAMPLE_DATA = {
 
 TASK_EXAMPLE_DATA = {
     "assignedTo": "user-1",
-    "body": "task-body",
+    "body": {"content": "task-body", "contentType": "html"},
     "categories": ["category1"],
     "changeKey": "key-change-1",
     "completedDateTime": {"dateTime": "2020-05-01T00:00:00.0000000", "timeZone": "UTC"},
