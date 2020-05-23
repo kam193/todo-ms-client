@@ -12,6 +12,12 @@ class WebBrowserProvider(AbstractProvider):
     """An provider that can call webbrowser to open sign-in page"""
 
     _SCOPES = "profile openid User.Read Calendars.Read Tasks.Read"
+    _DEFAULT_OPEN_MESSAGE = (
+        "Open following page in your webbrowser and finish singing in:"
+    )
+    _DEFAULT_FINISH_MESSAGE = (
+        "Authorization completed. You can close this page and return to the app"
+    )
 
     def __init__(
         self,
@@ -20,16 +26,20 @@ class WebBrowserProvider(AbstractProvider):
         authority: str = "https://login.microsoftonline.com/common/",
         authorize_endpoint: str = "oauth2/v2.0/authorize",
         token_endpoint: str = "oauth2/v2.0/token",
+        open_message: str = _DEFAULT_OPEN_MESSAGE,
+        finish_message: str = _DEFAULT_FINISH_MESSAGE,
     ):
         self._app_id = app_id
         self._app_secret = app_secret
         self._authority = authority
         self._authorize_endpoint = authorize_endpoint
         self._token_endpoint = token_endpoint
+        self._open_message = open_message
+        self._finish_message = finish_message
 
         self._session = None
 
-    def authorize(self, local_port: int = 8888):
+    def authorize(self, local_port: int = 8888, print_message: bool = True):
         """Run authorization workflow. Call webbrowser login, get response and token
 
         'local_port' - on this port we wait for redirection from sing-in page.
@@ -43,10 +53,14 @@ class WebBrowserProvider(AbstractProvider):
             self._authorize_url, prompt="login"
         )
 
-        response_app = _LocalRedirectHandlingApp()
+        response_app = _LocalRedirectHandlingApp(self._finish_message)
         response_server = wsgiref.simple_server.make_server(
             "localhost", local_port, response_app
         )
+
+        if print_message:
+            print(self._open_message)
+            print(sign_in_url)
 
         webbrowser.open(sign_in_url)
         response_server.handle_request()
@@ -102,15 +116,14 @@ class WebBrowserProvider(AbstractProvider):
 class _LocalRedirectHandlingApp(object):
     """A WSGI app handles redirection from sign-in service."""
 
-    _MESSAGE = "Authorization completed. You can close this page and return to the app"
-
-    def __init__(self):
+    def __init__(self, message):
         self.callback_url = None
+        self._message = message
 
     def __call__(self, environ, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         self.callback_url = wsgiref.util.request_uri(environ)
-        return [self._MESSAGE.encode("utf-8")]
+        return [self._message.encode("utf-8")]
 
 
 class RequestBeforeAuthenticatedError(Exception):
