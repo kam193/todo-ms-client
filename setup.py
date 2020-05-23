@@ -16,6 +16,7 @@ setup(
     version="0.0.1",
     description="Unofficial Python library for MS ToDo API",
     long_description=readme(),
+    long_description_content_type="text/markdown",
     install_requires=requirements(),
     url="https://github.com/kam193/todo-ms-client",
     author="Kamil Mańkowski",
