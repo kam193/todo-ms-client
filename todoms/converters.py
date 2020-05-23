@@ -14,9 +14,14 @@ class AttributeConverter:
 
 
 def datetime_dict_converter(data: dict) -> datetime:
+    if not data:
+        return None
+
     date = parser.parse(data["dateTime"])
     return datetime.combine(date.date(), date.time(), gettz(data["timeZone"]))
 
 
 def content_converter(data: dict) -> str:
+    if not data:
+        return ""
     return data["content"]
