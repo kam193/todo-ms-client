@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from unittest.mock import Mock
 
+from pytest import mark
+
 from todoms.converters import (
     AttributeConverter,
     content_converter,
@@ -26,6 +28,16 @@ def test_datetime_from_dict_converter():
     assert expected_utc == result_utc
 
 
+@mark.parametrize("data", [{}, None])
+def test_datetime_from_dict_converter_when_no_data(data):
+    assert datetime_dict_converter(data) is None
+
+
 def test_content_converter():
     data = {"content": "The description"}
     assert content_converter(data) == "The description"
+
+
+@mark.parametrize("data", [{}, None])
+def test_content_converter_when_no_data(data):
+    assert content_converter(data) == ""
