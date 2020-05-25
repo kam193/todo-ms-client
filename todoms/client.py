@@ -27,9 +27,7 @@ class ToDoClient(object):
             url = data.get("@odata.nextLink", None)
             params = {}
 
-        return [
-            resource_class.create_from_dict(self, element) for element in elements
-        ]
+        return [resource_class.create_from_dict(self, element) for element in elements]
 
     def get(self, resource_class: Resource, resource_id: str):
         # TODO: safe concatenation

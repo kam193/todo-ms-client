@@ -1,9 +1,9 @@
 from abc import ABC
+from datetime import datetime
 
 from dateutil import parser
 
 from .converters import AttributeConverter, content_converter, datetime_dict_converter
-from datetime import datetime
 
 
 class Resource(ABC):
