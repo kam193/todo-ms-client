@@ -43,6 +43,11 @@ def test_default_resource_init_creates_obj_from_data():
     class SimpleResource(Resource):
         ATTRIBUTES = ("id", "name")
 
+        def __init__(self, client, id, name):
+            super().__init__(client)
+            self.id = id
+            self.name = name
+
     obj = SimpleResource.create(None, id="id-1", name="name-1", not_attr="ignore")
 
     assert obj.id == "id-1"
@@ -54,16 +59,22 @@ def test_default_resource_init_translate_attributes():
     class ComplexResource(Resource):
         ATTRIBUTES = (AttributeConverter("old", "new"),)
 
+        def __init__(self, client, new):
+            super().__init__(client)
+            self.new = new
+
     obj_1 = ComplexResource.create(None, old="data")
-    obj_2 = ComplexResource.create(None, new="data")
 
     assert obj_1.new == "data"
-    assert obj_2.new == "data"
 
 
 def test_default_resource_init_converts_attributes_format():
     class ComplexResource(Resource):
         ATTRIBUTES = (AttributeConverter("old", "new", lambda x: "converted"),)
+
+        def __init__(self, client, new):
+            super().__init__(client)
+            self.new = new
 
     obj_1 = ComplexResource.create(None, old="data")
 

@@ -14,6 +14,10 @@ def resource_class():
         ENDPOINT = "fake"
         ATTRIBUTES = ("name",)
 
+        def __init__(self, client, name):
+            super().__init__(client)
+            self.name = name
+
         @classmethod
         def handle_list_filters(cls, **kwargs):
             return {name: f"{value}-parsed" for name, value in kwargs.items()}
