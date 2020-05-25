@@ -48,7 +48,9 @@ def test_default_resource_init_creates_obj_from_data():
             self.id = id
             self.name = name
 
-    obj = SimpleResource.create(None, id="id-1", name="name-1", not_attr="ignore")
+    obj = SimpleResource.create_from_dict(
+        None, {"id": "id-1", "name": "name-1", "not_attr": "ignore"}
+    )
 
     assert obj.id == "id-1"
     assert obj.name == "name-1"
@@ -63,7 +65,7 @@ def test_default_resource_init_translate_attributes():
             super().__init__(client)
             self.new = new
 
-    obj_1 = ComplexResource.create(None, old="data")
+    obj_1 = ComplexResource.create_from_dict(None, {"old": "data"})
 
     assert obj_1.new == "data"
 
@@ -76,7 +78,7 @@ def test_default_resource_init_converts_attributes_format():
             super().__init__(client)
             self.new = new
 
-    obj_1 = ComplexResource.create(None, old="data")
+    obj_1 = ComplexResource.create_from_dict(None, {"old": "data"})
 
     assert obj_1.new == "converted"
 
@@ -89,7 +91,7 @@ def test_resource_has_proper_endpoint(resource, endpoint):
 
 
 def test_create_tasklist_object_from_data():
-    task_list = TaskList.create(None, **TASK_LIST_EXAMPLE_DATA)
+    task_list = TaskList.create_from_dict(None, TASK_LIST_EXAMPLE_DATA)
 
     assert task_list.id == "id-1"
     assert task_list.name == "list-name"
@@ -105,15 +107,15 @@ def test_tasklist_get_tasks_returns_default_not_completed_tasks(client, requests
         json={"value": [TASK_EXAMPLE_DATA]},
         complete_qs=True,
     )
-    task_list = TaskList.create(client, **TASK_LIST_EXAMPLE_DATA)
+    task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
     tasks = task_list.get_tasks()
 
     assert len(tasks) == 1
     assert tasks[0].id == "task-1"
 
 
-def test_create_task_object_from_data():
-    task = Task.create(None, **TASK_EXAMPLE_DATA)
+def test_create_task_object_from_dict():
+    task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
 
     assert task.id == "task-1"
     assert task.body == "task-body"

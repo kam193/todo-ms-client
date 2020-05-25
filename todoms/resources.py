@@ -16,19 +16,19 @@ class Resource(ABC):
         self._client = client
 
     @classmethod
-    def create(cls, client, **kwargs):
+    def create_from_dict(cls, client, data_dict: dict):
         init_arguments = {}
         private_attributes = {}
 
         for attr in cls.ATTRIBUTES:
             if isinstance(attr, AttributeConverter):
-                value = attr.obj_converter(kwargs.get(attr.original_name))
+                value = attr.obj_converter(data_dict.get(attr.original_name))
                 if attr.local_name.startswith("_"):
                     private_attributes[attr.local_name] = value
                 else:
                     init_arguments[attr.local_name] = value
             else:
-                init_arguments[attr] = kwargs.get(attr)
+                init_arguments[attr] = data_dict.get(attr)
 
         obj = cls(client, **init_arguments)
         for attr, value in private_attributes.items():
