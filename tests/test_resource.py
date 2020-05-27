@@ -146,3 +146,15 @@ def test_task_handle_filters_default_completed():
 def test_task_handle_filters_select_status():
     filters = Task.handle_list_filters(status="my-filter")
     assert filters == {"$filter": "status my-filter"}
+
+
+def test_task_delete_themselfs(requests_mock, client):
+    requests_mock.delete(f"{API_BASE}/outlook/tasks/task-1", status_code=204)
+    task = Task.create_from_dict(client, TASK_EXAMPLE_DATA)
+    task.delete()
+
+
+def test_task_list_delete_themselfs(requests_mock, client):
+    requests_mock.delete(f"{API_BASE}/outlook/taskFolders/id-1", status_code=204)
+    task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
+    task_list.delete()

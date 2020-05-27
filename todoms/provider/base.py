@@ -5,5 +5,9 @@ from requests import Response
 
 class AbstractProvider(ABC):
     @abstractmethod
-    def get(url: str, params: dict) -> Response:
+    def get(self, url: str, params: dict) -> Response:
+        pass
+
+    @abstractmethod
+    def delete(self, url: str) -> Response:
         pass

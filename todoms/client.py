@@ -37,7 +37,13 @@ class ToDoClient(object):
 
         self._map_http_errors(response, codes.ok)
 
-        return resource_class(self, **response.json())
+        return resource_class.create_from_dict(self, response.json())
+
+    def delete(self, resource: Resource):
+        # TODO: safe concatenation
+        url = f"{self._url}/{resource.ENDPOINT}/{resource.id}"
+        response = self._provider.delete(url)
+        self._map_http_errors(response, codes.no_content)
 
     def _map_http_errors(self, response, expected):
         if response.status_code == codes.not_found:
