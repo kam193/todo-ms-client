@@ -63,6 +63,9 @@ class TaskList(Resource):
         tasks_endpoint = f"{self.ENDPOINT}/{self.id}/tasks"
         return self._client.list(Task, endpoint=tasks_endpoint, status=status)
 
+    def delete(self):
+        self._client.delete(self)
+
     def __repr__(self):
         return f"<TaskList '{self.name}'>"
 
