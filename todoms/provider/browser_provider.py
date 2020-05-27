@@ -11,7 +11,7 @@ from .base import AbstractProvider
 class WebBrowserProvider(AbstractProvider):
     """An provider that can call webbrowser to open sign-in page"""
 
-    _SCOPES = "profile openid User.Read Calendars.Read Tasks.Read"
+    _SCOPES = "profile openid User.Read Calendars.Read Tasks.ReadWrite"
     _DEFAULT_OPEN_MESSAGE = (
         "Open following page in your webbrowser and finish singing in:"
     )
@@ -78,6 +78,12 @@ class WebBrowserProvider(AbstractProvider):
             raise RequestBeforeAuthenticatedError
 
         return self._session.get(*args, **kwargs)
+
+    def delete(self, url):
+        if not self._token:
+            raise RequestBeforeAuthenticatedError
+
+        return self._session.delete(url=url)
 
     @property
     def _authorize_url(self):

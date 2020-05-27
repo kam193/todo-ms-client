@@ -12,17 +12,23 @@ EXPECTED_ERRORS = [(404, ResourceNotFoundError), (500, ResponseError)]
 def resource_class():
     class FakeResource(Resource):
         ENDPOINT = "fake"
-        ATTRIBUTES = ("name",)
+        ATTRIBUTES = ("name", "id")
 
-        def __init__(self, client, name):
+        def __init__(self, client, name, id):
             super().__init__(client)
             self.name = name
+            self.id = id
 
         @classmethod
         def handle_list_filters(cls, **kwargs):
             return {name: f"{value}-parsed" for name, value in kwargs.items()}
 
     return FakeResource
+
+
+@fixture
+def resource_obj(resource_class):
+    return resource_class(None, name="name-1", id="id-1")
 
 
 def test_list_resource_returns_all(client, resource_class, requests_mock):
@@ -111,3 +117,20 @@ def test_get_resource_raises_on_http_error(
 
     with raises(exception):
         client.get(resource_class, "fail")
+
+
+def test_delete_resource_pass(client, resource_obj, requests_mock):
+    requests_mock.delete(f"{API_BASE}/{resource_obj.ENDPOINT}/id-1", status_code=204)
+    client.delete(resource_obj)
+
+
+@mark.parametrize("error_code,exception", EXPECTED_ERRORS)
+def test_delete_resource_raises_on_http_error(
+    client, resource_obj, requests_mock, error_code, exception
+):
+    requests_mock.delete(
+        f"{API_BASE}/{resource_obj.ENDPOINT}/id-1", status_code=error_code
+    )
+
+    with raises(exception):
+        client.delete(resource_obj)

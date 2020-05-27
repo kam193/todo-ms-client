@@ -153,6 +153,9 @@ class Task(Resource):
     def __str__(self):
         return f"Task '{self.subject}'"
 
+    def delete(self):
+        self._client.delete(self)
+
     @classmethod
     def handle_list_filters(cls, **kwargs):
         kwargs.setdefault("status", "ne 'completed'")
