@@ -1,4 +1,6 @@
-from requests import codes
+from typing import Type
+
+from requests import Response, codes
 
 from .provider import AbstractProvider
 from .resources import Resource
@@ -14,7 +16,7 @@ class ToDoClient(object):
         self._provider = provider
         self._url = f"{api_url}/{api_prefix}"  # TODO: safe concatenation
 
-    def list(self, resource_class: Resource, endpoint: str = None, **kwargs):
+    def list(self, resource_class: Type[Resource], endpoint: str = None, **kwargs):
         url = f"{self._url}/{endpoint or resource_class.ENDPOINT}"
         params = resource_class.handle_list_filters(**kwargs)
 
@@ -29,7 +31,7 @@ class ToDoClient(object):
 
         return [resource_class.create_from_dict(self, element) for element in elements]
 
-    def get(self, resource_class: Resource, resource_id: str):
+    def get(self, resource_class: Type[Resource], resource_id: str):
         # TODO: safe concatenation
         url = f"{self._url}/{resource_class.ENDPOINT}/{resource_id}"
 
@@ -58,7 +60,7 @@ class ResponseError(Exception):
 
     MESSAGE = None
 
-    def __init__(self, response):
+    def __init__(self, response: Response):
         self.response = response
 
     def __str__(self):
