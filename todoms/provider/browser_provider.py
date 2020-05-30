@@ -79,11 +79,17 @@ class WebBrowserProvider(AbstractProvider):
 
         return self._session.get(*args, **kwargs)
 
-    def delete(self, url):
+    def delete(self, url: str):
         if not self._token:
             raise RequestBeforeAuthenticatedError
 
         return self._session.delete(url=url)
+
+    def patch(self, url: str, json_data: dict):
+        if not self._token:
+            raise RequestBeforeAuthenticatedError
+
+        return self._session.patch(url=url, json=json_data)
 
     @property
     def _authorize_url(self):

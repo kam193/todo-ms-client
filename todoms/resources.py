@@ -15,6 +15,9 @@ class Resource(ABC):
     def __init__(self, client):
         self._client = client
 
+    def to_dict(self):
+        return {"to-be": "implemented"}
+
     @classmethod
     def create_from_dict(cls, client, data_dict: dict):
         init_arguments = {}

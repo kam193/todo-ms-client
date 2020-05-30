@@ -47,6 +47,13 @@ class ToDoClient(object):
         response = self._provider.delete(url)
         self._map_http_errors(response, codes.no_content)
 
+    def patch(self, resource: Resource):
+        # TODO: safe concatenation
+        url = f"{self._url}/{resource.ENDPOINT}/{resource.id}"
+        response = self._provider.patch(url, json_data=resource.to_dict())
+        self._map_http_errors(response, codes.ok)
+        return response.json()
+
     def _map_http_errors(self, response, expected):
         if response.status_code == codes.not_found:
             raise ResourceNotFoundError(response)

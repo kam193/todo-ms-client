@@ -11,3 +11,7 @@ class AbstractProvider(ABC):
     @abstractmethod
     def delete(self, url: str) -> Response:
         pass
+
+    @abstractmethod
+    def patch(self, url: str, json_data: dict) -> Response:
+        pass
