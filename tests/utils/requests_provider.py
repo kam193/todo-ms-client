@@ -4,7 +4,7 @@ from todoms.provider import AbstractProvider
 
 
 class RequestsProvider(AbstractProvider):
-    def get(self, url, params):
+    def get(self, url, params=None):
         return requests.get(url=url, params=params)
 
     def delete(self, url):

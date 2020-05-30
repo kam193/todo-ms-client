@@ -73,11 +73,11 @@ class WebBrowserProvider(AbstractProvider):
             ),
         )
 
-    def get(self, *args, **kwargs):
+    def get(self, url: str, params: dict = None):
         if not self._token:
             raise RequestBeforeAuthenticatedError
 
-        return self._session.get(*args, **kwargs)
+        return self._session.get(url=url, params=params)
 
     def delete(self, url: str):
         if not self._token:
