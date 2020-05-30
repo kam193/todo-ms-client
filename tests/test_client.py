@@ -31,6 +31,13 @@ def resource_obj(resource_class):
     return resource_class(None, name="name-1", id="id-1")
 
 
+def match_body(expected_json: dict):
+    def _matcher(request):
+        return request.json() == expected_json
+
+    return _matcher
+
+
 def test_list_resource_returns_all(client, resource_class, requests_mock):
     requests_mock.get(
         f"{API_BASE}/{resource_class.ENDPOINT}",
@@ -134,3 +141,27 @@ def test_delete_resource_raises_on_http_error(
 
     with raises(exception):
         client.delete(resource_obj)
+
+
+@mark.parametrize("error_code,exception", EXPECTED_ERRORS)
+def test_patch_resource_raises_on_http_error(
+    client, resource_obj, requests_mock, error_code, exception
+):
+    requests_mock.patch(
+        f"{API_BASE}/{resource_obj.ENDPOINT}/id-1", status_code=error_code
+    )
+
+    with raises(exception):
+        client.patch(resource_obj)
+
+
+def test_patch_sends_data(client, resource_obj, requests_mock):
+    requests_mock.patch(
+        f"{API_BASE}/{resource_obj.ENDPOINT}/id-1",
+        json={"ok": "true"},
+        additional_matcher=match_body({"to-be": "implemented"}),
+    )
+
+    response = client.patch(resource_obj)
+
+    assert response == {"ok": "true"}
