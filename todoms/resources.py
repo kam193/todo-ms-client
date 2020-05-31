@@ -16,7 +16,15 @@ class Resource(ABC):
         self._client = client
 
     def to_dict(self):
-        return {"to-be": "implemented"}
+        data_dict = {}
+
+        for attr in self.ATTRIBUTES:
+            if isinstance(attr, AttributeConverter):
+                data_dict[attr.original_name] = getattr(self, attr.local_name)
+            else:
+                data_dict[attr] = getattr(self, attr)
+
+        return data_dict
 
     @classmethod
     def create_from_dict(cls, client, data_dict: dict):
