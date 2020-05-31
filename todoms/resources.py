@@ -3,7 +3,12 @@ from datetime import datetime
 
 from dateutil import parser
 
-from .converters import AttributeConverter, content_converter, datetime_dict_converter
+from .converters import (
+    AttributeConverter,
+    DatetimeAttrConverter,
+    ContentAttrConverter,
+    IsoTimeAttrConverter,
+)
 
 
 class Resource(ABC):
@@ -90,7 +95,7 @@ class Task(Resource):
     ENDPOINT = "outlook/tasks"
     ATTRIBUTES = (  # TODO: translate & format dates
         "id",
-        AttributeConverter("body", "body", content_converter),
+        ContentAttrConverter("body", "body"),
         "categories",
         "status",
         "subject",
@@ -102,18 +107,12 @@ class Task(Resource):
         AttributeConverter("hasAttachments", "has_attachments"),
         AttributeConverter("isReminderOn", "is_reminder_on"),
         AttributeConverter("parentFolderId", "task_list_id"),
-        AttributeConverter("createdDateTime", "created_datetime", parser.isoparse),
-        AttributeConverter("dueDateTime", "due_datetime", datetime_dict_converter),
-        AttributeConverter("startDateTime", "start_datetime", datetime_dict_converter),
-        AttributeConverter(
-            "completedDateTime", "completed_datetime", datetime_dict_converter
-        ),
-        AttributeConverter(
-            "lastModifiedDateTime", "last_modified_datetime", parser.isoparse
-        ),
-        AttributeConverter(
-            "reminderDateTime", "reminder_datetime", datetime_dict_converter
-        ),
+        IsoTimeAttrConverter("createdDateTime", "created_datetime"),
+        DatetimeAttrConverter("dueDateTime", "due_datetime"),
+        DatetimeAttrConverter("startDateTime", "start_datetime"),
+        DatetimeAttrConverter("completedDateTime", "completed_datetime"),
+        IsoTimeAttrConverter("lastModifiedDateTime", "last_modified_datetime"),
+        DatetimeAttrConverter("reminderDateTime", "reminder_datetime"),
         AttributeConverter("changeKey", "_change_key"),
     )
 

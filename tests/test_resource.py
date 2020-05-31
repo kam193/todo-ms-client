@@ -4,7 +4,13 @@ from datetime import datetime, timezone
 import pytest
 from pytest import mark
 
-from todoms.resources import AttributeConverter, Resource, Task, TaskList
+from todoms.resources import (
+    AttributeConverter,
+    ContentAttrConverter,
+    Resource,
+    Task,
+    TaskList,
+)
 
 from .utils.constants import API_BASE
 
@@ -79,13 +85,13 @@ def test_default_resource_init_translate_attributes():
 
 def test_default_resource_init_converts_attributes_format():
     class ComplexResource(Resource):
-        ATTRIBUTES = (AttributeConverter("old", "new", lambda x: "converted"),)
+        ATTRIBUTES = (ContentAttrConverter("old", "new"),)
 
         def __init__(self, client, new):
             super().__init__(client)
             self.new = new
 
-    obj_1 = ComplexResource.create_from_dict(None, {"old": "data"})
+    obj_1 = ComplexResource.create_from_dict(None, {"old": {"content": "converted"}})
 
     assert obj_1.new == "converted"
 
