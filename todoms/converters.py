@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any
 
-from dateutil import parser
+from dateutil import parser, tz
 from dateutil.tz import gettz
 
 
@@ -12,6 +12,9 @@ class AttributeConverter:
     local_name: str
 
     def obj_converter(self, data: Any) -> Any:
+        return data
+
+    def back_converter(self, data: Any) -> Any:
         return data
 
 
@@ -24,6 +27,15 @@ class DatetimeAttrConverter(AttributeConverter):
         date = parser.parse(data["dateTime"])
         return datetime.combine(date.date(), date.time(), gettz(data["timeZone"]))
 
+    def back_converter(self, data: datetime) -> dict:
+        if not data:
+            return None
+
+        return {
+            "dateTime": data.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+            "timeZone": data.tzname(),
+        }
+
 
 @dataclass
 class ContentAttrConverter(AttributeConverter):
@@ -32,8 +44,14 @@ class ContentAttrConverter(AttributeConverter):
             return ""
         return data["content"]
 
+    def back_converter(self, data: str) -> dict:
+        return {"content": data, "contentType": "html"}
+
 
 @dataclass
 class IsoTimeAttrConverter(AttributeConverter):
     def obj_converter(self, data: str) -> datetime:
         return parser.isoparse(data)
+
+    def back_converter(self, data: datetime) -> str:
+        return data.astimezone(tz.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
