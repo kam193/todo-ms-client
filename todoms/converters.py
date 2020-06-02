@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Any
 
 from dateutil import parser, tz
-from dateutil.tz import gettz
 
 
 @dataclass
@@ -25,7 +24,7 @@ class DatetimeAttrConverter(AttributeConverter):
             return None
 
         date = parser.parse(data["dateTime"])
-        return datetime.combine(date.date(), date.time(), gettz(data["timeZone"]))
+        return datetime.combine(date.date(), date.time(), tz.gettz(data["timeZone"]))
 
     def back_converter(self, data: datetime) -> dict:
         if not data:

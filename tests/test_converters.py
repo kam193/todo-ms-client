@@ -1,13 +1,13 @@
-from datetime import datetime, timezone, timedelta
-from dateutil import tz
+from datetime import datetime, timezone
 from unittest.mock import Mock
 
+from dateutil import tz
 from pytest import mark
 
 from todoms.converters import (
     AttributeConverter,
-    DatetimeAttrConverter,
     ContentAttrConverter,
+    DatetimeAttrConverter,
     IsoTimeAttrConverter,
 )
 

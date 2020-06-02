@@ -1,12 +1,10 @@
 from abc import ABC
 from datetime import datetime
 
-from dateutil import parser
-
 from .converters import (
     AttributeConverter,
-    DatetimeAttrConverter,
     ContentAttrConverter,
+    DatetimeAttrConverter,
     IsoTimeAttrConverter,
 )
 
@@ -25,7 +23,8 @@ class Resource(ABC):
 
         for attr in self.ATTRIBUTES:
             if isinstance(attr, AttributeConverter):
-                data_dict[attr.original_name] = getattr(self, attr.local_name)
+                value = getattr(self, attr.local_name)
+                data_dict[attr.original_name] = attr.back_converter(value)
             else:
                 data_dict[attr] = getattr(self, attr)
 

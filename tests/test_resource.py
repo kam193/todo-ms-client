@@ -114,11 +114,26 @@ def test_default_resource_complex_to_dict():
             super().__init__(client)
             self.new = new
 
-    resource = ComplexResource.create_from_dict(None, {"old": "data"})
+    resource = ComplexResource(None, new="data")
 
     resource_dict = resource.to_dict()
 
     assert resource_dict == {"old": "data"}
+
+
+def test_default_resource_complex_to_dict_with_converter():
+    class ComplexResource(Resource):
+        ATTRIBUTES = (ContentAttrConverter("old", "new"),)
+
+        def __init__(self, client, new):
+            super().__init__(client)
+            self.new = new
+
+    resource = ComplexResource(None, new="data")
+
+    resource_dict = resource.to_dict()
+
+    assert resource_dict == {"old": {"content": "data", "contentType": "html"}}
 
 
 @mark.parametrize(
