@@ -159,7 +159,7 @@ def test_patch_sends_data(client, resource_obj, requests_mock):
     requests_mock.patch(
         f"{API_BASE}/{resource_obj.ENDPOINT}/id-1",
         json={"ok": "true"},
-        additional_matcher=match_body({"to-be": "implemented"}),
+        additional_matcher=match_body({"name": "name-1", "id": "id-1"}),
     )
 
     response = client.patch(resource_obj)

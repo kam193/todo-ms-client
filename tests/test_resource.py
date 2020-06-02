@@ -1,11 +1,32 @@
 import urllib
 from datetime import datetime, timezone
 
+import pytest
 from pytest import mark
 
-from todoms.resources import AttributeConverter, Resource, Task, TaskList
+from todoms.resources import (
+    AttributeConverter,
+    ContentAttrConverter,
+    Resource,
+    Task,
+    TaskList,
+)
 
 from .utils.constants import API_BASE
+
+
+@pytest.fixture
+def simple_resource_class():
+    class SimpleResource(Resource):
+        ATTRIBUTES = ("id", "name")
+
+        def __init__(self, client, id, name):
+            super().__init__(client)
+            self.id = id
+            self.name = name
+
+    return SimpleResource
+
 
 TASK_LIST_EXAMPLE_DATA = {
     "changeKey": "abc",
@@ -39,16 +60,8 @@ TASK_EXAMPLE_DATA = {
 }
 
 
-def test_default_resource_init_creates_obj_from_data():
-    class SimpleResource(Resource):
-        ATTRIBUTES = ("id", "name")
-
-        def __init__(self, client, id, name):
-            super().__init__(client)
-            self.id = id
-            self.name = name
-
-    obj = SimpleResource.create_from_dict(
+def test_default_resource_init_creates_obj_from_data(simple_resource_class):
+    obj = simple_resource_class.create_from_dict(
         None, {"id": "id-1", "name": "name-1", "not_attr": "ignore"}
     )
 
@@ -72,15 +85,55 @@ def test_default_resource_init_translate_attributes():
 
 def test_default_resource_init_converts_attributes_format():
     class ComplexResource(Resource):
-        ATTRIBUTES = (AttributeConverter("old", "new", lambda x: "converted"),)
+        ATTRIBUTES = (ContentAttrConverter("old", "new"),)
 
         def __init__(self, client, new):
             super().__init__(client)
             self.new = new
 
-    obj_1 = ComplexResource.create_from_dict(None, {"old": "data"})
+    obj_1 = ComplexResource.create_from_dict(None, {"old": {"content": "converted"}})
 
     assert obj_1.new == "converted"
+
+
+def test_default_resource_simple_to_dict(simple_resource_class):
+    resource = simple_resource_class.create_from_dict(
+        None, {"id": "id-1", "name": "name-1"}
+    )
+
+    resource_dict = resource.to_dict()
+
+    assert resource_dict == {"id": "id-1", "name": "name-1"}
+
+
+def test_default_resource_complex_to_dict():
+    class ComplexResource(Resource):
+        ATTRIBUTES = (AttributeConverter("old", "new"),)
+
+        def __init__(self, client, new):
+            super().__init__(client)
+            self.new = new
+
+    resource = ComplexResource(None, new="data")
+
+    resource_dict = resource.to_dict()
+
+    assert resource_dict == {"old": "data"}
+
+
+def test_default_resource_complex_to_dict_with_converter():
+    class ComplexResource(Resource):
+        ATTRIBUTES = (ContentAttrConverter("old", "new"),)
+
+        def __init__(self, client, new):
+            super().__init__(client)
+            self.new = new
+
+    resource = ComplexResource(None, new="data")
+
+    resource_dict = resource.to_dict()
+
+    assert resource_dict == {"old": {"content": "data", "contentType": "html"}}
 
 
 @mark.parametrize(

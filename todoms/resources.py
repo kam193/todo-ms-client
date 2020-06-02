@@ -1,9 +1,12 @@
 from abc import ABC
 from datetime import datetime
 
-from dateutil import parser
-
-from .converters import AttributeConverter, content_converter, datetime_dict_converter
+from .converters import (
+    AttributeConverter,
+    ContentAttrConverter,
+    DatetimeAttrConverter,
+    IsoTimeAttrConverter,
+)
 
 
 class Resource(ABC):
@@ -16,7 +19,16 @@ class Resource(ABC):
         self._client = client
 
     def to_dict(self):
-        return {"to-be": "implemented"}
+        data_dict = {}
+
+        for attr in self.ATTRIBUTES:
+            if isinstance(attr, AttributeConverter):
+                value = getattr(self, attr.local_name)
+                data_dict[attr.original_name] = attr.back_converter(value)
+            else:
+                data_dict[attr] = getattr(self, attr)
+
+        return data_dict
 
     @classmethod
     def create_from_dict(cls, client, data_dict: dict):
@@ -82,7 +94,7 @@ class Task(Resource):
     ENDPOINT = "outlook/tasks"
     ATTRIBUTES = (  # TODO: translate & format dates
         "id",
-        AttributeConverter("body", "body", content_converter),
+        ContentAttrConverter("body", "body"),
         "categories",
         "status",
         "subject",
@@ -94,18 +106,12 @@ class Task(Resource):
         AttributeConverter("hasAttachments", "has_attachments"),
         AttributeConverter("isReminderOn", "is_reminder_on"),
         AttributeConverter("parentFolderId", "task_list_id"),
-        AttributeConverter("createdDateTime", "created_datetime", parser.isoparse),
-        AttributeConverter("dueDateTime", "due_datetime", datetime_dict_converter),
-        AttributeConverter("startDateTime", "start_datetime", datetime_dict_converter),
-        AttributeConverter(
-            "completedDateTime", "completed_datetime", datetime_dict_converter
-        ),
-        AttributeConverter(
-            "lastModifiedDateTime", "last_modified_datetime", parser.isoparse
-        ),
-        AttributeConverter(
-            "reminderDateTime", "reminder_datetime", datetime_dict_converter
-        ),
+        IsoTimeAttrConverter("createdDateTime", "created_datetime"),
+        DatetimeAttrConverter("dueDateTime", "due_datetime"),
+        DatetimeAttrConverter("startDateTime", "start_datetime"),
+        DatetimeAttrConverter("completedDateTime", "completed_datetime"),
+        IsoTimeAttrConverter("lastModifiedDateTime", "last_modified_datetime"),
+        DatetimeAttrConverter("reminderDateTime", "reminder_datetime"),
         AttributeConverter("changeKey", "_change_key"),
     )
 
