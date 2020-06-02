@@ -4,6 +4,7 @@ from todoms.client import ResourceNotFoundError, ResponseError
 from todoms.resources import Resource
 
 from .utils.constants import API_BASE
+from .utils.helpers import match_body
 
 EXPECTED_ERRORS = [(404, ResourceNotFoundError), (500, ResponseError)]
 
@@ -29,13 +30,6 @@ def resource_class():
 @fixture
 def resource_obj(resource_class):
     return resource_class(None, name="name-1", id="id-1")
-
-
-def match_body(expected_json: dict):
-    def _matcher(request):
-        return request.json() == expected_json
-
-    return _matcher
 
 
 def test_list_resource_returns_all(client, resource_class, requests_mock):

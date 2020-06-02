@@ -1,6 +1,8 @@
 import urllib
 from datetime import datetime, timezone
 
+from .utils.helpers import match_body
+
 import pytest
 from pytest import mark
 
@@ -136,6 +138,29 @@ def test_default_resource_complex_to_dict_with_converter():
     assert resource_dict == {"old": {"content": "data", "contentType": "html"}}
 
 
+def test_default_resource_update_client_call(client, requests_mock):
+    class ComplexResource(Resource):
+        ENDPOINT = "fake"
+        ATTRIBUTES = (ContentAttrConverter("old", "new"), "id")
+
+        def __init__(self, client, new, id):
+            super().__init__(client)
+            self.new = new
+            self.id = id
+
+    resource = ComplexResource(client, new="data", id="id-1")
+
+    requests_mock.patch(
+        f"{API_BASE}/fake/id-1",
+        json={},
+        status_code=200,
+        additional_matcher=match_body(resource.to_dict()),
+    )
+
+    resource.update()
+    assert requests_mock.called is True
+
+
 @mark.parametrize(
     "resource,endpoint", [(TaskList, "outlook/taskFolders"), (Task, "outlook/tasks")]
 )
@@ -205,9 +230,11 @@ def test_task_delete_themselfs(requests_mock, client):
     requests_mock.delete(f"{API_BASE}/outlook/tasks/task-1", status_code=204)
     task = Task.create_from_dict(client, TASK_EXAMPLE_DATA)
     task.delete()
+    assert requests_mock.called is True
 
 
 def test_task_list_delete_themselfs(requests_mock, client):
     requests_mock.delete(f"{API_BASE}/outlook/taskFolders/id-1", status_code=204)
     task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
     task_list.delete()
+    assert requests_mock.called is True
