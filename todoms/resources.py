@@ -30,6 +30,9 @@ class Resource(ABC):
 
         return data_dict
 
+    def update(self):
+        self._client.patch(self)
+
     @classmethod
     def create_from_dict(cls, client, data_dict: dict):
         init_arguments = {}

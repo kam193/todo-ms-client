@@ -19,10 +19,15 @@ task_lists = client.list(TaskList)
 
 print(task_lists)
 
-list_1 = client.get(TaskList, task_lists[0].id)
+list_1 = client.get(TaskList, task_lists[1].id)
 
 print(list_1)
 pprint(list_1.get_tasks())
 
 all_tasks = client.list(Task)
 pprint(all_tasks)
+
+# Updating task
+# first_task = all_tasks[0]
+# first_task.body = "changed"
+# first_task.update()

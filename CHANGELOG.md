@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `WebBrowserProvider` can display custom messages
 - Support deleting Task and TaskList
+- Support updating Task and TaskList
+- Converting resource to dict
 
 ### Changed
 
@@ -19,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Converting dates when aren't present in data dict
+- Type annotations
+- Package readme in PyPI
 
 ## [0.0.1] - 2020-05-21
 

@@ -2,7 +2,6 @@ import urllib
 from datetime import datetime, timezone
 
 import pytest
-from pytest import mark
 
 from todoms.resources import (
     AttributeConverter,
@@ -13,6 +12,7 @@ from todoms.resources import (
 )
 
 from .utils.constants import API_BASE
+from .utils.helpers import match_body
 
 
 @pytest.fixture
@@ -41,9 +41,9 @@ TASK_EXAMPLE_DATA = {
     "body": {"content": "task-body", "contentType": "html"},
     "categories": ["category1"],
     "changeKey": "key-change-1",
-    "completedDateTime": {"dateTime": "2020-05-01T00:00:00.0000000", "timeZone": "UTC"},
+    "completedDateTime": {"dateTime": "2020-05-01T00:00:00.000000", "timeZone": "UTC"},
     "createdDateTime": "2020-01-01T18:00:00Z",
-    "dueDateTime": {"dateTime": "2020-05-02T00:00:00.0000000", "timeZone": "UTC"},
+    "dueDateTime": {"dateTime": "2020-05-02T00:00:00.000000", "timeZone": "UTC"},
     "hasAttachments": True,
     "id": "task-1",
     "importance": "urgent",
@@ -52,9 +52,9 @@ TASK_EXAMPLE_DATA = {
     "owner": "user-1",
     "parentFolderId": "id-1",
     "recurrence": {"@odata.type": "microsoft.graph.patternedRecurrence"},
-    "reminderDateTime": {"dateTime": "2020-05-03T00:00:00.0000000", "timeZone": "UTC"},
+    "reminderDateTime": {"dateTime": "2020-05-03T00:00:00.000000", "timeZone": "UTC"},
     "sensitivity": "top-secret",
-    "startDateTime": {"dateTime": "2020-05-04T00:00:00.0000000", "timeZone": "UTC"},
+    "startDateTime": {"dateTime": "2020-05-04T00:00:00.000000", "timeZone": "UTC"},
     "status": "status-1",
     "subject": "My new task",
 }
@@ -136,11 +136,42 @@ def test_default_resource_complex_to_dict_with_converter():
     assert resource_dict == {"old": {"content": "data", "contentType": "html"}}
 
 
-@mark.parametrize(
+def test_default_resource_update_client_call(client, requests_mock):
+    class ComplexResource(Resource):
+        ENDPOINT = "fake"
+        ATTRIBUTES = (ContentAttrConverter("old", "new"), "id")
+
+        def __init__(self, client, new, id):
+            super().__init__(client)
+            self.new = new
+            self.id = id
+
+    resource = ComplexResource(client, new="data", id="id-1")
+
+    requests_mock.patch(
+        f"{API_BASE}/fake/id-1",
+        json={},
+        status_code=200,
+        additional_matcher=match_body(resource.to_dict()),
+    )
+
+    resource.update()
+    assert requests_mock.called is True
+
+
+@pytest.mark.parametrize(
     "resource,endpoint", [(TaskList, "outlook/taskFolders"), (Task, "outlook/tasks")]
 )
 def test_resource_has_proper_endpoint(resource, endpoint):
     assert resource.ENDPOINT == endpoint
+
+
+@pytest.mark.parametrize(
+    "resource,data", [(TaskList, TASK_LIST_EXAMPLE_DATA), (Task, TASK_EXAMPLE_DATA)]
+)
+def test_resource_is_proper_converted_back_to_dict(resource, data):
+    obj = resource.create_from_dict(None, data)
+    assert data == obj.to_dict()
 
 
 def test_create_tasklist_object_from_data():
@@ -205,9 +236,11 @@ def test_task_delete_themselfs(requests_mock, client):
     requests_mock.delete(f"{API_BASE}/outlook/tasks/task-1", status_code=204)
     task = Task.create_from_dict(client, TASK_EXAMPLE_DATA)
     task.delete()
+    assert requests_mock.called is True
 
 
 def test_task_list_delete_themselfs(requests_mock, client):
     requests_mock.delete(f"{API_BASE}/outlook/taskFolders/id-1", status_code=204)
     task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
     task_list.delete()
+    assert requests_mock.called is True
