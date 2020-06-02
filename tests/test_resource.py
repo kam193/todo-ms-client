@@ -1,10 +1,7 @@
 import urllib
 from datetime import datetime, timezone
 
-from .utils.helpers import match_body
-
 import pytest
-from pytest import mark
 
 from todoms.resources import (
     AttributeConverter,
@@ -15,6 +12,7 @@ from todoms.resources import (
 )
 
 from .utils.constants import API_BASE
+from .utils.helpers import match_body
 
 
 @pytest.fixture
@@ -161,14 +159,14 @@ def test_default_resource_update_client_call(client, requests_mock):
     assert requests_mock.called is True
 
 
-@mark.parametrize(
+@pytest.mark.parametrize(
     "resource,endpoint", [(TaskList, "outlook/taskFolders"), (Task, "outlook/tasks")]
 )
 def test_resource_has_proper_endpoint(resource, endpoint):
     assert resource.ENDPOINT == endpoint
 
 
-@mark.parametrize(
+@pytest.mark.parametrize(
     "resource,data", [(TaskList, TASK_LIST_EXAMPLE_DATA), (Task, TASK_EXAMPLE_DATA)]
 )
 def test_resource_is_proper_converted_back_to_dict(resource, data):
