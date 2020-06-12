@@ -159,3 +159,39 @@ def test_patch_sends_data(client, resource_obj, requests_mock):
     response = client.patch(resource_obj)
 
     assert response == {"ok": "true"}
+
+
+def test_raw_post(client, requests_mock):
+    requests_mock.post(
+        f"{API_BASE}/my-endpoint/sendind",
+        json={"result": "ok"},
+        status_code=201,
+        additional_matcher=match_body({"my": "body"}),
+    )
+    result = client.raw_post("my-endpoint/sendind", data={"my": "body"})
+
+    assert result == {"result": "ok"}
+
+
+def test_raw_post_with_nondefault_status_code(client, requests_mock):
+    requests_mock.post(
+        f"{API_BASE}/my-endpoint/sendind",
+        json={"result": "ok"},
+        status_code=205,
+        additional_matcher=match_body({"my": "body"}),
+    )
+    result = client.raw_post(
+        "my-endpoint/sendind", data={"my": "body"}, expected_code=205
+    )
+
+    assert result == {"result": "ok"}
+
+
+@mark.parametrize("error_code,exception", EXPECTED_ERRORS)
+def test_raw_post_raises_on_error(client, requests_mock, error_code, exception):
+    requests_mock.post(
+        f"{API_BASE}/my-endpoint/sendind", json={"result": "ok"}, status_code=error_code
+    )
+
+    with raises(exception):
+        client.raw_post("my-endpoint/sendind", data={})

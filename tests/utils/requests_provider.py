@@ -12,3 +12,6 @@ class RequestsProvider(AbstractProvider):
 
     def patch(self, url, json_data):
         return requests.patch(url=url, json=json_data)
+
+    def post(self, url, json_data):
+        return requests.post(url=url, json=json_data)

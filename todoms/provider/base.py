@@ -15,3 +15,7 @@ class AbstractProvider(ABC):
     @abstractmethod
     def patch(self, url: str, json_data: dict) -> Response:
         pass
+
+    @abstractmethod
+    def post(self, url: str, json_data: dict) -> Response:
+        pass
