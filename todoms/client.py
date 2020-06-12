@@ -54,6 +54,13 @@ class ToDoClient(object):
         self._map_http_errors(response, codes.ok)
         return response.json()
 
+    def raw_post(self, endpoint: str, data: dict, expected_code: int = codes.created):
+        # TODO: safe concatenation
+        url = f"{self._url}/{endpoint}"
+        response = self._provider.post(url, json_data=data)
+        self._map_http_errors(response, expected_code)
+        return response.json()
+
     def _map_http_errors(self, response, expected):
         if response.status_code == codes.not_found:
             raise ResourceNotFoundError(response)

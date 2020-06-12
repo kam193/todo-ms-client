@@ -31,3 +31,7 @@ pprint(all_tasks)
 # first_task = all_tasks[0]
 # first_task.body = "changed"
 # first_task.update()
+
+# Complete task
+# first_task = all_tasks[0]
+# first_task.complete()
