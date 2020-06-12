@@ -1,3 +1,4 @@
+import copy
 import urllib
 from datetime import datetime, timezone
 
@@ -244,3 +245,25 @@ def test_task_list_delete_themselfs(requests_mock, client):
     task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
     task_list.delete()
     assert requests_mock.called is True
+
+
+def test_task_complete(requests_mock, client):
+    response = copy.deepcopy(TASK_EXAMPLE_DATA)
+    response["status"] = "completed"
+    response["completedDateTime"] = {
+        "dateTime": "2020-06-12T00:00:00.000000",
+        "timeZone": "UTC",
+    }
+
+    requests_mock.post(
+        f"{API_BASE}/outlook/tasks/task-1/complete",
+        status_code=200,
+        json={"value": [response]},
+        additional_matcher=match_body({}),
+    )
+    task = Task.create_from_dict(client, TASK_EXAMPLE_DATA)
+    task.complete()
+
+    assert requests_mock.called is True
+    assert task.status == "completed"
+    assert task.completed_datetime == datetime(2020, 6, 12, tzinfo=timezone.utc)

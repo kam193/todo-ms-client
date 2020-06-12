@@ -91,6 +91,12 @@ class WebBrowserProvider(AbstractProvider):
 
         return self._session.patch(url=url, json=json_data)
 
+    def post(self, url: str, json_data: dict):
+        if not self._token:
+            raise RequestBeforeAuthenticatedError
+
+        return self._session.post(url=url, json=json_data)
+
     @property
     def _authorize_url(self):
         return urllib.parse.urljoin(self._authority, self._authorize_endpoint)

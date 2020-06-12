@@ -171,6 +171,17 @@ class Task(Resource):
     def delete(self):
         self._client.delete(self)
 
+    def complete(self):
+        # TODO: safe concatenation
+        endpoint = f"{self.ENDPOINT}/{self.id}/complete"
+        result = self._client.raw_post(endpoint, data={}, expected_code=200)
+
+        # TODO: better update object from result
+        self.status = result["value"][0]["status"]
+        self.completed_datetime = DatetimeAttrConverter("", "").obj_converter(
+            result["value"][0]["completedDateTime"]
+        )
+
     @classmethod
     def handle_list_filters(cls, **kwargs):
         kwargs.setdefault("status", "ne 'completed'")
