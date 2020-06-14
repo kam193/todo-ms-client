@@ -1,6 +1,8 @@
 from abc import ABC
 from datetime import datetime
 
+from furl import furl
+
 from .converters import (
     AttributeConverter,
     ContentAttrConverter,
@@ -95,7 +97,7 @@ class Task(Resource):
     """Represent a task. Listing tasks without specific TaskList returns all tasks"""
 
     ENDPOINT = "outlook/tasks"
-    ATTRIBUTES = (  # TODO: translate & format dates
+    ATTRIBUTES = (
         "id",
         ContentAttrConverter("body", "body"),
         "categories",
@@ -172,9 +174,8 @@ class Task(Resource):
         self._client.delete(self)
 
     def complete(self):
-        # TODO: safe concatenation
-        endpoint = f"{self.ENDPOINT}/{self.id}/complete"
-        result = self._client.raw_post(endpoint, data={}, expected_code=200)
+        endpoint = furl(self.ENDPOINT) / self.id / "complete"
+        result = self._client.raw_post(endpoint.url, data={}, expected_code=200)
 
         # TODO: better update object from result
         self.status = result["value"][0]["status"]

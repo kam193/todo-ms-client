@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Mark Task as complete
 
+### Fixed
+
+- Support URLs with or without `/` at the begin or end
+
 ## [0.0.2] - 2020-05-02
 
 ### Added
