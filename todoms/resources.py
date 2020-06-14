@@ -1,14 +1,14 @@
 from abc import ABC
 from datetime import datetime
 
+from furl import furl
+
 from .converters import (
     AttributeConverter,
     ContentAttrConverter,
     DatetimeAttrConverter,
     IsoTimeAttrConverter,
 )
-
-from furl import furl
 
 
 class Resource(ABC):

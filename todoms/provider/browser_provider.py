@@ -2,8 +2,8 @@ import webbrowser
 import wsgiref.simple_server
 import wsgiref.util
 
-from requests_oauthlib import OAuth2Session
 from furl import furl
+from requests_oauthlib import OAuth2Session
 
 from .base import AbstractProvider
 
