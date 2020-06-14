@@ -1,6 +1,7 @@
 from typing import Type
 
 from requests import Response, codes
+from furl import furl
 
 from .provider import AbstractProvider
 from .resources import Resource
@@ -14,10 +15,10 @@ class ToDoClient(object):
         api_prefix: str = "me",
     ):
         self._provider = provider
-        self._url = f"{api_url}/{api_prefix}"  # TODO: safe concatenation
+        self._url = furl(api_url) / api_prefix
 
     def list(self, resource_class: Type[Resource], endpoint: str = None, **kwargs):
-        url = f"{self._url}/{endpoint or resource_class.ENDPOINT}"
+        url = self._url / (endpoint or resource_class.ENDPOINT)
         params = resource_class.handle_list_filters(**kwargs)
 
         elements = []
@@ -32,8 +33,7 @@ class ToDoClient(object):
         return [resource_class.create_from_dict(self, element) for element in elements]
 
     def get(self, resource_class: Type[Resource], resource_id: str):
-        # TODO: safe concatenation
-        url = f"{self._url}/{resource_class.ENDPOINT}/{resource_id}"
+        url = self._url / resource_class.ENDPOINT / resource_id
 
         response = self._provider.get(url)
 
@@ -42,21 +42,18 @@ class ToDoClient(object):
         return resource_class.create_from_dict(self, response.json())
 
     def delete(self, resource: Resource):
-        # TODO: safe concatenation
-        url = f"{self._url}/{resource.ENDPOINT}/{resource.id}"
+        url = self._url / resource.ENDPOINT / resource.id
         response = self._provider.delete(url)
         self._map_http_errors(response, codes.no_content)
 
     def patch(self, resource: Resource):
-        # TODO: safe concatenation
-        url = f"{self._url}/{resource.ENDPOINT}/{resource.id}"
+        url = self._url / resource.ENDPOINT / resource.id
         response = self._provider.patch(url, json_data=resource.to_dict())
         self._map_http_errors(response, codes.ok)
         return response.json()
 
     def raw_post(self, endpoint: str, data: dict, expected_code: int = codes.created):
-        # TODO: safe concatenation
-        url = f"{self._url}/{endpoint}"
+        url = self._url / endpoint
         response = self._provider.post(url, json_data=data)
         self._map_http_errors(response, expected_code)
         return response.json()

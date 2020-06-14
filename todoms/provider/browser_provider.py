@@ -1,9 +1,9 @@
-import urllib.parse
 import webbrowser
 import wsgiref.simple_server
 import wsgiref.util
 
 from requests_oauthlib import OAuth2Session
+from furl import furl
 
 from .base import AbstractProvider
 
@@ -31,11 +31,12 @@ class WebBrowserProvider(AbstractProvider):
     ):
         self._app_id = app_id
         self._app_secret = app_secret
-        self._authority = authority
-        self._authorize_endpoint = authorize_endpoint
-        self._token_endpoint = token_endpoint
         self._open_message = open_message
         self._finish_message = finish_message
+
+        authority = furl(authority)
+        self._authorize_url = (authority / authorize_endpoint).url
+        self._token_url = (authority / token_endpoint).url
 
         self._session = None
 
@@ -96,14 +97,6 @@ class WebBrowserProvider(AbstractProvider):
             raise RequestBeforeAuthenticatedError
 
         return self._session.post(url=url, json=json_data)
-
-    @property
-    def _authorize_url(self):
-        return urllib.parse.urljoin(self._authority, self._authorize_endpoint)
-
-    @property
-    def _token_url(self):
-        return urllib.parse.urljoin(self._authority, self._token_endpoint)
 
     def _build_session(self, redirect_url: str):
         refresh_params = {"client_id": self._app_id, "client_secret": self._app_secret}
