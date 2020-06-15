@@ -18,7 +18,7 @@ def resource_class():
         def __init__(self, client, name, id):
             super().__init__(client)
             self.name = name
-            self.id = id
+            self._id = id
 
         @classmethod
         def handle_list_filters(cls, **kwargs):

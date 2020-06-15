@@ -19,11 +19,10 @@ from .utils.helpers import match_body
 @pytest.fixture
 def simple_resource_class():
     class SimpleResource(Resource):
-        ATTRIBUTES = ("id", "name")
+        ATTRIBUTES = ("_id", "name")
 
-        def __init__(self, client, id, name):
+        def __init__(self, client, name):
             super().__init__(client)
-            self.id = id
             self.name = name
 
     return SimpleResource
@@ -63,10 +62,10 @@ TASK_EXAMPLE_DATA = {
 
 def test_default_resource_init_creates_obj_from_data(simple_resource_class):
     obj = simple_resource_class.create_from_dict(
-        None, {"id": "id-1", "name": "name-1", "not_attr": "ignore"}
+        None, {"_id": "id-1", "name": "name-1", "not_attr": "ignore"}
     )
 
-    assert obj.id == "id-1"
+    assert obj._id == "id-1"
     assert obj.name == "name-1"
     assert getattr(obj, "not_attr", None) is None
 
@@ -99,12 +98,12 @@ def test_default_resource_init_converts_attributes_format():
 
 def test_default_resource_simple_to_dict(simple_resource_class):
     resource = simple_resource_class.create_from_dict(
-        None, {"id": "id-1", "name": "name-1"}
+        None, {"_id": "id-1", "name": "name-1"}
     )
 
     resource_dict = resource.to_dict()
 
-    assert resource_dict == {"id": "id-1", "name": "name-1"}
+    assert resource_dict == {"_id": "id-1", "name": "name-1"}
 
 
 def test_default_resource_complex_to_dict():
@@ -145,7 +144,7 @@ def test_default_resource_update_client_call(client, requests_mock):
         def __init__(self, client, new, id):
             super().__init__(client)
             self.new = new
-            self.id = id
+            self._id = id
 
     resource = ComplexResource(client, new="data", id="id-1")
 
@@ -158,6 +157,20 @@ def test_default_resource_update_client_call(client, requests_mock):
 
     resource.update()
     assert requests_mock.called is True
+
+
+def test_default_resource_id(simple_resource_class):
+    resource = simple_resource_class.create_from_dict(
+        None, {"_id": "id-1", "name": "name-1"}
+    )
+
+    assert resource.id == "id-1"
+
+
+def test_default_resource_id_return_none_when_unset(simple_resource_class):
+    resource = simple_resource_class.create_from_dict(None, {"name": "name-1"})
+
+    assert resource.id is None
 
 
 @pytest.mark.parametrize(
