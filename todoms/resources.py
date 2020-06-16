@@ -97,8 +97,8 @@ class TaskList(Resource):
         self.is_default = is_default
 
     def get_tasks(self, status: str = "ne 'completed'"):
-        tasks_endpoint = f"{self.ENDPOINT}/{self.id}/tasks"
-        return self._client.list(Task, endpoint=tasks_endpoint, status=status)
+        tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
+        return self._client.list(Task, endpoint=tasks_endpoint.url, status=status)
 
     def delete(self):
         self._client.delete(self)
