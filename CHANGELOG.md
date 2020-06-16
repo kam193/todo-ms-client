@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Mark Task as complete
+- Create TaskList
 
 ### Fixed
 

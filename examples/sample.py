@@ -35,3 +35,7 @@ pprint(all_tasks)
 # Complete task
 # first_task = all_tasks[0]
 # first_task.complete()
+
+# Create list
+new_list = TaskList(client, "My new list")
+new_list.create()

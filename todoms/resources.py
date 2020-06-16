@@ -11,6 +11,10 @@ from .converters import (
 )
 
 
+class ResourceAlreadyCreatedError(Exception):
+    """This resource is already created. Prevent duplicate"""
+
+
 class Resource(ABC):
     """Base Resource for any other"""
 
@@ -25,30 +29,44 @@ class Resource(ABC):
 
         for attr in self.ATTRIBUTES:
             if isinstance(attr, AttributeConverter):
-                value = getattr(self, attr.local_name)
+                value = getattr(self, attr.local_name, None)
                 data_dict[attr.original_name] = attr.back_converter(value)
             else:
-                data_dict[attr] = getattr(self, attr)
+                data_dict[attr] = getattr(self, attr, None)
 
         return data_dict
 
     def update(self):
         self._client.patch(self)
 
+    def create(self):
+        if self.id:
+            raise ResourceAlreadyCreatedError
+        result = self._client.raw_post(self.ENDPOINT, self.to_dict(), 201)
+        # TODO: update object from result
+        self._id = result.get("id", None)
+
+    @property
+    def id(self):
+        return getattr(self, "_id", None)
+
     @classmethod
     def create_from_dict(cls, client, data_dict: dict):
         init_arguments = {}
         private_attributes = {}
 
+        def store_attribute(name, value):
+            if name.startswith("_"):
+                private_attributes[name] = value
+            else:
+                init_arguments[name] = value
+
         for attr in cls.ATTRIBUTES:
             if isinstance(attr, AttributeConverter):
                 value = attr.obj_converter(data_dict.get(attr.original_name))
-                if attr.local_name.startswith("_"):
-                    private_attributes[attr.local_name] = value
-                else:
-                    init_arguments[attr.local_name] = value
+                store_attribute(attr.local_name, value)
             else:
-                init_arguments[attr] = data_dict.get(attr)
+                store_attribute(attr, data_dict.get(attr))
 
         obj = cls(client, **init_arguments)
         for attr, value in private_attributes.items():
@@ -66,22 +84,21 @@ class TaskList(Resource):
 
     ENDPOINT = "outlook/taskFolders"
     ATTRIBUTES = (
-        "id",
+        AttributeConverter("id", "_id"),
         "name",
         AttributeConverter("isDefaultFolder", "is_default"),
         AttributeConverter("changeKey", "_change_key"),
         AttributeConverter("parentGroupKey", "_parent_group_key"),
     )
 
-    def __init__(self, client, id: str, name: str, is_default: bool = False):
+    def __init__(self, client, name: str, is_default: bool = False):
         super().__init__(client)
-        self.id = id
         self.name = name
         self.is_default = is_default
 
     def get_tasks(self, status: str = "ne 'completed'"):
-        tasks_endpoint = f"{self.ENDPOINT}/{self.id}/tasks"
-        return self._client.list(Task, endpoint=tasks_endpoint, status=status)
+        tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
+        return self._client.list(Task, endpoint=tasks_endpoint.url, status=status)
 
     def delete(self):
         self._client.delete(self)
@@ -98,7 +115,7 @@ class Task(Resource):
 
     ENDPOINT = "outlook/tasks"
     ATTRIBUTES = (
-        "id",
+        AttributeConverter("id", "_id"),
         ContentAttrConverter("body", "body"),
         "categories",
         "status",
@@ -123,7 +140,6 @@ class Task(Resource):
     def __init__(
         self,
         client,
-        id: str,
         body: str,
         subject: str,
         task_list_id: str,
@@ -144,7 +160,6 @@ class Task(Resource):
         reminder_datetime: datetime = None,
     ):
         super().__init__(client)
-        self.id = id
         self.body = body
         self.subject = subject
         self.task_list_id = task_list_id

@@ -53,4 +53,6 @@ class IsoTimeAttrConverter(AttributeConverter):
         return parser.isoparse(data)
 
     def back_converter(self, data: datetime) -> str:
+        if not data:
+            return None
         return data.astimezone(tz.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
