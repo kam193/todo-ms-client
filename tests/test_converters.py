@@ -91,3 +91,8 @@ def test_isotime_attr_converter_back():
     converter = IsoTimeAttrConverter("", "")
     data = datetime(2020, 1, 1, 18, tzinfo=tz.gettz("UTC+2"))
     assert converter.back_converter(data) == "2020-01-01T16:00:00Z"
+
+
+def test_isotime_attr_converter_back_when_no_data():
+    converter = IsoTimeAttrConverter("", "")
+    assert converter.back_converter(None) is None
