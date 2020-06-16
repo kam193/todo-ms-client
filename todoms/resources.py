@@ -11,6 +11,10 @@ from .converters import (
 )
 
 
+class ResourceAlreadyCreatedError(Exception):
+    """This resource is already created. Prevent duplicate"""
+
+
 class Resource(ABC):
     """Base Resource for any other"""
 
@@ -25,15 +29,22 @@ class Resource(ABC):
 
         for attr in self.ATTRIBUTES:
             if isinstance(attr, AttributeConverter):
-                value = getattr(self, attr.local_name)
+                value = getattr(self, attr.local_name, None)
                 data_dict[attr.original_name] = attr.back_converter(value)
             else:
-                data_dict[attr] = getattr(self, attr)
+                data_dict[attr] = getattr(self, attr, None)
 
         return data_dict
 
     def update(self):
         self._client.patch(self)
+
+    def create(self):
+        if self.id:
+            raise ResourceAlreadyCreatedError
+        result = self._client.raw_post(self.ENDPOINT, self.to_dict(), 201)
+        # TODO: update object from result
+        self._id = result.get("id", None)
 
     @property
     def id(self):

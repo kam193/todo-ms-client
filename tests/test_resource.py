@@ -8,6 +8,7 @@ from todoms.resources import (
     AttributeConverter,
     ContentAttrConverter,
     Resource,
+    ResourceAlreadyCreatedError,
     Task,
     TaskList,
 )
@@ -19,6 +20,7 @@ from .utils.helpers import match_body
 @pytest.fixture
 def simple_resource_class():
     class SimpleResource(Resource):
+        ENDPOINT = "endpoint"
         ATTRIBUTES = ("_id", "name")
 
         def __init__(self, client, name):
@@ -171,6 +173,32 @@ def test_default_resource_id_return_none_when_unset(simple_resource_class):
     resource = simple_resource_class.create_from_dict(None, {"name": "name-1"})
 
     assert resource.id is None
+
+
+def test_default_resource_create_fails_when_id_set(simple_resource_class):
+    resource = simple_resource_class.create_from_dict(
+        None, {"_id": "id-1", "name": "name-1"}
+    )
+
+    with pytest.raises(ResourceAlreadyCreatedError):
+        resource.create()
+
+
+def test_default_resource_create_calls_endpoint(
+    simple_resource_class, client, requests_mock
+):
+    resource = simple_resource_class(client, name="new-resource")
+    requests_mock.post(
+        f"{API_BASE}/endpoint",
+        json={"id": "new-id", "name": "new-resource"},
+        status_code=201,
+        additional_matcher=match_body({"_id": None, "name": "new-resource"}),
+    )
+
+    resource.create()
+
+    assert requests_mock.called is True
+    assert resource.id == "new-id"
 
 
 @pytest.mark.parametrize(
