@@ -15,6 +15,10 @@ class ResourceAlreadyCreatedError(Exception):
     """This resource is already created. Prevent duplicate"""
 
 
+class NotSupportedError(Exception):
+    """This method isn't supported in this resource type"""
+
+
 class Resource(ABC):
     """Base Resource for any other"""
 
@@ -203,3 +207,48 @@ class Task(Resource):
         kwargs.setdefault("status", "ne 'completed'")
         params = {"$filter": f"status {kwargs['status']}" if kwargs["status"] else None}
         return params
+
+
+class Attachment(Resource):
+    """Represent a generic attachment attachted to a task"""
+
+    ENDPOINT = "attachments"
+    ATTRIBUTES = (
+        AttributeConverter("id", "_id"),
+        "name",
+        "size",
+        AttributeConverter("isInline", "is_inline"),
+        AttributeConverter("contentType", "content_type"),
+        IsoTimeAttrConverter("lastModifiedDateTime", "last_modified_datetime"),
+    )
+
+    def __init__(
+        self,
+        client,
+        name: str,
+        size: int,
+        content_type: str,
+        is_inline: bool = True,
+        last_modified_datetime: datetime = None,
+        task: Task = None,
+    ):
+        super().__init__(client)
+        self.task = task
+        self.name = name
+        self.size = size
+        self.content_type = content_type
+        self.is_inline = is_inline
+        self.last_modified_datetime = last_modified_datetime
+
+    def update(self):
+        raise NotSupportedError
+
+    @classmethod
+    def handle_list_filters(cls, **kwargs):
+        raise NotSupportedError
+
+    @classmethod
+    def create_from_dict(cls, client, task, data_dict):
+        attachment = super().create_from_dict(client, data_dict)
+        attachment.task = task
+        return attachment

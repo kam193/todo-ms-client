@@ -11,6 +11,8 @@ from todoms.resources import (
     ResourceAlreadyCreatedError,
     Task,
     TaskList,
+    Attachment,
+    NotSupportedError,
 )
 
 from .utils.constants import API_BASE
@@ -59,6 +61,15 @@ TASK_EXAMPLE_DATA = {
     "startDateTime": {"dateTime": "2020-05-04T00:00:00.000000", "timeZone": "UTC"},
     "status": "status-1",
     "subject": "My new task",
+}
+
+ATTACHMENT_EXAMPLE_DATA = {
+    "contentType": "mime/type",
+    "id": "attachment-1",
+    "isInline": True,
+    "lastModifiedDateTime": "2021-01-01T18:00:00Z",
+    "name": "The Attachment",
+    "size": 1024,
 }
 
 
@@ -202,7 +213,12 @@ def test_default_resource_create_calls_endpoint(
 
 
 @pytest.mark.parametrize(
-    "resource,endpoint", [(TaskList, "outlook/taskFolders"), (Task, "outlook/tasks")]
+    "resource,endpoint",
+    [
+        (TaskList, "outlook/taskFolders"),
+        (Task, "outlook/tasks"),
+        (Attachment, "attachments"),
+    ],
 )
 def test_resource_has_proper_endpoint(resource, endpoint):
     assert resource.ENDPOINT == endpoint
@@ -308,3 +324,30 @@ def test_task_complete(requests_mock, client):
     assert requests_mock.called is True
     assert task.status == "completed"
     assert task.completed_datetime == datetime(2020, 6, 12, tzinfo=timezone.utc)
+
+
+def test_attachment_from_dict():
+    task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
+    attachment = Attachment.create_from_dict(None, task, ATTACHMENT_EXAMPLE_DATA)
+
+    assert attachment.task == task
+    assert attachment.id == "attachment-1"
+    assert attachment.is_inline is True
+    assert attachment.content_type == "mime/type"
+    assert attachment.last_modified_datetime == datetime(
+        2021, 1, 1, 18, tzinfo=timezone.utc
+    )
+    assert attachment.name == "The Attachment"
+    assert attachment.size == 1024
+
+
+def test_attachment_update_not_supported():
+    attachment = Attachment.create_from_dict(None, None, ATTACHMENT_EXAMPLE_DATA)
+
+    with pytest.raises(NotSupportedError):
+        attachment.update()
+
+
+def test_attachment_list_filter_not_supported():
+    with pytest.raises(NotSupportedError):
+        Attachment.handle_list_filters()
