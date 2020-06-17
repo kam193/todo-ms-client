@@ -5,14 +5,14 @@ from datetime import datetime, timezone
 import pytest
 
 from todoms.resources import (
+    Attachment,
     AttributeConverter,
     ContentAttrConverter,
+    NotSupportedError,
     Resource,
     ResourceAlreadyCreatedError,
     Task,
     TaskList,
-    Attachment,
-    NotSupportedError,
 )
 
 from .utils.constants import API_BASE
@@ -326,9 +326,25 @@ def test_task_complete(requests_mock, client):
     assert task.completed_datetime == datetime(2020, 6, 12, tzinfo=timezone.utc)
 
 
+def test_task_list_attachment(requests_mock, client):
+    requests_mock.get(
+        f"{API_BASE}/outlook/tasks/task-1/attachments",
+        status_code=200,
+        json={"value": [ATTACHMENT_EXAMPLE_DATA]},
+    )
+    task = Task.create_from_dict(client, TASK_EXAMPLE_DATA)
+
+    result = task.list_attachments()
+
+    assert len(result) == 1
+    assert isinstance(result[0], Attachment) is True
+    assert result[0].id == "attachment-1"
+    assert result[0].task == task
+
+
 def test_attachment_from_dict():
     task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
-    attachment = Attachment.create_from_dict(None, task, ATTACHMENT_EXAMPLE_DATA)
+    attachment = Attachment.create_from_dict(None, ATTACHMENT_EXAMPLE_DATA, task=task)
 
     assert attachment.task == task
     assert attachment.id == "attachment-1"
@@ -342,12 +358,7 @@ def test_attachment_from_dict():
 
 
 def test_attachment_update_not_supported():
-    attachment = Attachment.create_from_dict(None, None, ATTACHMENT_EXAMPLE_DATA)
+    attachment = Attachment.create_from_dict(None, ATTACHMENT_EXAMPLE_DATA, task=None)
 
     with pytest.raises(NotSupportedError):
         attachment.update()
-
-
-def test_attachment_list_filter_not_supported():
-    with pytest.raises(NotSupportedError):
-        Attachment.handle_list_filters()

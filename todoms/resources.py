@@ -202,6 +202,15 @@ class Task(Resource):
             result["value"][0]["completedDateTime"]
         )
 
+    def list_attachments(self):
+        endpoint = furl(self.ENDPOINT) / self.id / Attachment.ENDPOINT
+        attachments = self._client.list(Attachment, endpoint.url)
+
+        for attachment in attachments:
+            attachment.task = self
+
+        return attachments
+
     @classmethod
     def handle_list_filters(cls, **kwargs):
         kwargs.setdefault("status", "ne 'completed'")
@@ -221,6 +230,12 @@ class Attachment(Resource):
         AttributeConverter("contentType", "content_type"),
         IsoTimeAttrConverter("lastModifiedDateTime", "last_modified_datetime"),
     )
+
+    def __repr__(self):
+        return f"<Attachment '{self.name}'>"
+
+    def __str__(self):
+        return f"Attachment '{self.name}'"
 
     def __init__(
         self,
@@ -244,11 +259,7 @@ class Attachment(Resource):
         raise NotSupportedError
 
     @classmethod
-    def handle_list_filters(cls, **kwargs):
-        raise NotSupportedError
-
-    @classmethod
-    def create_from_dict(cls, client, task, data_dict):
+    def create_from_dict(cls, client, data_dict, task=None):
         attachment = super().create_from_dict(client, data_dict)
         attachment.task = task
         return attachment
