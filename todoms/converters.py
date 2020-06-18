@@ -1,8 +1,12 @@
+from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 from typing import Any
 
 from dateutil import parser, tz
+
+from .attributes import Importance, Sensitivity, Status
 
 
 @dataclass
@@ -56,3 +60,33 @@ class IsoTimeAttrConverter(AttributeConverter):
         if not data:
             return None
         return data.astimezone(tz.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+@dataclass
+class EnumAttrConverter(AttributeConverter, ABC):
+    _ENUM = None
+
+    def obj_converter(self, data: str) -> Enum:
+        if not data:
+            return None
+        return self._ENUM(data)
+
+    def back_converter(self, data: Enum) -> str:
+        if not data:
+            return None
+        return data.value
+
+
+@dataclass
+class ImportanceAttrConverter(EnumAttrConverter):
+    _ENUM = Importance
+
+
+@dataclass
+class SensitivityAttrConverter(EnumAttrConverter):
+    _ENUM = Sensitivity
+
+
+@dataclass
+class StatusAttrConverter(EnumAttrConverter):
+    _ENUM = Status

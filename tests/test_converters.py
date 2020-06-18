@@ -1,13 +1,15 @@
 from datetime import datetime, timezone
+from enum import Enum
 from unittest.mock import Mock
 
+import pytest
 from dateutil import tz
-from pytest import mark
 
 from todoms.converters import (
     AttributeConverter,
     ContentAttrConverter,
     DatetimeAttrConverter,
+    EnumAttrConverter,
     IsoTimeAttrConverter,
 )
 
@@ -38,7 +40,7 @@ class TestDatetimeAttrConverter:
 
         assert expected_utc == result_utc
 
-    @mark.parametrize("data", [{}, None])
+    @pytest.mark.parametrize("data", [{}, None])
     def test_datetime_attr_converter_when_no_data(self, data):
         converter = DatetimeAttrConverter("", "")
         assert converter.obj_converter(data) is None
@@ -53,14 +55,14 @@ class TestDatetimeAttrConverter:
 
         assert expected == result
 
-    @mark.parametrize("data", [{}, None])
+    @pytest.mark.parametrize("data", [{}, None])
     def test_datetime_attr_converter_back_when_no_data(self, data):
         converter = DatetimeAttrConverter("", "")
         assert converter.back_converter(data) is None
 
 
 class TestContentAttrConverter:
-    @mark.parametrize("data", [{}, None])
+    @pytest.mark.parametrize("data", [{}, None])
     def test_content_attr_converter_when_no_data(self, data):
         converter = ContentAttrConverter("", "")
         assert converter.obj_converter(data) == ""
@@ -92,3 +94,32 @@ class TestIsoTimeAttrConverter:
     def test_isotime_attr_converter_back_when_no_data(self):
         converter = IsoTimeAttrConverter("", "")
         assert converter.back_converter(None) is None
+
+
+class ExampleEnum(Enum):
+    VAL_1 = "val1"
+    VAL_2 = "val2"
+
+
+@pytest.fixture
+def enum_converter():
+    class ExampleEnumConverter(EnumAttrConverter):
+        _ENUM = ExampleEnum
+
+    return ExampleEnumConverter("", "")
+
+
+class TestEnumAttrConverter:
+    @pytest.mark.parametrize(
+        "data,expected",
+        [("val1", ExampleEnum.VAL_1), ("val2", ExampleEnum.VAL_2), (None, None)],
+    )
+    def test_enum_attr_converter(self, enum_converter, data, expected):
+        assert enum_converter.obj_converter(data) == expected
+
+    @pytest.mark.parametrize(
+        "data,expected",
+        [(ExampleEnum.VAL_1, "val1"), (ExampleEnum.VAL_2, "val2"), (None, None)],
+    )
+    def test_enum_attr_back_converter(self, enum_converter, data, expected):
+        assert enum_converter.back_converter(data) == expected
