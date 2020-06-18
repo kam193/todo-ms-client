@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 import pytest
 
+from todoms.attributes import Importance, Sensitivity, Status
 from todoms.resources import (
     Attachment,
     AttributeConverter,
@@ -50,16 +51,16 @@ TASK_EXAMPLE_DATA = {
     "dueDateTime": {"dateTime": "2020-05-02T00:00:00.000000", "timeZone": "UTC"},
     "hasAttachments": True,
     "id": "task-1",
-    "importance": "urgent",
+    "importance": "high",
     "isReminderOn": True,
     "lastModifiedDateTime": "2021-01-01T18:00:00Z",
     "owner": "user-1",
     "parentFolderId": "id-1",
     "recurrence": {"@odata.type": "microsoft.graph.patternedRecurrence"},
     "reminderDateTime": {"dateTime": "2020-05-03T00:00:00.000000", "timeZone": "UTC"},
-    "sensitivity": "top-secret",
+    "sensitivity": "normal",
     "startDateTime": {"dateTime": "2020-05-04T00:00:00.000000", "timeZone": "UTC"},
-    "status": "status-1",
+    "status": "notStarted",
     "subject": "My new task",
 }
 
@@ -269,11 +270,11 @@ class TestTaskResource:
         assert task.id == "task-1"
         assert task.body == "task-body"
         assert task.categories == ["category1"]
-        assert task.status == "status-1"
+        assert task.status == Status.NOT_STARTED
         assert task.subject == "My new task"
-        assert task.sensitivity == "top-secret"
+        assert task.sensitivity == Sensitivity.NORMAL
         assert task.owner == "user-1"
-        assert task.importance == "urgent"
+        assert task.importance == Importance.HIGH
         assert task.assigned_to == "user-1"
         assert task.has_attachments is True
         assert task.is_reminder_on is True
@@ -320,7 +321,7 @@ class TestTaskResource:
         task.complete()
 
         assert requests_mock.called is True
-        assert task.status == "completed"
+        assert task.status == Status.COMPLETED
         assert task.completed_datetime == datetime(2020, 6, 12, tzinfo=timezone.utc)
 
     def test_task_list_attachment(self, requests_mock, client):

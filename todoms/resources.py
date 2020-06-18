@@ -7,7 +7,10 @@ from .converters import (
     AttributeConverter,
     ContentAttrConverter,
     DatetimeAttrConverter,
+    ImportanceAttrConverter,
     IsoTimeAttrConverter,
+    SensitivityAttrConverter,
+    StatusAttrConverter,
 )
 
 
@@ -122,12 +125,12 @@ class Task(Resource):
         AttributeConverter("id", "_id"),
         ContentAttrConverter("body", "body"),
         "categories",
-        "status",
+        StatusAttrConverter("status", "status"),
         "subject",
-        "sensitivity",
+        SensitivityAttrConverter("sensitivity", "sensitivity"),
         "owner",
         "recurrence",
-        "importance",
+        ImportanceAttrConverter("importance", "importance"),
         AttributeConverter("assignedTo", "assigned_to"),
         AttributeConverter("hasAttachments", "has_attachments"),
         AttributeConverter("isReminderOn", "is_reminder_on"),
@@ -197,7 +200,9 @@ class Task(Resource):
         result = self._client.raw_post(endpoint.url, data={}, expected_code=200)
 
         # TODO: better update object from result
-        self.status = result["value"][0]["status"]
+        self.status = StatusAttrConverter("", "").obj_converter(
+            result["value"][0]["status"]
+        )
         self.completed_datetime = DatetimeAttrConverter("", "").obj_converter(
             result["value"][0]["completedDateTime"]
         )
