@@ -57,6 +57,9 @@ class Resource(ABC):
         # TODO: update object from result
         self._id = result.get("id", None)
 
+    def delete(self):
+        self._client.delete(self)
+
     @property
     def id(self):
         return getattr(self, "_id", None)
@@ -114,9 +117,6 @@ class TaskList(Resource):
     def save_task(self, task):
         task.task_list_id = self.id
         task.create()
-
-    def delete(self):
-        self._client.delete(self)
 
     def __repr__(self):
         return f"<TaskList '{self.name}'>"
@@ -204,9 +204,6 @@ class Task(Resource):
         if not self.task_list_id:
             raise TaskListNotSpecifiedError
         return super().create()
-
-    def delete(self):
-        self._client.delete(self)
 
     def complete(self):
         endpoint = furl(self.ENDPOINT) / self.id / "complete"

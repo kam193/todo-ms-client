@@ -231,6 +231,18 @@ class TestDefaultResource:
         assert requests_mock.called is True
         assert resource.id == "new-id"
 
+    def test_default_resource_delete_calls_endpoint(
+        self, simple_resource_class, client, requests_mock
+    ):
+        resource = simple_resource_class.create_from_dict(
+            client, {"_id": "id-1", "name": "name-1"}
+        )
+        requests_mock.delete(f"{API_BASE}/endpoint/id-1", status_code=204)
+
+        resource.delete()
+
+        assert requests_mock.called is True
+
 
 class TestTaskListResource:
     def test_create_tasklist_object_from_data(self,):
