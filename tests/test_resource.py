@@ -277,7 +277,7 @@ class TestTaskListResource:
 
     def test_task_list_saves_task(self, requests_mock, client):
         task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
-        new_task = Task(client, "Test", "Test")
+        new_task = Task(client, "Test")
 
         expected_body = new_task.to_dict()
         expected_body["parentFolderId"] = "id-1"
@@ -296,6 +296,13 @@ class TestTaskListResource:
 
 
 class TestTaskResource:
+    def test_default_crucial_values(self):
+        task = Task(None, "Subject")
+
+        assert task.id is None
+        assert task.categories == []
+        assert task.subject == "Subject"
+
     def test_create_task_object_from_dict(self):
         task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
 
@@ -372,7 +379,7 @@ class TestTaskResource:
         assert result[0].task == task
 
     def test_task_create_raises_when_no_tasklist_id(self):
-        task = Task(None, "Test", "Test")
+        task = Task(None, "Test")
 
         with pytest.raises(TaskListNotSpecifiedError):
             task.create()

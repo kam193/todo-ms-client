@@ -155,8 +155,8 @@ class Task(Resource):
     def __init__(
         self,
         client,
-        body: str,
         subject: str,
+        body: str = None,
         task_list_id: str = None,
         status: str = None,
         importance: str = None,
