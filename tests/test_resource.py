@@ -14,6 +14,7 @@ from todoms.resources import (
     ResourceAlreadyCreatedError,
     Task,
     TaskList,
+    TaskListNotSpecifiedError,
 )
 
 from .utils.constants import API_BASE
@@ -230,6 +231,18 @@ class TestDefaultResource:
         assert requests_mock.called is True
         assert resource.id == "new-id"
 
+    def test_default_resource_delete_calls_endpoint(
+        self, simple_resource_class, client, requests_mock
+    ):
+        resource = simple_resource_class.create_from_dict(
+            client, {"_id": "id-1", "name": "name-1"}
+        )
+        requests_mock.delete(f"{API_BASE}/endpoint/id-1", status_code=204)
+
+        resource.delete()
+
+        assert requests_mock.called is True
+
 
 class TestTaskListResource:
     def test_create_tasklist_object_from_data(self,):
@@ -262,8 +275,34 @@ class TestTaskListResource:
         task_list.delete()
         assert requests_mock.called is True
 
+    def test_task_list_saves_task(self, requests_mock, client):
+        task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
+        new_task = Task(client, "Test")
+
+        expected_body = new_task.to_dict()
+        expected_body["parentFolderId"] = "id-1"
+        requests_mock.post(
+            f"{API_BASE}/outlook/tasks",
+            status_code=201,
+            json={"id": "new_id"},
+            additional_matcher=match_body(expected_body),
+        )
+
+        task_list.save_task(new_task)
+
+        assert new_task.task_list_id == "id-1"
+        assert new_task.id == "new_id"
+        assert requests_mock.called is True
+
 
 class TestTaskResource:
+    def test_default_crucial_values(self):
+        task = Task(None, "Subject")
+
+        assert task.id is None
+        assert task.categories == []
+        assert task.subject == "Subject"
+
     def test_create_task_object_from_dict(self):
         task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
 
@@ -338,6 +377,12 @@ class TestTaskResource:
         assert isinstance(result[0], Attachment) is True
         assert result[0].id == "attachment-1"
         assert result[0].task == task
+
+    def test_task_create_raises_when_no_tasklist_id(self):
+        task = Task(None, "Test")
+
+        with pytest.raises(TaskListNotSpecifiedError):
+            task.create()
 
 
 class TestAttachmentResource:

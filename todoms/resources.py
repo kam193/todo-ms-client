@@ -22,6 +22,10 @@ class NotSupportedError(Exception):
     """This method isn't supported in this resource type"""
 
 
+class TaskListNotSpecifiedError(Exception):
+    """TaskList id must be set before create task"""
+
+
 class Resource(ABC):
     """Base Resource for any other"""
 
@@ -52,6 +56,9 @@ class Resource(ABC):
         result = self._client.raw_post(self.ENDPOINT, self.to_dict(), 201)
         # TODO: update object from result
         self._id = result.get("id", None)
+
+    def delete(self):
+        self._client.delete(self)
 
     @property
     def id(self):
@@ -107,8 +114,9 @@ class TaskList(Resource):
         tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
         return self._client.list(Task, endpoint=tasks_endpoint.url, status=status)
 
-    def delete(self):
-        self._client.delete(self)
+    def save_task(self, task):
+        task.task_list_id = self.id
+        task.create()
 
     def __repr__(self):
         return f"<TaskList '{self.name}'>"
@@ -147,9 +155,9 @@ class Task(Resource):
     def __init__(
         self,
         client,
-        body: str,
         subject: str,
-        task_list_id: str,
+        body: str = None,
+        task_list_id: str = None,
         status: str = None,
         importance: str = None,
         sensitivity: str = None,
@@ -174,7 +182,6 @@ class Task(Resource):
         self.importance = importance
         self.sensitivity = sensitivity
         self.recurrence = recurrence
-        self.categories = categories
         self.owner = owner
         self.assigned_to = assigned_to
         self.has_attachments = has_attachments
@@ -185,6 +192,7 @@ class Task(Resource):
         self.completed_datetime = completed_datetime
         self.last_modified_datetime = last_modified_datetime
         self.reminder_datetime = reminder_datetime
+        self.categories = categories if categories is not None else []
 
     def __repr__(self):
         return f"<Task '{self.subject}'>"
@@ -192,8 +200,10 @@ class Task(Resource):
     def __str__(self):
         return f"Task '{self.subject}'"
 
-    def delete(self):
-        self._client.delete(self)
+    def create(self):
+        if not self.task_list_id:
+            raise TaskListNotSpecifiedError
+        return super().create()
 
     def complete(self):
         endpoint = furl(self.ENDPOINT) / self.id / "complete"

@@ -77,6 +77,11 @@ class TestContentAttrConverter:
         expected = {"content": "The description", "contentType": "html"}
         assert converter.back_converter("The description") == expected
 
+    def test_content_attr_converter_back_when_no_data(self):
+        converter = ContentAttrConverter("", "")
+        expected = {"content": None, "contentType": "html"}
+        assert converter.back_converter(None) == expected
+
 
 class TestIsoTimeAttrConverter:
     def test_isotime_attr_converter(self):
