@@ -14,6 +14,7 @@ from todoms.resources import (
     ResourceAlreadyCreatedError,
     Task,
     TaskList,
+    TaskListNotSpecifiedError,
 )
 
 from .utils.constants import API_BASE
@@ -262,6 +263,25 @@ class TestTaskListResource:
         task_list.delete()
         assert requests_mock.called is True
 
+    def test_task_list_saves_task(self, requests_mock, client):
+        task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
+        new_task = Task(client, "Test", "Test")
+
+        expected_body = new_task.to_dict()
+        expected_body["parentFolderId"] = "id-1"
+        requests_mock.post(
+            f"{API_BASE}/outlook/tasks",
+            status_code=201,
+            json={"id": "new_id"},
+            additional_matcher=match_body(expected_body),
+        )
+
+        task_list.save_task(new_task)
+
+        assert new_task.task_list_id == "id-1"
+        assert new_task.id == "new_id"
+        assert requests_mock.called is True
+
 
 class TestTaskResource:
     def test_create_task_object_from_dict(self):
@@ -338,6 +358,12 @@ class TestTaskResource:
         assert isinstance(result[0], Attachment) is True
         assert result[0].id == "attachment-1"
         assert result[0].task == task
+
+    def test_task_create_raises_when_no_tasklist_id(self):
+        task = Task(None, "Test", "Test")
+
+        with pytest.raises(TaskListNotSpecifiedError):
+            task.create()
 
 
 class TestAttachmentResource:
