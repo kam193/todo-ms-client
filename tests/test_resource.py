@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import pytest
 
 from todoms.attributes import Importance, Sensitivity, Status
+from todoms.filters import and_, eq
 from todoms.resources import (
     Attachment,
     AttributeConverter,
@@ -242,6 +243,22 @@ class TestDefaultResource:
         resource.delete()
 
         assert requests_mock.called is True
+
+    def test_default_handle_list_filter_when_empty(self, simple_resource_class):
+        assert simple_resource_class.handle_list_filters() == {}
+
+    def test_default_handle_list_filter_when_given(self, simple_resource_class):
+        expected = {
+            "$filter": (
+                "((key1 eq 'val1' and key2 eq 'val2') and status eq 'inProgress')"
+            )
+        }
+        assert (
+            simple_resource_class.handle_list_filters(
+                and_(key1=eq("val1"), key2=eq("val2")), status=eq(Status.IN_PROGRESS)
+            )
+            == expected
+        )
 
 
 class TestTaskListResource:

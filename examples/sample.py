@@ -15,7 +15,9 @@ provider = WebBrowserProvider(APP_ID, APP_SECRET)
 provider.authorize(local_port=8000)
 
 client = ToDoClient(provider)
+# task_lists = client.list(TaskList, name="name>")
 task_lists = client.list(TaskList)
+
 
 print(task_lists)
 

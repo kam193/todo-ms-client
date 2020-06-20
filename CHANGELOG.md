@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Mark Task as complete
 - Create TaskList and Task
 - List attachments in task
+- Filtering TaskList on when listed
+- Simple support for filtering operators
 
 ### Fixed
 
