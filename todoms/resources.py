@@ -12,6 +12,7 @@ from .converters import (
     SensitivityAttrConverter,
     StatusAttrConverter,
 )
+from .filters import and_, ne
 
 
 class ResourceAlreadyCreatedError(Exception):
@@ -89,8 +90,11 @@ class Resource(ABC):
         return obj
 
     @classmethod
-    def handle_list_filters(cls, **kwargs):
-        return {}
+    def handle_list_filters(cls, *args, **kwargs):
+        if len(args) + len(kwargs) == 0:
+            return {}
+        params = {"$filter": and_(*args, **kwargs)}
+        return params
 
 
 class TaskList(Resource):
@@ -227,10 +231,9 @@ class Task(Resource):
         return attachments
 
     @classmethod
-    def handle_list_filters(cls, **kwargs):
-        kwargs.setdefault("status", "ne 'completed'")
-        params = {"$filter": f"status {kwargs['status']}" if kwargs["status"] else None}
-        return params
+    def handle_list_filters(cls, *args, **kwargs):
+        kwargs.setdefault("status", ne("completed"))
+        return super().handle_list_filters(*args, **kwargs)
 
 
 class Attachment(Resource):
