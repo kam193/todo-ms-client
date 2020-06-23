@@ -38,6 +38,7 @@ class Resource(ABC):
         self._client = client
 
     def to_dict(self):
+        """Convert resource into dict accepted by API"""
         data_dict = {}
 
         for attr in self.ATTRIBUTES:
@@ -50,9 +51,11 @@ class Resource(ABC):
         return data_dict
 
     def update(self):
+        """Update resource in API"""
         self._client.patch(self)
 
     def create(self):
+        """Create object in API"""
         if self.id:
             raise ResourceAlreadyCreatedError
         result = self._client.raw_post(self.ENDPOINT, self.to_dict(), 201)
@@ -60,6 +63,7 @@ class Resource(ABC):
         self._id = result.get("id", None)
 
     def delete(self):
+        """Delete object in API"""
         self._client.delete(self)
 
     @property
@@ -116,6 +120,7 @@ class TaskList(Resource):
         self.is_default = is_default
 
     def get_tasks(self, *args, **kwargs):
+        """Get list of tasks in given list. Default returns only non-completed tasks."""
         tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
         return self._client.list(Task, endpoint=tasks_endpoint.url, *args, **kwargs)
 
