@@ -3,6 +3,7 @@ from datetime import datetime
 
 from furl import furl
 
+from .attributes import Status
 from .converters import (
     AttributeConverter,
     ContentAttrConverter,
@@ -114,9 +115,9 @@ class TaskList(Resource):
         self.name = name
         self.is_default = is_default
 
-    def get_tasks(self, status: str = "ne 'completed'"):
+    def get_tasks(self, *args, **kwargs):
         tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
-        return self._client.list(Task, endpoint=tasks_endpoint.url, status=status)
+        return self._client.list(Task, endpoint=tasks_endpoint.url, *args, **kwargs)
 
     def save_task(self, task):
         task.task_list_id = self.id
@@ -232,7 +233,7 @@ class Task(Resource):
 
     @classmethod
     def handle_list_filters(cls, *args, **kwargs):
-        kwargs.setdefault("status", ne("completed"))
+        kwargs.setdefault("status", ne(Status.COMPLETED))
         return super().handle_list_filters(*args, **kwargs)
 
 
