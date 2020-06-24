@@ -1,12 +1,6 @@
 Welcome to ToDo MS Client's documentation!
 ==========================================
 
-.. toctree::
-   :maxdepth: 3
-   :caption: Contents:
-
-   reference/index
-
 ToDo MC Client is an unofficial Python library for accessing MS ToDo API.
 
 .. note::
@@ -34,6 +28,12 @@ To learn more about MS ToDo API look into Microsoft docs on `Microsoft Docs page
 
 .. _Microsoft Docs page: https://docs.microsoft.com/en-us/graph/api/resources/outlooktask?view=graph-rest-beta
 
-----
+.. important::
 
-This library is not created nor related in any way with Microsoft.
+   This library is not created nor related in any way with Microsoft.
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Contents:
+
+   reference/index
