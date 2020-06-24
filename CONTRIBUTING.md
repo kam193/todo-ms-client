@@ -21,3 +21,9 @@ An then run one of the following tox environments: `py37` (tests on Python 3.7),
 For example:
 
     tox -e py37
+
+## Building docs
+
+Docs are generated using Sphinx. You can build it using tox:
+
+    tox -e docs

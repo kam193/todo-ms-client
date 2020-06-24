@@ -11,23 +11,14 @@ Resource classes
 ----------------
 
 .. autoclass:: TaskList
-    :members:
-    :undoc-members:
-    :inherited-members:
     :exclude-members: ATTRIBUTES, ENDPOINT
 
 
 .. autoclass:: Task
-    :members:
-    :undoc-members:
-    :inherited-members:
     :exclude-members: ATTRIBUTES, ENDPOINT
 
 
 .. autoclass:: Attachment
-    :members:
-    :undoc-members:
-    :inherited-members:
     :exclude-members: ATTRIBUTES, ENDPOINT
 
 ----------
@@ -35,7 +26,10 @@ Exceptions
 ----------
 
 .. autoclass:: ResourceAlreadyCreatedError
+    :no-inherited-members:
 
 .. autoclass:: NotSupportedError
+    :no-inherited-members:
 
 .. autoclass:: TaskListNotSpecifiedError
+    :no-inherited-members:

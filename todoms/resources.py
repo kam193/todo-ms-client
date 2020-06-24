@@ -3,7 +3,7 @@ from datetime import datetime
 
 from furl import furl
 
-from .attributes import Status
+from .attributes import Importance, Sensitivity, Status
 from .converters import (
     AttributeConverter,
     ContentAttrConverter,
@@ -37,6 +37,22 @@ class Resource(ABC):
     def __init__(self, client):
         self._client = client
 
+    def create(self):
+        """Create object in API"""
+        if self.id:
+            raise ResourceAlreadyCreatedError
+        result = self._client.raw_post(self.ENDPOINT, self.to_dict(), 201)
+        # TODO: update object from result
+        self._id = result.get("id", None)
+
+    def update(self):
+        """Update resource in API"""
+        self._client.patch(self)
+
+    def delete(self):
+        """Delete object in API"""
+        self._client.delete(self)
+
     def to_dict(self):
         """Convert resource into dict accepted by API"""
         data_dict = {}
@@ -49,22 +65,6 @@ class Resource(ABC):
                 data_dict[attr] = getattr(self, attr, None)
 
         return data_dict
-
-    def update(self):
-        """Update resource in API"""
-        self._client.patch(self)
-
-    def create(self):
-        """Create object in API"""
-        if self.id:
-            raise ResourceAlreadyCreatedError
-        result = self._client.raw_post(self.ENDPOINT, self.to_dict(), 201)
-        # TODO: update object from result
-        self._id = result.get("id", None)
-
-    def delete(self):
-        """Delete object in API"""
-        self._client.delete(self)
 
     @property
     def id(self):
@@ -119,6 +119,12 @@ class TaskList(Resource):
         self.name = name
         self.is_default = is_default
 
+    def __repr__(self):
+        return f"<TaskList '{self.name}'>"
+
+    def __str__(self):
+        return f"List '{self.name}'"
+
     def get_tasks(self, *args, **kwargs):
         """Get list of tasks in given list. Default returns only non-completed tasks."""
         tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
@@ -127,12 +133,6 @@ class TaskList(Resource):
     def save_task(self, task):
         task.task_list_id = self.id
         task.create()
-
-    def __repr__(self):
-        return f"<TaskList '{self.name}'>"
-
-    def __str__(self):
-        return f"List '{self.name}'"
 
 
 class Task(Resource):
@@ -168,9 +168,9 @@ class Task(Resource):
         subject: str,
         body: str = None,
         task_list_id: str = None,
-        status: str = None,
-        importance: str = None,
-        sensitivity: str = None,
+        status: Status = None,
+        importance: Importance = None,
+        sensitivity: Sensitivity = None,
         recurrence: dict = None,
         categories: list = None,
         owner: str = None,

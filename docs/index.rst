@@ -2,7 +2,7 @@ Welcome to ToDo MS Client's documentation!
 ==========================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
    :caption: Contents:
 
    reference/index
