@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Basic docs with library interface reference
+- Deleting tasks' attachment
+
 ## [0.0.3] - 2020-06-20
 
 ### Added

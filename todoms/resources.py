@@ -67,6 +67,10 @@ class Resource(ABC):
         return data_dict
 
     @property
+    def managing_endpoint(self):
+        return (furl(self.ENDPOINT) / self.id).url
+
+    @property
     def id(self):
         return getattr(self, "_id", None)
 
@@ -281,6 +285,10 @@ class Attachment(Resource):
 
     def update(self):
         raise NotSupportedError
+
+    @property
+    def managing_endpoint(self):
+        return (furl(self.task.managing_endpoint) / self.ENDPOINT / self.id).url
 
     @classmethod
     def create_from_dict(cls, client, data_dict, task=None):

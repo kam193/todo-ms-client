@@ -203,6 +203,13 @@ class TestDefaultResource:
 
         assert resource.id == "id-1"
 
+    def test_default_resource_managing_endpoint(self, simple_resource_class):
+        resource = simple_resource_class.create_from_dict(
+            None, {"_id": "id-1", "name": "name-1"}
+        )
+
+        assert resource.managing_endpoint == "endpoint/id-1"
+
     def test_default_resource_id_return_none_when_unset(self, simple_resource_class):
         resource = simple_resource_class.create_from_dict(None, {"name": "name-1"})
 
@@ -426,3 +433,14 @@ class TestAttachmentResource:
 
         with pytest.raises(NotSupportedError):
             attachment.update()
+
+    def test_attachment_managing_url(self):
+        task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
+        attachment = Attachment.create_from_dict(
+            None, ATTACHMENT_EXAMPLE_DATA, task=task
+        )
+
+        assert (
+            attachment.managing_endpoint
+            == "outlook/tasks/task-1/attachments/attachment-1"
+        )
