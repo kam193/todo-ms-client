@@ -39,12 +39,12 @@ class ToDoClient(object):
         return resource_class.create_from_dict(self, response.json())
 
     def delete(self, resource: Resource):
-        url = (self._url / resource.ENDPOINT / resource.id).url
+        url = (self._url / resource.managing_endpoint).url
         response = self._provider.delete(url)
         self._map_http_errors(response, codes.no_content)
 
     def patch(self, resource: Resource):
-        url = (self._url / resource.ENDPOINT / resource.id).url
+        url = (self._url / resource.managing_endpoint).url
         response = self._provider.patch(url, json_data=resource.to_dict())
         self._map_http_errors(response, codes.ok)
         return response.json()
