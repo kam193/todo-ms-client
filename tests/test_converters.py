@@ -11,6 +11,7 @@ from todoms.converters import (
     DatetimeAttrConverter,
     EnumAttrConverter,
     IsoTimeAttrConverter,
+    ListConverter,
 )
 
 
@@ -128,3 +129,37 @@ class TestEnumAttrConverter:
     )
     def test_enum_attr_back_converter(self, enum_converter, data, expected):
         assert enum_converter.back_converter(data) == expected
+
+
+class TestListConverter:
+    def test_list_converter_proxy_attribute_names(self):
+        converter = ListConverter(AttributeConverter("original", "local"))
+
+        assert converter.original_name == "original"
+        assert converter.local_name == "local"
+
+    @pytest.mark.parametrize(
+        "data,expected",
+        [
+            (["val1", "val2"], [ExampleEnum.VAL_1, ExampleEnum.VAL_2]),
+            (None, None),
+            ([], []),
+        ],
+    )
+    def test_list_converter_converts(self, enum_converter, data, expected):
+        converter = ListConverter(enum_converter)
+
+        assert converter.obj_converter(data) == expected
+
+    @pytest.mark.parametrize(
+        "data,expected",
+        [
+            ([ExampleEnum.VAL_1, ExampleEnum.VAL_2], ["val1", "val2"]),
+            (None, None),
+            ([], []),
+        ],
+    )
+    def test_list_converter_back_converting(self, enum_converter, data, expected):
+        converter = ListConverter(enum_converter)
+
+        assert converter.back_converter(data) == expected

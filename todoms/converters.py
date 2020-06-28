@@ -2,11 +2,11 @@ from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, List
 
 from dateutil import parser, tz
 
-from .attributes import Importance, Sensitivity, Status
+from .attributes import Importance, Sensitivity, Status, RecurrencePatternType, Weekday
 
 
 @dataclass
@@ -62,6 +62,29 @@ class IsoTimeAttrConverter(AttributeConverter):
         return data.astimezone(tz.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+class ListConverter(AttributeConverter):
+    def __init__(self, obj_converter: AttributeConverter):
+        self._converter = obj_converter
+
+    def obj_converter(self, data: List[Any]) -> List[Any]:
+        if data is None:
+            return None
+        return [self._converter.obj_converter(element) for element in data]
+
+    def back_converter(self, data: List[Any]) -> List[Any]:
+        if data is None:
+            return None
+        return [self._converter.back_converter(element) for element in data]
+
+    @property
+    def original_name(self) -> str:
+        return self._converter.original_name
+
+    @property
+    def local_name(self) -> str:
+        return self._converter.local_name
+
+
 @dataclass
 class EnumAttrConverter(AttributeConverter, ABC):
     _ENUM = None
@@ -90,3 +113,13 @@ class SensitivityAttrConverter(EnumAttrConverter):
 @dataclass
 class StatusAttrConverter(EnumAttrConverter):
     _ENUM = Status
+
+
+@dataclass
+class RecurrencePatternTypeAttrConverter(EnumAttrConverter):
+    _ENUM = RecurrencePatternType
+
+
+@dataclass
+class WeekdayAttrConverter(EnumAttrConverter):
+    _ENUM = Weekday

@@ -8,7 +8,6 @@ from todoms.attributes import Importance, Sensitivity, Status
 from todoms.filters import and_, eq
 from todoms.resources import (
     Attachment,
-    AttributeConverter,
     ContentAttrConverter,
     NotSupportedError,
     Resource,
