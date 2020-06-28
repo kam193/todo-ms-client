@@ -1,4 +1,3 @@
-import pytest
 from todoms.convertable import BaseConvertableObject
 from todoms.converters import AttributeConverter, ContentAttrConverter
 

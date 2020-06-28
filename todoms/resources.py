@@ -4,6 +4,7 @@ from datetime import datetime
 from furl import furl
 
 from .attributes import Importance, Sensitivity, Status
+from .convertable import BaseConvertableObject
 from .converters import (
     AttributeConverter,
     ContentAttrConverter,
@@ -14,8 +15,6 @@ from .converters import (
     StatusAttrConverter,
 )
 from .filters import and_, ne
-
-from .convertable import BaseConvertableObject
 
 
 class ResourceAlreadyCreatedError(Exception):

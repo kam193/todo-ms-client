@@ -6,7 +6,7 @@ from typing import Any, List
 
 from dateutil import parser, tz
 
-from .attributes import Importance, Sensitivity, Status, RecurrencePatternType, Weekday
+from .attributes import Importance, RecurrencePatternType, Sensitivity, Status, Weekday
 
 
 @dataclass
