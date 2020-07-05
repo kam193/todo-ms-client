@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 
+from ..convertable import BaseConvertableObject
 from .patterns import BaseRecurrencePattern
 from .ranges import BaseRecurrenceRange
 
 
 @dataclass
-class Recurrence:
+class Recurrence(BaseConvertableObject):
     pattern: BaseRecurrencePattern
     range: BaseRecurrenceRange
 

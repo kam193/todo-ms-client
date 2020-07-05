@@ -1,11 +1,14 @@
+from datetime import datetime
+
+import pytest
+from dateutil import tz
+
 from todoms.converters.recurrence import (
+    RecurrenceAttrConverter,
     RecurrencePatternAttrConverter,
     RecurrenceRangeAttrConverter,
 )
-from todoms.recurrence import patterns, ranges
-import pytest
-from datetime import datetime
-from dateutil import tz
+from todoms.recurrence import Recurrence, patterns, ranges
 
 
 class TestRecurrencePatternConverter:
@@ -78,6 +81,9 @@ class TestRecurrencePatternConverter:
         assert converter.back_converter(None) is None
 
 
+# TODO: fix date support in range! (incl. timezone)
+
+
 class TestRecurrenceRangeConverter:
     @pytest.mark.parametrize(
         "data,expected_class",
@@ -128,4 +134,50 @@ class TestRecurrenceRangeConverter:
 
     def test_recurrence_range_back_converter_when_none(self):
         converter = RecurrenceRangeAttrConverter("", "")
+        assert converter.back_converter(None) is None
+
+
+class TestRecurrenceConverter:
+    def test_recurrence_converter(self):
+        converter = RecurrenceAttrConverter("", "")
+
+        data = {
+            "pattern": {
+                "type": "absoluteYearly",
+                "interval": 1,
+                "month": 7,
+                "dayOfMonth": 5,
+                "firstDayOfWeek": "sunday",
+                "index": "first",
+            },
+            "range": {
+                "type": "noEnd",
+                "startDate": "2020-07-05",
+                "endDate": "0001-01-01",
+                "recurrenceTimeZone": "UTC",
+                "numberOfOccurrences": 0,
+            },
+        }
+
+        recurrence = converter.obj_converter(data)
+
+        assert isinstance(recurrence.pattern, patterns.YearlyAbsolute) is True
+        assert isinstance(recurrence.range, ranges.NoEnd) is True
+
+    def test_recurrence_converter_when_none(self):
+        converter = RecurrenceAttrConverter("", "")
+        assert converter.obj_converter(None) is None
+
+    def test_recurrence_back_converter(self):
+        converter = RecurrenceAttrConverter("", "")
+        data = Recurrence(
+            patterns.Daily(1), ranges.NoEnd(datetime(2020, 5, 16, tzinfo=tz.UTC))
+        )
+        assert converter.back_converter(data) == {
+            "range": {"type": "noEnd", "startDate": "2020-05-16T00:00:00Z"},
+            "pattern": {"type": "daily", "interval": 1},
+        }
+
+    def test_recurrence_back_converter_when_none(self):
+        converter = RecurrenceAttrConverter("", "")
         assert converter.back_converter(None) is None
