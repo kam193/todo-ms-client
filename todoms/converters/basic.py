@@ -6,7 +6,7 @@ from typing import Any, List
 
 from dateutil import parser, tz
 
-from .attributes import (
+from ..attributes import (
     Importance,
     RecurrencePatternType,
     RecurrenceRangeType,
@@ -14,10 +14,11 @@ from .attributes import (
     Status,
     Weekday,
 )
+from . import BaseConverter
 
 
 @dataclass
-class AttributeConverter:
+class AttributeConverter(BaseConverter):
     original_name: str
     local_name: str
 

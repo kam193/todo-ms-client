@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import pytest
 from dateutil import tz
 
-from todoms.converters import (
+from todoms.converters.basic import (
     AttributeConverter,
     ContentAttrConverter,
     DatetimeAttrConverter,

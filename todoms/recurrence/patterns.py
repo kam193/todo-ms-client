@@ -2,7 +2,7 @@ from typing import Iterable
 
 from ..attributes import RecurrencePatternType, Weekday
 from ..convertable import BaseConvertableObject
-from ..converters import (
+from ..converters.basic import (
     AttributeConverter,
     ListConverter,
     RecurrencePatternTypeAttrConverter,
@@ -13,11 +13,11 @@ from ..converters import (
 class BaseRecurrencePattern(BaseConvertableObject):
     ATTRIBUTES = (
         "interval",
-        RecurrencePatternTypeAttrConverter("type", "pattern_type"),
+        RecurrencePatternTypeAttrConverter("type", "_pattern_type"),
     )
 
     def __init__(self, pattern_type: RecurrencePatternType, interval: int):
-        self.pattern_type = pattern_type
+        self._pattern_type = pattern_type
         self.interval = interval
 
 

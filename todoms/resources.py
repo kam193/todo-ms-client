@@ -5,7 +5,7 @@ from furl import furl
 
 from .attributes import Importance, Sensitivity, Status
 from .convertable import BaseConvertableObject
-from .converters import (
+from .converters.basic import (
     AttributeConverter,
     ContentAttrConverter,
     DatetimeAttrConverter,

@@ -1,6 +1,6 @@
 from abc import ABC
 
-from .converters import AttributeConverter
+from .converters import BaseConverter
 
 
 class BaseConvertableObject(ABC):
@@ -11,7 +11,7 @@ class BaseConvertableObject(ABC):
         data_dict = {}
 
         for attr in self.ATTRIBUTES:
-            if isinstance(attr, AttributeConverter):
+            if isinstance(attr, BaseConverter):
                 value = getattr(self, attr.local_name, None)
                 data_dict[attr.original_name] = attr.back_converter(value)
             else:
@@ -31,7 +31,7 @@ class BaseConvertableObject(ABC):
                 init_arguments[name] = value
 
         for attr in cls.ATTRIBUTES:
-            if isinstance(attr, AttributeConverter):
+            if isinstance(attr, BaseConverter):
                 if attr.original_name in data_dict:
                     value = attr.obj_converter(data_dict.get(attr.original_name))
                     store_attribute(attr.local_name, value)
