@@ -3,7 +3,7 @@ from datetime import datetime
 from dateutil import tz
 
 from todoms.attributes import RecurrenceRangeType
-from todoms.recurrence.range import BaseRecurrenceRange, EndDate, NoEnd, Numbered
+from todoms.recurrence.ranges import BaseRecurrenceRange, EndDate, NoEnd, Numbered
 
 
 def test_base_range_to_dict():

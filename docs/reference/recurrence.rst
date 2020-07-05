@@ -17,8 +17,8 @@ be repeated.
 Recurrence Ranges
 -----------------
 
-Module `todoms.recurrence.range` provides ranges how long recurrence tasks should
+Module `todoms.recurrence.ranges` provides ranges how long recurrence tasks should
 be repeated.
 
-.. automodule:: todoms.recurrence.range
+.. automodule:: todoms.recurrence.ranges
     :exclude-members: ATTRIBUTES, BaseRecurrenceRange

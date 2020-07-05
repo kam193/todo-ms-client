@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from .patterns import BaseRecurrencePattern
-from .range import BaseRecurrenceRange
+from .ranges import BaseRecurrenceRange
 
 
 @dataclass
