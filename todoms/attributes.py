@@ -31,6 +31,12 @@ class RecurrencePatternType(Enum):
     YEARLY_RELATIVE = "relativeYearly"
 
 
+class RecurrenceRangeType(Enum):
+    END_DATE = "endDate"
+    NO_END = "noEnd"
+    NUMBERED = "numbered"
+
+
 class Weekday(Enum):
     SUNDAY = "sunday"
     MONDAY = "monday"

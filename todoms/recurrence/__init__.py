@@ -1,11 +1,7 @@
 from dataclasses import dataclass
 
 from .patterns import BaseRecurrencePattern
-
-
-class BaseRecurrenceRange:
-    def to_dict(self):
-        return {"recurrence": "range"}
+from .range import BaseRecurrenceRange
 
 
 @dataclass

@@ -6,7 +6,14 @@ from typing import Any, List
 
 from dateutil import parser, tz
 
-from .attributes import Importance, RecurrencePatternType, Sensitivity, Status, Weekday
+from .attributes import (
+    Importance,
+    RecurrencePatternType,
+    RecurrenceRangeType,
+    Sensitivity,
+    Status,
+    Weekday,
+)
 
 
 @dataclass
@@ -118,6 +125,11 @@ class StatusAttrConverter(EnumAttrConverter):
 @dataclass
 class RecurrencePatternTypeAttrConverter(EnumAttrConverter):
     _ENUM = RecurrencePatternType
+
+
+@dataclass
+class RecurrenceRangeTypeAttrConverter(EnumAttrConverter):
+    _ENUM = RecurrenceRangeType
 
 
 @dataclass
