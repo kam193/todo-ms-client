@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 from typing import Any, List
 
@@ -68,6 +68,17 @@ class IsoTimeAttrConverter(AttributeConverter):
         if not data:
             return None
         return data.astimezone(tz.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+@dataclass
+class DateAttrConverter(AttributeConverter):
+    def obj_converter(self, data: str) -> date:
+        return parser.parse(data).date()
+
+    def back_converter(self, data: date) -> str:
+        if not data:
+            return None
+        return data.isoformat()
 
 
 class ListConverter(AttributeConverter):

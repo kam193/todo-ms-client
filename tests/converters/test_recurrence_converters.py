@@ -1,7 +1,6 @@
-from datetime import datetime
+from datetime import date
 
 import pytest
-from dateutil import tz
 
 from todoms.converters.recurrence import (
     RecurrenceAttrConverter,
@@ -81,9 +80,6 @@ class TestRecurrencePatternConverter:
         assert converter.back_converter(None) is None
 
 
-# TODO: fix date support in range! (incl. timezone)
-
-
 class TestRecurrenceRangeConverter:
     @pytest.mark.parametrize(
         "data,expected_class",
@@ -122,14 +118,11 @@ class TestRecurrenceRangeConverter:
 
     def test_recurrence_range_back_converter(self):
         converter = RecurrenceRangeAttrConverter("", "")
-        data = ranges.EndDate(
-            start_date=datetime(2020, 4, 8, 16, tzinfo=tz.UTC),
-            end_date=datetime(2022, 4, 8, 16, tzinfo=tz.UTC),
-        )
+        data = ranges.EndDate(start_date=date(2020, 4, 8), end_date=date(2022, 4, 8),)
         assert converter.back_converter(data) == {
             "type": "endDate",
-            "startDate": "2020-04-08T16:00:00Z",
-            "endDate": "2022-04-08T16:00:00Z",
+            "startDate": "2020-04-08",
+            "endDate": "2022-04-08",
         }
 
     def test_recurrence_range_back_converter_when_none(self):
@@ -170,11 +163,9 @@ class TestRecurrenceConverter:
 
     def test_recurrence_back_converter(self):
         converter = RecurrenceAttrConverter("", "")
-        data = Recurrence(
-            patterns.Daily(1), ranges.NoEnd(datetime(2020, 5, 16, tzinfo=tz.UTC))
-        )
+        data = Recurrence(patterns.Daily(1), ranges.NoEnd(date(2020, 5, 16)))
         assert converter.back_converter(data) == {
-            "range": {"type": "noEnd", "startDate": "2020-05-16T00:00:00Z"},
+            "range": {"type": "noEnd", "startDate": "2020-05-16"},
             "pattern": {"type": "daily", "interval": 1},
         }
 

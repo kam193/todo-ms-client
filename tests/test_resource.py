@@ -6,6 +6,7 @@ import pytest
 
 from todoms.attributes import Importance, Sensitivity, Status
 from todoms.filters import and_, eq
+from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import (
     Attachment,
     ContentAttrConverter,
@@ -57,7 +58,15 @@ TASK_EXAMPLE_DATA = {
     "lastModifiedDateTime": "2021-01-01T18:00:00Z",
     "owner": "user-1",
     "parentFolderId": "id-1",
-    "recurrence": {"@odata.type": "microsoft.graph.patternedRecurrence"},
+    "recurrence": {
+        "pattern": {
+            "type": "absoluteYearly",
+            "interval": 1,
+            "month": 7,
+            "dayOfMonth": 5,
+        },
+        "range": {"type": "noEnd", "startDate": "2020-07-05"},
+    },
     "reminderDateTime": {"dateTime": "2020-05-03T00:00:00.000000", "timeZone": "UTC"},
     "sensitivity": "normal",
     "startDateTime": {"dateTime": "2020-05-04T00:00:00.000000", "timeZone": "UTC"},
@@ -286,6 +295,9 @@ class TestTaskResource:
         assert task.due_datetime == datetime(2020, 5, 2, tzinfo=timezone.utc)
         assert task.reminder_datetime == datetime(2020, 5, 3, tzinfo=timezone.utc)
         assert task.start_datetime == datetime(2020, 5, 4, tzinfo=timezone.utc)
+        assert isinstance(task.recurrence, Recurrence) is True
+        assert isinstance(task.recurrence.pattern, patterns.YearlyAbsolute)
+        assert isinstance(task.recurrence.range, ranges.NoEnd)
 
     def test_task_handle_filters_default_completed(self):
         filters = Task.handle_list_filters()

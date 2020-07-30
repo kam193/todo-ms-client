@@ -14,6 +14,7 @@ from .converters.basic import (
     SensitivityAttrConverter,
     StatusAttrConverter,
 )
+from .converters.recurrence import RecurrenceAttrConverter
 from .filters import and_, ne
 
 
@@ -119,7 +120,7 @@ class Task(Resource):
         "subject",
         SensitivityAttrConverter("sensitivity", "sensitivity"),
         "owner",
-        "recurrence",
+        RecurrenceAttrConverter("recurrence", "recurrence"),
         ImportanceAttrConverter("importance", "importance"),
         AttributeConverter("assignedTo", "assigned_to"),
         AttributeConverter("hasAttachments", "has_attachments"),

@@ -4,7 +4,7 @@ from ..attributes import RecurrenceRangeType
 from ..convertable import BaseConvertableObject
 from ..converters.basic import (
     AttributeConverter,
-    IsoTimeAttrConverter,
+    DateAttrConverter,
     RecurrenceRangeTypeAttrConverter,
 )
 
@@ -12,7 +12,7 @@ from ..converters.basic import (
 class BaseRecurrenceRange(BaseConvertableObject):
     ATTRIBUTES = (
         RecurrenceRangeTypeAttrConverter("type", "_range_type"),
-        IsoTimeAttrConverter("startDate", "start_date"),
+        DateAttrConverter("startDate", "start_date"),
     )
 
     def __init__(self, range_type: RecurrenceRangeType, start_date: datetime):
@@ -23,7 +23,7 @@ class BaseRecurrenceRange(BaseConvertableObject):
 class EndDate(BaseRecurrenceRange):
     ATTRIBUTES = (
         *BaseRecurrenceRange.ATTRIBUTES,
-        IsoTimeAttrConverter("endDate", "end_date"),
+        DateAttrConverter("endDate", "end_date"),
     )
 
     def __init__(self, start_date: datetime, end_date: datetime):

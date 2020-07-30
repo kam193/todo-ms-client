@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from enum import Enum
 from unittest.mock import Mock
 
@@ -8,6 +8,7 @@ from dateutil import tz
 from todoms.converters.basic import (
     AttributeConverter,
     ContentAttrConverter,
+    DateAttrConverter,
     DatetimeAttrConverter,
     EnumAttrConverter,
     IsoTimeAttrConverter,
@@ -99,6 +100,24 @@ class TestIsoTimeAttrConverter:
 
     def test_isotime_attr_converter_back_when_no_data(self):
         converter = IsoTimeAttrConverter("", "")
+        assert converter.back_converter(None) is None
+
+
+class TestDateAttrConverter:
+    def test_date_attr_converter(self):
+        converter = DateAttrConverter("", "")
+        data = "2020-01-01"
+        expected_time = date(2020, 1, 1)
+
+        assert converter.obj_converter(data) == expected_time
+
+    def test_date_attr_converter_back(self):
+        converter = DateAttrConverter("", "")
+        data = date(2020, 1, 1)
+        assert converter.back_converter(data) == "2020-01-01"
+
+    def test_date_attr_converter_back_when_no_data(self):
+        converter = DateAttrConverter("", "")
         assert converter.back_converter(None) is None
 
 
