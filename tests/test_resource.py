@@ -6,9 +6,9 @@ import pytest
 
 from todoms.attributes import Importance, Sensitivity, Status
 from todoms.filters import and_, eq
+from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import (
     Attachment,
-    AttributeConverter,
     ContentAttrConverter,
     NotSupportedError,
     Resource,
@@ -58,7 +58,15 @@ TASK_EXAMPLE_DATA = {
     "lastModifiedDateTime": "2021-01-01T18:00:00Z",
     "owner": "user-1",
     "parentFolderId": "id-1",
-    "recurrence": {"@odata.type": "microsoft.graph.patternedRecurrence"},
+    "recurrence": {
+        "pattern": {
+            "type": "absoluteYearly",
+            "interval": 1,
+            "month": 7,
+            "dayOfMonth": 5,
+        },
+        "range": {"type": "noEnd", "startDate": "2020-07-05"},
+    },
     "reminderDateTime": {"dateTime": "2020-05-03T00:00:00.000000", "timeZone": "UTC"},
     "sensitivity": "normal",
     "startDateTime": {"dateTime": "2020-05-04T00:00:00.000000", "timeZone": "UTC"},
@@ -102,77 +110,13 @@ def test_resource_is_proper_converted_back_to_dict(resource, data):
 
 
 class TestDefaultResource:
-    def test_default_resource_init_creates_obj_from_data(self, simple_resource_class):
-        obj = simple_resource_class.create_from_dict(
-            None, {"_id": "id-1", "name": "name-1", "not_attr": "ignore"}
-        )
-
-        assert obj._id == "id-1"
-        assert obj.name == "name-1"
-        assert getattr(obj, "not_attr", None) is None
-
-    def test_default_resource_init_translate_attributes(self):
-        class ComplexResource(Resource):
-            ATTRIBUTES = (AttributeConverter("old", "new"),)
-
-            def __init__(self, client, new):
-                super().__init__(client)
-                self.new = new
-
-        obj_1 = ComplexResource.create_from_dict(None, {"old": "data"})
-
-        assert obj_1.new == "data"
-
-    def test_default_resource_init_converts_attributes_format(self):
-        class ComplexResource(Resource):
-            ATTRIBUTES = (ContentAttrConverter("old", "new"),)
-
-            def __init__(self, client, new):
-                super().__init__(client)
-                self.new = new
-
-        obj_1 = ComplexResource.create_from_dict(
-            None, {"old": {"content": "converted"}}
-        )
-
-        assert obj_1.new == "converted"
-
-    def test_default_resource_simple_to_dict(self, simple_resource_class):
+    def test_default_resource_create_set_client(self, client, simple_resource_class):
         resource = simple_resource_class.create_from_dict(
-            None, {"_id": "id-1", "name": "name-1"}
+            client, {"_id": "id-1", "name": "name-1"}
         )
 
-        resource_dict = resource.to_dict()
-
-        assert resource_dict == {"_id": "id-1", "name": "name-1"}
-
-    def test_default_resource_complex_to_dict(self):
-        class ComplexResource(Resource):
-            ATTRIBUTES = (AttributeConverter("old", "new"),)
-
-            def __init__(self, client, new):
-                super().__init__(client)
-                self.new = new
-
-        resource = ComplexResource(None, new="data")
-
-        resource_dict = resource.to_dict()
-
-        assert resource_dict == {"old": "data"}
-
-    def test_default_resource_complex_to_dict_with_converter(self):
-        class ComplexResource(Resource):
-            ATTRIBUTES = (ContentAttrConverter("old", "new"),)
-
-            def __init__(self, client, new):
-                super().__init__(client)
-                self.new = new
-
-        resource = ComplexResource(None, new="data")
-
-        resource_dict = resource.to_dict()
-
-        assert resource_dict == {"old": {"content": "data", "contentType": "html"}}
+        assert resource._client == client
+        assert resource.name == "name-1"
 
     def test_default_resource_update_client_call(self, client, requests_mock):
         class ComplexResource(Resource):
@@ -351,6 +295,9 @@ class TestTaskResource:
         assert task.due_datetime == datetime(2020, 5, 2, tzinfo=timezone.utc)
         assert task.reminder_datetime == datetime(2020, 5, 3, tzinfo=timezone.utc)
         assert task.start_datetime == datetime(2020, 5, 4, tzinfo=timezone.utc)
+        assert isinstance(task.recurrence, Recurrence) is True
+        assert isinstance(task.recurrence.pattern, patterns.YearlyAbsolute)
+        assert isinstance(task.recurrence.range, ranges.NoEnd)
 
     def test_task_handle_filters_default_completed(self):
         filters = Task.handle_list_filters()

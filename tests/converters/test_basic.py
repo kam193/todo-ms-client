@@ -1,16 +1,18 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from enum import Enum
 from unittest.mock import Mock
 
 import pytest
 from dateutil import tz
 
-from todoms.converters import (
+from todoms.converters.basic import (
     AttributeConverter,
     ContentAttrConverter,
+    DateAttrConverter,
     DatetimeAttrConverter,
     EnumAttrConverter,
     IsoTimeAttrConverter,
+    ListConverter,
 )
 
 
@@ -101,6 +103,24 @@ class TestIsoTimeAttrConverter:
         assert converter.back_converter(None) is None
 
 
+class TestDateAttrConverter:
+    def test_date_attr_converter(self):
+        converter = DateAttrConverter("", "")
+        data = "2020-01-01"
+        expected_time = date(2020, 1, 1)
+
+        assert converter.obj_converter(data) == expected_time
+
+    def test_date_attr_converter_back(self):
+        converter = DateAttrConverter("", "")
+        data = date(2020, 1, 1)
+        assert converter.back_converter(data) == "2020-01-01"
+
+    def test_date_attr_converter_back_when_no_data(self):
+        converter = DateAttrConverter("", "")
+        assert converter.back_converter(None) is None
+
+
 class ExampleEnum(Enum):
     VAL_1 = "val1"
     VAL_2 = "val2"
@@ -128,3 +148,37 @@ class TestEnumAttrConverter:
     )
     def test_enum_attr_back_converter(self, enum_converter, data, expected):
         assert enum_converter.back_converter(data) == expected
+
+
+class TestListConverter:
+    def test_list_converter_proxy_attribute_names(self):
+        converter = ListConverter(AttributeConverter("original", "local"))
+
+        assert converter.original_name == "original"
+        assert converter.local_name == "local"
+
+    @pytest.mark.parametrize(
+        "data,expected",
+        [
+            (["val1", "val2"], [ExampleEnum.VAL_1, ExampleEnum.VAL_2]),
+            (None, None),
+            ([], []),
+        ],
+    )
+    def test_list_converter_converts(self, enum_converter, data, expected):
+        converter = ListConverter(enum_converter)
+
+        assert converter.obj_converter(data) == expected
+
+    @pytest.mark.parametrize(
+        "data,expected",
+        [
+            ([ExampleEnum.VAL_1, ExampleEnum.VAL_2], ["val1", "val2"]),
+            (None, None),
+            ([], []),
+        ],
+    )
+    def test_list_converter_back_converting(self, enum_converter, data, expected):
+        converter = ListConverter(enum_converter)
+
+        assert converter.back_converter(data) == expected

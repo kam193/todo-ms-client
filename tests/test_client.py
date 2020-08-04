@@ -15,7 +15,7 @@ def resource_class():
         ENDPOINT = "fake"
         ATTRIBUTES = ("name", "id")
 
-        def __init__(self, client, name, id):
+        def __init__(self, client, name, id=None):
             super().__init__(client)
             self.name = name
             self._id = id

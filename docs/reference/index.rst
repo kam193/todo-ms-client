@@ -10,5 +10,6 @@ Library reference
    resources
    attributes
    filters
+   recurrence
    
 This is reference of library code.

@@ -1,16 +1,24 @@
 from abc import ABC
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
-from typing import Any
+from typing import Any, List
 
 from dateutil import parser, tz
 
-from .attributes import Importance, Sensitivity, Status
+from ..attributes import (
+    Importance,
+    RecurrencePatternType,
+    RecurrenceRangeType,
+    Sensitivity,
+    Status,
+    Weekday,
+)
+from . import BaseConverter
 
 
 @dataclass
-class AttributeConverter:
+class AttributeConverter(BaseConverter):
     original_name: str
     local_name: str
 
@@ -63,6 +71,40 @@ class IsoTimeAttrConverter(AttributeConverter):
 
 
 @dataclass
+class DateAttrConverter(AttributeConverter):
+    def obj_converter(self, data: str) -> date:
+        return parser.parse(data).date()
+
+    def back_converter(self, data: date) -> str:
+        if not data:
+            return None
+        return data.isoformat()
+
+
+class ListConverter(AttributeConverter):
+    def __init__(self, obj_converter: AttributeConverter):
+        self._converter = obj_converter
+
+    def obj_converter(self, data: List[Any]) -> List[Any]:
+        if data is None:
+            return None
+        return [self._converter.obj_converter(element) for element in data]
+
+    def back_converter(self, data: List[Any]) -> List[Any]:
+        if data is None:
+            return None
+        return [self._converter.back_converter(element) for element in data]
+
+    @property
+    def original_name(self) -> str:
+        return self._converter.original_name
+
+    @property
+    def local_name(self) -> str:
+        return self._converter.local_name
+
+
+@dataclass
 class EnumAttrConverter(AttributeConverter, ABC):
     _ENUM = None
 
@@ -90,3 +132,18 @@ class SensitivityAttrConverter(EnumAttrConverter):
 @dataclass
 class StatusAttrConverter(EnumAttrConverter):
     _ENUM = Status
+
+
+@dataclass
+class RecurrencePatternTypeAttrConverter(EnumAttrConverter):
+    _ENUM = RecurrencePatternType
+
+
+@dataclass
+class RecurrenceRangeTypeAttrConverter(EnumAttrConverter):
+    _ENUM = RecurrenceRangeType
+
+
+@dataclass
+class WeekdayAttrConverter(EnumAttrConverter):
+    _ENUM = Weekday
