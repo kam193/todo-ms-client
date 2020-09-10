@@ -1,6 +1,7 @@
 import copy
 import urllib
 from datetime import datetime, timezone
+from xml.etree.ElementTree import TreeBuilder
 
 import pytest
 
@@ -36,11 +37,13 @@ def simple_resource_class():
 
 
 TASK_LIST_EXAMPLE_DATA = {
-    "changeKey": "abc",
+    # "@odata.context": "https://graph.microsoft.com/beta/$metadata#lists/$entity",
+    # "@odata.etag": "xxx",
+    "displayName": "list-name",
+    "isOwner": True,  # TODO:
+    "isShared": True,  # TODO:
+    "wellknownListName": "none",  # TODO:
     "id": "id-1",
-    "isDefaultFolder": True,
-    "name": "list-name",
-    "parentGroupKey": "group-1",
 }
 
 TASK_EXAMPLE_DATA = {
@@ -87,7 +90,7 @@ ATTACHMENT_EXAMPLE_DATA = {
 @pytest.mark.parametrize(
     "resource,endpoint",
     [
-        (TaskList, "outlook/taskFolders"),
+        (TaskList, "todo/lists"),
         (Task, "outlook/tasks"),
         (Attachment, "attachments"),
     ],
@@ -218,16 +221,16 @@ class TestTaskListResource:
 
         assert task_list.id == "id-1"
         assert task_list.name == "list-name"
-        assert task_list.is_default is True
-        assert task_list._change_key == "abc"
-        assert task_list._parent_group_key == "group-1"
+        assert task_list._is_owner is True
+        assert task_list._is_shared is True
+        assert task_list._well_known_name == "none"
 
     def test_tasklist_get_tasks_returns_default_not_completed_tasks(
         self, client, requests_mock
     ):
         qs = urllib.parse.urlencode({"$filter": "status ne 'completed'"})
         requests_mock.get(
-            f"{API_BASE}/outlook/taskFolders/id-1/tasks?{qs}",
+            f"{API_BASE}/todo/lists/id-1/tasks?{qs}",
             json={"value": [TASK_EXAMPLE_DATA]},
             complete_qs=True,
         )
@@ -238,7 +241,7 @@ class TestTaskListResource:
         assert tasks[0].id == "task-1"
 
     def test_task_list_delete_themselfs(self, requests_mock, client):
-        requests_mock.delete(f"{API_BASE}/outlook/taskFolders/id-1", status_code=204)
+        requests_mock.delete(f"{API_BASE}/todo/lists/id-1", status_code=204)
         task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
         task_list.delete()
         assert requests_mock.called is True

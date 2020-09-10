@@ -78,19 +78,18 @@ class Resource(BaseConvertableObject, ABC):
 class TaskList(Resource):
     """Represent a list of tasks"""
 
-    ENDPOINT = "outlook/taskFolders"
+    ENDPOINT = "todo/lists"
     ATTRIBUTES = (
         AttributeConverter("id", "_id"),
-        "name",
-        AttributeConverter("isDefaultFolder", "is_default"),
-        AttributeConverter("changeKey", "_change_key"),
-        AttributeConverter("parentGroupKey", "_parent_group_key"),
+        AttributeConverter("displayName", "name"),
+        AttributeConverter("isShared", "_is_shared"),
+        AttributeConverter("isOwner", "_is_owner"),
+        AttributeConverter("wellknownListName", "_well_known_name"),
     )
 
-    def __init__(self, client, name: str, is_default: bool = False):
+    def __init__(self, client, name: str):
         super().__init__(client)
         self.name = name
-        self.is_default = is_default
 
     def __repr__(self):
         return f"<TaskList '{self.name}'>"
