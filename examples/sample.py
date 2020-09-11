@@ -3,7 +3,7 @@ from pprint import pprint
 
 from todoms.client import ToDoClient
 from todoms.provider import WebBrowserProvider
-from todoms.resources import Task, TaskList
+from todoms.resources import TaskList  # Task
 
 # Get app details from MS and register "http://localhost:8000" as redirect URI, see:
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app
