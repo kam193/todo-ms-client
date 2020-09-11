@@ -17,18 +17,11 @@ Resource classes
 .. autoclass:: Task
     :exclude-members: ATTRIBUTES, ENDPOINT
 
-
-.. autoclass:: Attachment
-    :exclude-members: ATTRIBUTES, ENDPOINT
-
 ----------
 Exceptions
 ----------
 
 .. autoclass:: ResourceAlreadyCreatedError
-    :no-inherited-members:
-
-.. autoclass:: NotSupportedError
     :no-inherited-members:
 
 .. autoclass:: TaskListNotSpecifiedError

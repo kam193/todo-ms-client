@@ -14,7 +14,7 @@ Available from PIP:
 
     pip install todo-ms-client
 
-To learn more about MS ToDo API look into Microsoft docs on [Microsoft Docs page](https://docs.microsoft.com/en-us/graph/api/resources/outlooktask?view=graph-rest-beta).
+To learn more about MS ToDo API look into Microsoft docs on [Microsoft Docs page](https://docs.microsoft.com/en-us/graph/api/resources/todo-overview?view=graph-rest-beta).
 
 ---
 

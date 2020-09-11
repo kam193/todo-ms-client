@@ -1,16 +1,13 @@
-import copy
 import urllib
 from datetime import datetime, timezone
 
 import pytest
 
-from todoms.attributes import Importance, Sensitivity, Status
+from todoms.attributes import Importance, Status
 from todoms.filters import and_, eq
 from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import (
-    Attachment,
     ContentAttrConverter,
-    NotSupportedError,
     Resource,
     ResourceAlreadyCreatedError,
     Task,
@@ -36,28 +33,28 @@ def simple_resource_class():
 
 
 TASK_LIST_EXAMPLE_DATA = {
-    "changeKey": "abc",
+    # "@odata.context": "https://graph.microsoft.com/beta/$metadata#lists/$entity",
+    # "@odata.etag": "xxx",
+    "displayName": "list-name",
+    "isOwner": True,  # TODO:
+    "isShared": True,  # TODO:
+    "wellknownListName": "none",  # TODO:
     "id": "id-1",
-    "isDefaultFolder": True,
-    "name": "list-name",
-    "parentGroupKey": "group-1",
 }
 
 TASK_EXAMPLE_DATA = {
-    "assignedTo": "user-1",
-    "body": {"content": "task-body", "contentType": "html"},
-    "categories": ["category1"],
-    "changeKey": "key-change-1",
-    "completedDateTime": {"dateTime": "2020-05-01T00:00:00.000000", "timeZone": "UTC"},
-    "createdDateTime": "2020-01-01T18:00:00Z",
-    "dueDateTime": {"dateTime": "2020-05-02T00:00:00.000000", "timeZone": "UTC"},
-    "hasAttachments": True,
-    "id": "task-1",
+    # "@odata.etag": "W/\"SRqIGuHKgEaeKjdSMmaZRwADcFhrVA==\"",
     "importance": "high",
     "isReminderOn": True,
+    "reminderDateTime": {"dateTime": "2020-05-03T00:00:00.000000", "timeZone": "UTC"},
+    "status": "notStarted",
+    "title": "My new task",
+    "createdDateTime": "2020-01-01T18:00:00Z",
     "lastModifiedDateTime": "2021-01-01T18:00:00Z",
-    "owner": "user-1",
-    "parentFolderId": "id-1",
+    "dueDateTime": {"dateTime": "2020-05-02T00:00:00.000000", "timeZone": "UTC"},
+    "id": "task-1",
+    "body": {"content": "task-body", "contentType": "html"},
+    "completedDateTime": {"dateTime": "2020-05-01T00:00:00.000000", "timeZone": "UTC"},
     "recurrence": {
         "pattern": {
             "type": "absoluteYearly",
@@ -67,42 +64,23 @@ TASK_EXAMPLE_DATA = {
         },
         "range": {"type": "noEnd", "startDate": "2020-07-05"},
     },
-    "reminderDateTime": {"dateTime": "2020-05-03T00:00:00.000000", "timeZone": "UTC"},
-    "sensitivity": "normal",
-    "startDateTime": {"dateTime": "2020-05-04T00:00:00.000000", "timeZone": "UTC"},
-    "status": "notStarted",
-    "subject": "My new task",
 }
 
-ATTACHMENT_EXAMPLE_DATA = {
-    "contentType": "mime/type",
-    "id": "attachment-1",
-    "isInline": True,
-    "lastModifiedDateTime": "2021-01-01T18:00:00Z",
-    "name": "The Attachment",
-    "size": 1024,
-}
+
+@pytest.fixture
+def task_list(client):
+    return TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
 
 
 @pytest.mark.parametrize(
-    "resource,endpoint",
-    [
-        (TaskList, "outlook/taskFolders"),
-        (Task, "outlook/tasks"),
-        (Attachment, "attachments"),
-    ],
+    "resource,endpoint", [(TaskList, "todo/lists"), (Task, "tasks")],
 )
 def test_resource_has_proper_endpoint(resource, endpoint):
     assert resource.ENDPOINT == endpoint
 
 
 @pytest.mark.parametrize(
-    "resource,data",
-    [
-        (TaskList, TASK_LIST_EXAMPLE_DATA),
-        (Task, TASK_EXAMPLE_DATA),
-        (Attachment, ATTACHMENT_EXAMPLE_DATA),
-    ],
+    "resource,data", [(TaskList, TASK_LIST_EXAMPLE_DATA), (Task, TASK_EXAMPLE_DATA)],
 )
 def test_resource_is_proper_converted_back_to_dict(resource, data):
     obj = resource.create_from_dict(None, data)
@@ -218,16 +196,16 @@ class TestTaskListResource:
 
         assert task_list.id == "id-1"
         assert task_list.name == "list-name"
-        assert task_list.is_default is True
-        assert task_list._change_key == "abc"
-        assert task_list._parent_group_key == "group-1"
+        assert task_list._is_owner is True
+        assert task_list._is_shared is True
+        assert task_list._well_known_name == "none"
 
     def test_tasklist_get_tasks_returns_default_not_completed_tasks(
         self, client, requests_mock
     ):
         qs = urllib.parse.urlencode({"$filter": "status ne 'completed'"})
         requests_mock.get(
-            f"{API_BASE}/outlook/taskFolders/id-1/tasks?{qs}",
+            f"{API_BASE}/todo/lists/id-1/tasks?{qs}",
             json={"value": [TASK_EXAMPLE_DATA]},
             complete_qs=True,
         )
@@ -238,7 +216,7 @@ class TestTaskListResource:
         assert tasks[0].id == "task-1"
 
     def test_task_list_delete_themselfs(self, requests_mock, client):
-        requests_mock.delete(f"{API_BASE}/outlook/taskFolders/id-1", status_code=204)
+        requests_mock.delete(f"{API_BASE}/todo/lists/id-1", status_code=204)
         task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
         task_list.delete()
         assert requests_mock.called is True
@@ -248,9 +226,8 @@ class TestTaskListResource:
         new_task = Task(client, "Test")
 
         expected_body = new_task.to_dict()
-        expected_body["parentFolderId"] = "id-1"
         requests_mock.post(
-            f"{API_BASE}/outlook/tasks",
+            f"{API_BASE}/todo/lists/id-1/tasks",
             status_code=201,
             json={"id": "new_id"},
             additional_matcher=match_body(expected_body),
@@ -258,35 +235,29 @@ class TestTaskListResource:
 
         task_list.save_task(new_task)
 
-        assert new_task.task_list_id == "id-1"
+        assert new_task.task_list is task_list
         assert new_task.id == "new_id"
         assert requests_mock.called is True
 
 
 class TestTaskResource:
-    def test_default_crucial_values(self):
-        task = Task(None, "Subject")
+    def test_minimum_task(self):
+        task = Task(None, "Title")
 
         assert task.id is None
-        assert task.categories == []
-        assert task.subject == "Subject"
+        assert task.title == "Title"
+        assert task.task_list is None
 
     def test_create_task_object_from_dict(self):
         task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
 
         assert task.id == "task-1"
         assert task.body == "task-body"
-        assert task.categories == ["category1"]
         assert task.status == Status.NOT_STARTED
-        assert task.subject == "My new task"
-        assert task.sensitivity == Sensitivity.NORMAL
-        assert task.owner == "user-1"
+        assert task.title == "My new task"
         assert task.importance == Importance.HIGH
-        assert task.assigned_to == "user-1"
-        assert task.has_attachments is True
         assert task.is_reminder_on is True
-        assert task.task_list_id == "id-1"
-        assert task._change_key == "key-change-1"
+        assert task.task_list is None
         assert task.last_modified_datetime == datetime(
             2021, 1, 1, 18, tzinfo=timezone.utc
         )
@@ -294,7 +265,6 @@ class TestTaskResource:
         assert task.completed_datetime == datetime(2020, 5, 1, tzinfo=timezone.utc)
         assert task.due_datetime == datetime(2020, 5, 2, tzinfo=timezone.utc)
         assert task.reminder_datetime == datetime(2020, 5, 3, tzinfo=timezone.utc)
-        assert task.start_datetime == datetime(2020, 5, 4, tzinfo=timezone.utc)
         assert isinstance(task.recurrence, Recurrence) is True
         assert isinstance(task.recurrence.pattern, patterns.YearlyAbsolute)
         assert isinstance(task.recurrence.range, ranges.NoEnd)
@@ -307,87 +277,19 @@ class TestTaskResource:
         filters = Task.handle_list_filters(status="my-filter")
         assert filters == {"$filter": "status my-filter"}
 
-    def test_task_delete_themselfs(self, requests_mock, client):
-        requests_mock.delete(f"{API_BASE}/outlook/tasks/task-1", status_code=204)
+    def test_task_delete_themselfs(self, requests_mock, client, task_list):
+        requests_mock.delete(
+            f"{API_BASE}/todo/lists/id-1/tasks/task-1", status_code=204
+        )
         task = Task.create_from_dict(client, TASK_EXAMPLE_DATA)
+        task.task_list = task_list
+
         task.delete()
-        assert requests_mock.called is True
-
-    def test_task_complete(self, requests_mock, client):
-        response = copy.deepcopy(TASK_EXAMPLE_DATA)
-        response["status"] = "completed"
-        response["completedDateTime"] = {
-            "dateTime": "2020-06-12T00:00:00.000000",
-            "timeZone": "UTC",
-        }
-
-        requests_mock.post(
-            f"{API_BASE}/outlook/tasks/task-1/complete",
-            status_code=200,
-            json={"value": [response]},
-            additional_matcher=match_body({}),
-        )
-        task = Task.create_from_dict(client, TASK_EXAMPLE_DATA)
-        task.complete()
 
         assert requests_mock.called is True
-        assert task.status == Status.COMPLETED
-        assert task.completed_datetime == datetime(2020, 6, 12, tzinfo=timezone.utc)
-
-    def test_task_list_attachment(self, requests_mock, client):
-        requests_mock.get(
-            f"{API_BASE}/outlook/tasks/task-1/attachments",
-            status_code=200,
-            json={"value": [ATTACHMENT_EXAMPLE_DATA]},
-        )
-        task = Task.create_from_dict(client, TASK_EXAMPLE_DATA)
-
-        result = task.list_attachments()
-
-        assert len(result) == 1
-        assert isinstance(result[0], Attachment) is True
-        assert result[0].id == "attachment-1"
-        assert result[0].task == task
 
     def test_task_create_raises_when_no_tasklist_id(self):
         task = Task(None, "Test")
 
         with pytest.raises(TaskListNotSpecifiedError):
             task.create()
-
-
-class TestAttachmentResource:
-    def test_attachment_from_dict(self):
-        task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
-        attachment = Attachment.create_from_dict(
-            None, ATTACHMENT_EXAMPLE_DATA, task=task
-        )
-
-        assert attachment.task == task
-        assert attachment.id == "attachment-1"
-        assert attachment.is_inline is True
-        assert attachment.content_type == "mime/type"
-        assert attachment.last_modified_datetime == datetime(
-            2021, 1, 1, 18, tzinfo=timezone.utc
-        )
-        assert attachment.name == "The Attachment"
-        assert attachment.size == 1024
-
-    def test_attachment_update_not_supported(self):
-        attachment = Attachment.create_from_dict(
-            None, ATTACHMENT_EXAMPLE_DATA, task=None
-        )
-
-        with pytest.raises(NotSupportedError):
-            attachment.update()
-
-    def test_attachment_managing_url(self):
-        task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
-        attachment = Attachment.create_from_dict(
-            None, ATTACHMENT_EXAMPLE_DATA, task=task
-        )
-
-        assert (
-            attachment.managing_endpoint
-            == "outlook/tasks/task-1/attachments/attachment-1"
-        )

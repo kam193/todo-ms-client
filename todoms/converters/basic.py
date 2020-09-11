@@ -10,7 +10,6 @@ from ..attributes import (
     Importance,
     RecurrencePatternType,
     RecurrenceRangeType,
-    Sensitivity,
     Status,
     Weekday,
 )
@@ -122,11 +121,6 @@ class EnumAttrConverter(AttributeConverter, ABC):
 @dataclass
 class ImportanceAttrConverter(EnumAttrConverter):
     _ENUM = Importance
-
-
-@dataclass
-class SensitivityAttrConverter(EnumAttrConverter):
-    _ENUM = Sensitivity
 
 
 @dataclass

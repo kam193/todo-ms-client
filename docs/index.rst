@@ -26,7 +26,7 @@ See :doc:`reference/index` for this library API reference
 
 To learn more about MS ToDo API look into Microsoft docs on `Microsoft Docs page`_.
 
-.. _Microsoft Docs page: https://docs.microsoft.com/en-us/graph/api/resources/outlooktask?view=graph-rest-beta
+.. _Microsoft Docs page: https://docs.microsoft.com/en-us/graph/api/resources/todo-overview?view=graph-rest-beta
 
 .. important::
 

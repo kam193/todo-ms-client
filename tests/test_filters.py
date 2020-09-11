@@ -3,13 +3,12 @@ from datetime import datetime
 import pytest
 from dateutil import tz
 
-from todoms.attributes import Importance, Sensitivity, Status
+from todoms.attributes import Importance, Status
 from todoms.filters import and_, eq, ge, gt, le, lt, ne, or_
 
 comparable_example_values = [
     ("value", "'value'"),
     (Importance.LOW, "'low'"),
-    (Sensitivity.PRIVATE, "'private'"),
     (Status.COMPLETED, "'completed'"),
     (datetime(2020, 1, 1, 18, tzinfo=tz.UTC), "2020-01-01T18:00:00Z"),
     (True, "true"),
