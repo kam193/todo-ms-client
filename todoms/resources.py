@@ -103,7 +103,7 @@ class TaskList(Resource):
 
 
 class Task(Resource):
-    """Represent a task. Listing tasks without specific TaskList returns all tasks"""
+    """Represent a task."""
 
     ENDPOINT = "tasks"
     ATTRIBUTES = (
