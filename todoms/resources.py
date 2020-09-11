@@ -43,7 +43,7 @@ class Resource(BaseConvertableObject, ABC):
         """Create object in API"""
         if self.id:
             raise ResourceAlreadyCreatedError
-        result = self._client.raw_post(self.ENDPOINT, self.to_dict(), 201)
+        result = self._client.raw_post(self.managing_endpoint, self.to_dict(), 201)
         # TODO: update object from result
         self._id = result.get("id", None)
 
@@ -57,7 +57,7 @@ class Resource(BaseConvertableObject, ABC):
 
     @property
     def managing_endpoint(self):
-        return (furl(self.ENDPOINT) / self.id).url
+        return (furl(self.ENDPOINT) / (self.id or "")).url
 
     @property
     def id(self):
@@ -103,163 +103,75 @@ class TaskList(Resource):
         return self._client.list(Task, endpoint=tasks_endpoint.url, *args, **kwargs)
 
     def save_task(self, task):
-        task.task_list_id = self.id
+        task.task_list = self
         task.create()
 
 
 class Task(Resource):
     """Represent a task. Listing tasks without specific TaskList returns all tasks"""
 
-    ENDPOINT = "outlook/tasks"
+    ENDPOINT = "tasks"
     ATTRIBUTES = (
         AttributeConverter("id", "_id"),
         ContentAttrConverter("body", "body"),
-        "categories",
         StatusAttrConverter("status", "status"),
-        "subject",
-        SensitivityAttrConverter("sensitivity", "sensitivity"),
-        "owner",
+        "title",
         RecurrenceAttrConverter("recurrence", "recurrence"),
         ImportanceAttrConverter("importance", "importance"),
-        AttributeConverter("assignedTo", "assigned_to"),
-        AttributeConverter("hasAttachments", "has_attachments"),
         AttributeConverter("isReminderOn", "is_reminder_on"),
-        AttributeConverter("parentFolderId", "task_list_id"),
         IsoTimeAttrConverter("createdDateTime", "created_datetime"),
         DatetimeAttrConverter("dueDateTime", "due_datetime"),
-        DatetimeAttrConverter("startDateTime", "start_datetime"),
         DatetimeAttrConverter("completedDateTime", "completed_datetime"),
         IsoTimeAttrConverter("lastModifiedDateTime", "last_modified_datetime"),
         DatetimeAttrConverter("reminderDateTime", "reminder_datetime"),
-        AttributeConverter("changeKey", "_change_key"),
     )
 
     def __init__(
         self,
         client,
-        subject: str,
+        title: str,
         body: str = None,
-        task_list_id: str = None,
         status: Status = None,
         importance: Importance = None,
-        sensitivity: Sensitivity = None,
         recurrence: dict = None,
-        categories: list = None,
-        owner: str = None,
-        assigned_to: str = None,
-        has_attachments: bool = False,
         is_reminder_on: bool = False,
         created_datetime: datetime = None,
         due_datetime: datetime = None,
-        start_datetime: datetime = None,
         completed_datetime: datetime = None,
         last_modified_datetime: datetime = None,
         reminder_datetime: datetime = None,
+        task_list: TaskList = None,
     ):
         super().__init__(client)
         self.body = body
-        self.subject = subject
-        self.task_list_id = task_list_id
+        self.title = title
         self.status = status
         self.importance = importance
-        self.sensitivity = sensitivity
         self.recurrence = recurrence
-        self.owner = owner
-        self.assigned_to = assigned_to
-        self.has_attachments = has_attachments
         self.is_reminder_on = is_reminder_on
         self.created_datetime = created_datetime
         self.due_datetime = due_datetime
-        self.start_datetime = start_datetime
         self.completed_datetime = completed_datetime
         self.last_modified_datetime = last_modified_datetime
         self.reminder_datetime = reminder_datetime
-        self.categories = categories if categories is not None else []
+        self.task_list = task_list
 
     def __repr__(self):
-        return f"<Task '{self.subject}'>"
+        return f"<Task '{self.title}'>"
 
     def __str__(self):
-        return f"Task '{self.subject}'"
+        return f"Task '{self.title}'"
 
     def create(self):
-        if not self.task_list_id:
+        if not self.task_list:
             raise TaskListNotSpecifiedError
         return super().create()
-
-    def complete(self):
-        endpoint = furl(self.ENDPOINT) / self.id / "complete"
-        result = self._client.raw_post(endpoint.url, data={}, expected_code=200)
-
-        # TODO: better update object from result
-        self.status = StatusAttrConverter("", "").obj_converter(
-            result["value"][0]["status"]
-        )
-        self.completed_datetime = DatetimeAttrConverter("", "").obj_converter(
-            result["value"][0]["completedDateTime"]
-        )
-
-    def list_attachments(self):
-        endpoint = furl(self.ENDPOINT) / self.id / Attachment.ENDPOINT
-        attachments = self._client.list(Attachment, endpoint.url)
-
-        for attachment in attachments:
-            attachment.task = self
-
-        return attachments
 
     @classmethod
     def handle_list_filters(cls, *args, **kwargs):
         kwargs.setdefault("status", ne(Status.COMPLETED))
         return super().handle_list_filters(*args, **kwargs)
 
-
-class Attachment(Resource):
-    """Represent a generic attachment attachted to a task"""
-
-    ENDPOINT = "attachments"
-    ATTRIBUTES = (
-        AttributeConverter("id", "_id"),
-        "name",
-        "size",
-        AttributeConverter("isInline", "is_inline"),
-        AttributeConverter("contentType", "content_type"),
-        IsoTimeAttrConverter("lastModifiedDateTime", "last_modified_datetime"),
-    )
-
-    def __repr__(self):
-        return f"<Attachment '{self.name}'>"
-
-    def __str__(self):
-        return f"Attachment '{self.name}'"
-
-    def __init__(
-        self,
-        client,
-        name: str,
-        size: int,
-        content_type: str,
-        is_inline: bool = True,
-        last_modified_datetime: datetime = None,
-        task: Task = None,
-    ):
-        super().__init__(client)
-        self.task = task
-        self.name = name
-        self.size = size
-        self.content_type = content_type
-        self.is_inline = is_inline
-        self.last_modified_datetime = last_modified_datetime
-
-    def update(self):
-        raise NotSupportedError
-
     @property
     def managing_endpoint(self):
-        return (furl(self.task.managing_endpoint) / self.ENDPOINT / self.id).url
-
-    @classmethod
-    def create_from_dict(cls, client, data_dict, task=None):
-        attachment = super().create_from_dict(client, data_dict)
-        attachment.task = task
-        return attachment
+        return (furl(self.task_list.managing_endpoint) / super().managing_endpoint).url

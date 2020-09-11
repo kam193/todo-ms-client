@@ -17,10 +17,6 @@ Resource classes
 .. autoclass:: Task
     :exclude-members: ATTRIBUTES, ENDPOINT
 
-
-.. autoclass:: Attachment
-    :exclude-members: ATTRIBUTES, ENDPOINT
-
 ----------
 Exceptions
 ----------

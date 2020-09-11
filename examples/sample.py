@@ -25,7 +25,6 @@ list_1 = client.get(TaskList, task_lists[1].id)
 
 print(list_1)
 pprint(list_1.get_tasks())
-pprint(list_1.get_tasks()[0].list_attachments())
 
 all_tasks = client.list(Task)
 pprint(all_tasks)
