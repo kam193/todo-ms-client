@@ -7,8 +7,6 @@ Module `todoms.attributes` contains enums for fields where only a given values a
 
 .. autoclass:: Importance
 
-.. autoclass:: Sensitivity
-
 .. autoclass:: Status
 
 

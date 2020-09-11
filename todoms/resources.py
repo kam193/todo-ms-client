@@ -3,7 +3,7 @@ from datetime import datetime
 
 from furl import furl
 
-from .attributes import Importance, Sensitivity, Status
+from .attributes import Importance, Status
 from .convertable import BaseConvertableObject
 from .converters.basic import (
     AttributeConverter,
@@ -11,7 +11,6 @@ from .converters.basic import (
     DatetimeAttrConverter,
     ImportanceAttrConverter,
     IsoTimeAttrConverter,
-    SensitivityAttrConverter,
     StatusAttrConverter,
 )
 from .converters.recurrence import RecurrenceAttrConverter
@@ -20,10 +19,6 @@ from .filters import and_, ne
 
 class ResourceAlreadyCreatedError(Exception):
     """This resource is already created. Prevent duplicate"""
-
-
-class NotSupportedError(Exception):
-    """This method isn't supported in this resource type"""
 
 
 class TaskListNotSpecifiedError(Exception):

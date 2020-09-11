@@ -7,13 +7,6 @@ class Importance(Enum):
     HIGH = "high"
 
 
-class Sensitivity(Enum):
-    NORMAL = "normal"
-    PERSONAL = "personal"
-    PRIVATE = "private"
-    CONFIDENTIAL = "confidential"
-
-
 class Status(Enum):
     NOT_STARTED = "notStarted"
     IN_PROGRESS = "inProgress"

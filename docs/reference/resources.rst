@@ -24,8 +24,5 @@ Exceptions
 .. autoclass:: ResourceAlreadyCreatedError
     :no-inherited-members:
 
-.. autoclass:: NotSupportedError
-    :no-inherited-members:
-
 .. autoclass:: TaskListNotSpecifiedError
     :no-inherited-members:

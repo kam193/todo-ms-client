@@ -9,7 +9,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Basic docs with library interface reference
-- Deleting tasks' attachment
+
+### Changed
+
+- Switching to the new ToDo API
+
+### Removed
+
+- `Attachment`, `Sensitivity` as not supported by the new API
 
 ## [0.0.3] - 2020-06-20
 

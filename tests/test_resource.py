@@ -1,15 +1,13 @@
-import copy
 import urllib
 from datetime import datetime, timezone
 
 import pytest
 
-from todoms.attributes import Importance, Sensitivity, Status
+from todoms.attributes import Importance, Status
 from todoms.filters import and_, eq
 from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import (
     ContentAttrConverter,
-    NotSupportedError,
     Resource,
     ResourceAlreadyCreatedError,
     Task,
@@ -68,25 +66,21 @@ TASK_EXAMPLE_DATA = {
     },
 }
 
+
 @pytest.fixture
 def task_list(client):
     return TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
 
 
 @pytest.mark.parametrize(
-    "resource,endpoint",
-    [(TaskList, "todo/lists"), (Task, "tasks")],
+    "resource,endpoint", [(TaskList, "todo/lists"), (Task, "tasks")],
 )
 def test_resource_has_proper_endpoint(resource, endpoint):
     assert resource.ENDPOINT == endpoint
 
 
 @pytest.mark.parametrize(
-    "resource,data",
-    [
-        (TaskList, TASK_LIST_EXAMPLE_DATA),
-        (Task, TASK_EXAMPLE_DATA),
-    ],
+    "resource,data", [(TaskList, TASK_LIST_EXAMPLE_DATA), (Task, TASK_EXAMPLE_DATA)],
 )
 def test_resource_is_proper_converted_back_to_dict(resource, data):
     obj = resource.create_from_dict(None, data)
@@ -254,7 +248,6 @@ class TestTaskResource:
         assert task.title == "Title"
         assert task.task_list is None
 
-
     def test_create_task_object_from_dict(self):
         task = Task.create_from_dict(None, TASK_EXAMPLE_DATA)
 
@@ -285,7 +278,9 @@ class TestTaskResource:
         assert filters == {"$filter": "status my-filter"}
 
     def test_task_delete_themselfs(self, requests_mock, client, task_list):
-        requests_mock.delete(f"{API_BASE}/todo/lists/id-1/tasks/task-1", status_code=204)
+        requests_mock.delete(
+            f"{API_BASE}/todo/lists/id-1/tasks/task-1", status_code=204
+        )
         task = Task.create_from_dict(client, TASK_EXAMPLE_DATA)
         task.task_list = task_list
 
