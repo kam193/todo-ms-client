@@ -153,7 +153,7 @@ class TestDefaultResource:
             f"{API_BASE}/endpoint",
             json={"id": "new-id", "name": "new-resource"},
             status_code=201,
-            additional_matcher=match_body({"_id": None, "name": "new-resource"}),
+            additional_matcher=match_body({"name": "new-resource"}),
         )
 
         resource.create()
@@ -225,7 +225,7 @@ class TestTaskListResource:
         task_list = TaskList.create_from_dict(client, TASK_LIST_EXAMPLE_DATA)
         new_task = Task(client, "Test")
 
-        expected_body = new_task.to_dict()
+        expected_body = {k: v for k, v in new_task.to_dict().items() if v is not None}
         requests_mock.post(
             f"{API_BASE}/todo/lists/id-1/tasks",
             status_code=201,
