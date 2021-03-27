@@ -38,7 +38,8 @@ class Resource(BaseConvertableObject, ABC):
         """Create object in API"""
         if self.id:
             raise ResourceAlreadyCreatedError
-        result = self._client.raw_post(self.managing_endpoint, self.to_dict(), 201)
+        data_dict = {k: v for k, v in self.to_dict().items() if v is not None}
+        result = self._client.raw_post(self.managing_endpoint, data_dict, 201)
         # TODO: update object from result
         self._id = result.get("id", None)
 
