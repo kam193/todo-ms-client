@@ -21,6 +21,8 @@ certifi==2020.4.5.1
     #   -r requirements-test.txt
     #   -r requirements.txt
     #   requests
+cfgv==3.2.0
+    # via pre-commit
 chardet==3.0.4
     # via
     #   -r requirements-test.txt
@@ -48,6 +50,8 @@ flake8==3.8.1
     # via -r requirements-test.txt
 furl==2.1.0
     # via -r requirements.txt
+identify==2.2.3
+    # via pre-commit
 idna==2.9
     # via
     #   -r requirements-test.txt
@@ -63,6 +67,8 @@ more-itertools==8.2.0
     # via
     #   -r requirements-test.txt
     #   pytest
+nodeenv==1.6.0
+    # via pre-commit
 oauthlib==3.1.0
     # via
     #   -r requirements.txt
@@ -89,6 +95,8 @@ pluggy==0.13.1
     #   -r requirements-test.txt
     #   pytest
     #   tox
+pre-commit==2.12.0
+    # via -r requirements-dev.in
 py==1.8.1
     # via
     #   -r requirements-test.txt
@@ -122,6 +130,8 @@ pytest==5.4.2
     #   pytest-metadata
 python-dateutil==2.8.1
     # via -r requirements.txt
+pyyaml==5.4.1
+    # via pre-commit
 regex==2020.5.14
     # via
     #   -r requirements-test.txt
@@ -151,6 +161,7 @@ toml==0.10.1
     # via
     #   -r requirements-test.txt
     #   black
+    #   pre-commit
     #   tox
 tox==3.15.0
     # via -r requirements-test.txt
@@ -166,6 +177,7 @@ urllib3==1.25.9
 virtualenv==20.0.20
     # via
     #   -r requirements-test.txt
+    #   pre-commit
     #   tox
 wcwidth==0.1.9
     # via
