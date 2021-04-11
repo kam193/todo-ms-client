@@ -65,9 +65,10 @@ class Resource(BaseConvertableObject, ABC):
 
     @classmethod
     def handle_list_filters(cls, *args, **kwargs):
-        if len(args) + len(kwargs) == 0:
+        not_empty_kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        if len(args) + len(not_empty_kwargs) == 0:
             return {}
-        params = {"$filter": and_(*args, **kwargs)}
+        params = {"$filter": and_(*args, **not_empty_kwargs)}
         return params
 
 

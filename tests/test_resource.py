@@ -189,6 +189,11 @@ class TestDefaultResource:
             == expected
         )
 
+    def test_default_handle_list_filter_when_parameter_none(
+        self, simple_resource_class: Resource
+    ):
+        assert simple_resource_class.handle_list_filters(status=None) == {}
+
 
 class TestTaskListResource:
     def test_create_tasklist_object_from_data(self,):
