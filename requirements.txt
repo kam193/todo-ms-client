@@ -6,7 +6,7 @@
 #
 certifi==2020.4.5.1
     # via requests
-chardet==3.0.4
+charset-normalizer==2.0.8
     # via requests
 furl==2.1.0
     # via -r requirements.in
@@ -20,7 +20,7 @@ python-dateutil==2.8.1
     # via -r requirements.in
 requests-oauthlib==1.3.0
     # via -r requirements.in
-requests==2.23.0
+requests==2.26.0
     # via
     #   -r requirements.in
     #   requests-oauthlib
@@ -28,5 +28,5 @@ six==1.15.0
     # via
     #   furl
     #   python-dateutil
-urllib3==1.25.9
+urllib3==1.26.7
     # via requests
