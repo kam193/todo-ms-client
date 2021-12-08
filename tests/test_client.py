@@ -1,5 +1,4 @@
 from pytest import fixture, mark, raises
-
 from todoms.client import ResourceNotFoundError, ResponseError
 from todoms.resources import Resource
 
@@ -106,6 +105,21 @@ def test_get_resource_returns_obj(client, resource_class, requests_mock):
 
     assert result.name == "res-1"
     assert isinstance(result, resource_class)
+
+
+def test_get_uses_provided_endpoint(client, resource_class, requests_mock):
+    requests_mock.get(
+        f"{API_BASE}/precreated-endpoint", json={"name": "res-1"},
+    )
+    result = client.get(resource_class, endpoint="precreated-endpoint")
+
+    assert result.name == "res-1"
+    assert isinstance(result, resource_class)
+
+
+def test_get_raises_when_not_endpint_and_id(client, resource_class):
+    with raises(ValueError):
+        client.get(resource_class)
 
 
 @mark.parametrize("error_code,exception", EXPECTED_ERRORS)

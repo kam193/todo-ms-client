@@ -32,8 +32,16 @@ class ToDoClient(object):
 
         return [resource_class.create_from_dict(self, element) for element in elements]
 
-    def get(self, resource_class: Type[Resource], resource_id: str):
-        url = (self._url / resource_class.ENDPOINT / resource_id).url
+    def get(
+        self,
+        resource_class: Type[Resource],
+        resource_id: str = None,
+        endpoint: str = None,
+    ):
+        if not endpoint and not resource_id:
+            raise ValueError("Either endpoint or resource_id must be provided")
+
+        url = (self._url / (endpoint or f"{resource_class.ENDPOINT}/{resource_id}")).url
         response = self._provider.get(url)
         self._map_http_errors(response, codes.ok)
         return resource_class.create_from_dict(self, response.json())

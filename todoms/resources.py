@@ -174,4 +174,6 @@ class Task(Resource):
 
     @property
     def managing_endpoint(self):
+        if not self.task_list:
+            raise TaskListNotSpecifiedError
         return (furl(self.task_list.managing_endpoint) / super().managing_endpoint).url
