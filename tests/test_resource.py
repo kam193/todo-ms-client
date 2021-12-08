@@ -2,7 +2,6 @@ import urllib
 from datetime import datetime, timezone
 
 import pytest
-
 from todoms.attributes import Importance, Status
 from todoms.filters import and_, eq
 from todoms.recurrence import Recurrence, patterns, ranges
@@ -219,6 +218,7 @@ class TestTaskListResource:
 
         assert len(tasks) == 1
         assert tasks[0].id == "task-1"
+        assert tasks[0].task_list == task_list
 
     def test_task_list_delete_themselfs(self, requests_mock, client):
         requests_mock.delete(f"{API_BASE}/todo/lists/id-1", status_code=204)
@@ -298,3 +298,9 @@ class TestTaskResource:
 
         with pytest.raises(TaskListNotSpecifiedError):
             task.create()
+
+    def test_task_managing_endpoint_raises_when_no_tasklist_id(self):
+        task = Task(None, "Test")
+
+        with pytest.raises(TaskListNotSpecifiedError):
+            task.managing_endpoint

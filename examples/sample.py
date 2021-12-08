@@ -5,6 +5,9 @@ from todoms.client import ToDoClient
 from todoms.provider import WebBrowserProvider
 from todoms.resources import TaskList  # Task
 
+# from todoms.attributes import Status
+
+
 # Get app details from MS and register "http://localhost:8000" as redirect URI, see:
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app
 
@@ -24,7 +27,8 @@ print(task_lists)
 list_1 = client.get(TaskList, task_lists[1].id)
 
 print(list_1)
-pprint(list_1.get_tasks())
+all_tasks = list_1.get_tasks()
+pprint(all_tasks)
 
 # Updating task
 # first_task = all_tasks[0]
@@ -33,7 +37,12 @@ pprint(list_1.get_tasks())
 
 # Complete task
 # first_task = all_tasks[0]
-# first_task.complete()
+# first_task.status = Status.COMPLETED
+# first_task.update()
+
+# Delete task
+# first_task = all_tasks[0]
+# first_task.delete()
 
 # Create list
 # new_list = TaskList(client, "My new list")

@@ -1,6 +1,9 @@
+import hashlib
+import secrets
 import webbrowser
 import wsgiref.simple_server
 import wsgiref.util
+from base64 import urlsafe_b64encode
 
 from furl import furl
 from requests_oauthlib import OAuth2Session
@@ -50,8 +53,17 @@ class WebBrowserProvider(AbstractProvider):
 
         self._session = self._build_session(redirect_url)
 
+        code_veryfier = secrets.token_bytes(32).hex()
+        code_challenge = str(
+            urlsafe_b64encode(hashlib.sha256(code_veryfier.encode("ascii")).digest()),
+            "utf-8",
+        ).replace("=", "")
+
         sign_in_url, state = self._session.authorization_url(
-            self._authorize_url, prompt="login"
+            self._authorize_url,
+            prompt="login",
+            code_challenge=code_challenge,
+            code_challenge_method="S256",
         )
 
         response_app = _LocalRedirectHandlingApp(self._finish_message)
@@ -66,12 +78,20 @@ class WebBrowserProvider(AbstractProvider):
         webbrowser.open(sign_in_url)
         response_server.handle_request()
 
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "Origin": "http://localhost",
+        }
         self._token = self._session.fetch_token(
             self._token_url,
-            client_secret=self._app_secret,
+            # client_secret=self._app_secret,
+            include_client_id=True,
             authorization_response=self._replace_http_into_https(
                 response_app.callback_url
             ),
+            code_verifier=code_veryfier,
+            headers=headers,
         )
 
     def get(self, url: str, params: dict = None):

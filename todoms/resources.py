@@ -97,7 +97,10 @@ class TaskList(Resource):
     def get_tasks(self, *args, **kwargs):
         """Get list of tasks in given list. Default returns only non-completed tasks."""
         tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
-        return self._client.list(Task, endpoint=tasks_endpoint.url, *args, **kwargs)
+        tasks = self._client.list(Task, endpoint=tasks_endpoint.url, *args, **kwargs)
+        for task in tasks:
+            task.task_list = self
+        return tasks
 
     def save_task(self, task):
         task.task_list = self
