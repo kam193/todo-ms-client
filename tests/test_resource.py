@@ -2,6 +2,7 @@ import urllib
 from datetime import datetime, timezone
 
 import pytest
+
 from todoms.attributes import Importance, Status
 from todoms.filters import and_, eq
 from todoms.recurrence import Recurrence, patterns, ranges
