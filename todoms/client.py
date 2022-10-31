@@ -1,3 +1,4 @@
+import logging
 from typing import Type
 
 from furl import furl
@@ -5,6 +6,8 @@ from requests import Response, codes
 
 from .provider import AbstractProvider
 from .resources import Resource
+
+logger = logging.getLogger(__name__)
 
 
 class ToDoClient(object):
@@ -23,6 +26,7 @@ class ToDoClient(object):
 
         elements = []
         while url:
+            logger.debug("Listing %s", url)
             response = self._provider.get(url, params=params)
             self._map_http_errors(response, codes.ok)
             data = response.json()
@@ -42,23 +46,29 @@ class ToDoClient(object):
             raise ValueError("Either endpoint or resource_id must be provided")
 
         url = (self._url / (endpoint or f"{resource_class.ENDPOINT}/{resource_id}")).url
+        logger.debug("Getting %s", url)
         response = self._provider.get(url)
         self._map_http_errors(response, codes.ok)
         return resource_class.create_from_dict(self, response.json())
 
     def delete(self, resource: Resource):
         url = (self._url / resource.managing_endpoint).url
+        logger.debug("Deleting %s", url)
         response = self._provider.delete(url)
         self._map_http_errors(response, codes.no_content)
 
     def patch(self, resource: Resource):
         url = (self._url / resource.managing_endpoint).url
-        response = self._provider.patch(url, json_data=resource.to_dict())
+
+        data = resource.to_dict()
+        response = self._provider.patch(url, json_data=data)
+        logger.debug("Patching %s", url, extra={"data": data})
         self._map_http_errors(response, codes.ok)
         return response.json()
 
     def raw_post(self, endpoint: str, data: dict, expected_code: int = codes.created):
         url = (self._url / endpoint).url
+        logger.debug("Posting %s", url, extra={"data": data})
         response = self._provider.post(url, json_data=data)
         self._map_http_errors(response, expected_code)
         return response.json()
@@ -68,6 +78,9 @@ class ToDoClient(object):
             raise ResourceNotFoundError(response)
 
         if response.status_code != expected:
+            logger.debug(
+                "Unexpected response %s: %s", response.status_code, response.text
+            )
             raise ResponseError(response)
 
 
