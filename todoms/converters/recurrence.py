@@ -30,6 +30,8 @@ class RecurrencePatternAttrConverter(AttributeConverter):
 
 
 class RecurrenceRangeAttrConverter(AttributeConverter):
+    # TODO: #104 - Support the way the recurrence is updated in the API
+    # until then, updating the recurrence will not work
     _CONVERTING_TABLE = {
         RecurrenceRangeType.END_DATE.value: ranges.EndDate,
         RecurrenceRangeType.NO_END.value: ranges.NoEnd,

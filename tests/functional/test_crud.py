@@ -26,6 +26,7 @@ def task_data(generate_id):
         "title": generate_id("task"),
     }
     del data["id"]
+    del data["recurrence"]  # TODO: Get back when #104 is implemented
     return data
 
 
