@@ -14,6 +14,7 @@ from ..attributes import (
     Weekday,
 )
 from . import BaseConverter
+from .field import *  # noqa: F401, F403
 
 
 @dataclass

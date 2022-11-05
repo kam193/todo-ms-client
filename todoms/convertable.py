@@ -1,6 +1,7 @@
 from abc import ABC
 
 from .converters import BaseConverter
+from .converters.field import Field
 
 
 class BaseConvertableObject(ABC):
@@ -42,4 +43,24 @@ class BaseConvertableObject(ABC):
         for attr, value in private_attributes.items():
             setattr(obj, attr, value)
 
+        return obj
+
+
+class BaseConvertableFieldsObject(BaseConvertableObject):
+    @classmethod
+    @property
+    def FIELDS(cls):
+        return (field for field in cls.__dict__.values() if isinstance(field, Field))
+
+    def to_dict(self):
+        data_dict = dict()
+        for field in self.FIELDS:
+            data_dict.update(field.to_dict(self))
+        return data_dict
+
+    @classmethod
+    def create_from_dict(cls, data_dict: dict, **additional_kwargs):
+        obj = cls(**additional_kwargs)
+        for field in cls.FIELDS:
+            field.from_dict(obj, data_dict)
         return obj

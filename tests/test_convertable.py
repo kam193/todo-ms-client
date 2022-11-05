@@ -1,12 +1,13 @@
-from todoms.convertable import BaseConvertableObject
+from todoms.convertable import BaseConvertableFieldsObject, BaseConvertableObject
 from todoms.converters.basic import AttributeConverter, ContentAttrConverter
+from todoms.converters.field import Field
 
 
-class SimpleObject(BaseConvertableObject):
-    ATTRIBUTES = ("name", "other")
+class SimpleObject(BaseConvertableFieldsObject):
+    name = Field("name")
+    other = Field("other")
 
-    def __init__(self, name, other):
-        self.name = name
+    def __init__(self, other=None):
         self.other = other
 
 
