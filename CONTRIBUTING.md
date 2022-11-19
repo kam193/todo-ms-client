@@ -9,7 +9,7 @@
 | **Changelog**        | Keep CHANGELOG.md up-to-date. Review it before release.                           |
 | **Style guide**      | We use `flake8`, `black` and obligatory `isort`.                                  |
 | **Pip requirements** | We use [pip-tools](https://github.com/jazzband/pip-tools) to manage requirements  |
-| **Python**           | Supported Python is 3.7+                                                          |
+| **Python**           | Supported Python is 3.9+                                                          |
 
 ## Running tests locally
 
@@ -17,10 +17,10 @@
 
     pip install tox
 
-An then run one of the following tox environments: `py37` (tests on Python 3.7), `py38` (Python 3.8) or `lint` (style checks).
+An then run one of the following tox environments: `py39` (tests on Python 3.9), `py310` (Python 3.10) or `lint` (style checks).
 For example:
 
-    tox -e py37
+    tox -e py39
 
 ## Building docs
 

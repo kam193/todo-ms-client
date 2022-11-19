@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v1
         with:
-          python-version: "3.8"
+          python-version: "3.9"
       - name: Cache pip
         uses: actions/cache@v1
         with:
@@ -33,14 +33,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Python 3.7
+      - name: Setup Python 3.9
         uses: actions/setup-python@v1
         with:
-          python-version: "3.7"
-      - name: Setup Python 3.8
+          python-version: "3.9"
+      - name: Setup Python 3.10
         uses: actions/setup-python@v1
         with:
-          python-version: "3.8"
+          python-version: "3.10"
       - name: Cache pip
         uses: actions/cache@v1
         with:
@@ -67,10 +67,10 @@ jobs:
     needs: [style_check, unittests]
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v1
         with:
-          python-version: "3.8"
+          python-version: "3.9"
       - name: Cache pip
         uses: actions/cache@v1
         with:
