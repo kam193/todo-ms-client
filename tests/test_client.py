@@ -1,6 +1,7 @@
 from pytest import fixture, mark, raises
 
 from todoms.client import ResourceNotFoundError, ResponseError
+from todoms.converters.field import Attribute
 from todoms.resources import Resource
 
 from .utils.constants import API_BASE
@@ -13,12 +14,8 @@ EXPECTED_ERRORS = [(404, ResourceNotFoundError), (500, ResponseError)]
 def resource_class():
     class FakeResource(Resource):
         ENDPOINT = "fake"
-        ATTRIBUTES = ("name", "id")
-
-        def __init__(self, client, name, id=None):
-            super().__init__(client)
-            self.name = name
-            self._id = id
+        _id = Attribute("id")
+        name = Attribute("name")
 
         @classmethod
         def handle_list_filters(cls, **kwargs):
@@ -29,7 +26,7 @@ def resource_class():
 
 @fixture
 def resource_obj(resource_class):
-    return resource_class(None, name="name-1", id="id-1")
+    return resource_class(None, name="name-1", _id="id-1")
 
 
 def test_list_resource_returns_all(client, resource_class, requests_mock):

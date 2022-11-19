@@ -1,6 +1,5 @@
-from todoms.convertable import BaseConvertableFieldsObject, BaseConvertableObject
-from todoms.converters.basic import ContentAttrConverter
-from todoms.converters.field import Attribute
+from todoms.convertable import BaseConvertableFieldsObject
+from todoms.converters.field import Attribute, Content
 
 
 class SimpleObject(BaseConvertableFieldsObject):
@@ -12,11 +11,8 @@ class ComplexObject(BaseConvertableFieldsObject):
     new = Attribute("old")
 
 
-class ComplexObjectWithConverting(BaseConvertableObject):
-    ATTRIBUTES = (ContentAttrConverter("old", "new"),)
-
-    def __init__(self, new):
-        self.new = new
+class ComplexObjectWithConverting(BaseConvertableFieldsObject):
+    new = Content("old")
 
 
 class TestBaseConvertableObject:

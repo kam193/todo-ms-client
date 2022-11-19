@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import pytest
 
 from todoms.attributes import Importance, Status
+from todoms.converters.field import Attribute
 from todoms.filters import and_, eq
 from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import (
@@ -23,11 +24,8 @@ from .utils.helpers import match_body
 def simple_resource_class():
     class SimpleResource(Resource):
         ENDPOINT = "endpoint"
-        ATTRIBUTES = ("_id", "name")
-
-        def __init__(self, client, name):
-            super().__init__(client)
-            self.name = name
+        _id = Attribute("id")
+        name = Attribute("name")
 
     return SimpleResource
 
@@ -120,14 +118,14 @@ class TestDefaultResource:
 
     def test_default_resource_id(self, simple_resource_class):
         resource = simple_resource_class.from_dict(
-            None, {"_id": "id-1", "name": "name-1"}
+            None, {"id": "id-1", "name": "name-1"}
         )
 
         assert resource.id == "id-1"
 
     def test_default_resource_managing_endpoint(self, simple_resource_class):
         resource = simple_resource_class.from_dict(
-            None, {"_id": "id-1", "name": "name-1"}
+            None, {"id": "id-1", "name": "name-1"}
         )
 
         assert resource.managing_endpoint == "endpoint/id-1"
@@ -139,7 +137,7 @@ class TestDefaultResource:
 
     def test_default_resource_create_fails_when_id_set(self, simple_resource_class):
         resource = simple_resource_class.from_dict(
-            None, {"_id": "id-1", "name": "name-1"}
+            None, {"id": "id-1", "name": "name-1"}
         )
 
         with pytest.raises(ResourceAlreadyCreatedError):
@@ -165,7 +163,7 @@ class TestDefaultResource:
         self, simple_resource_class, client, requests_mock
     ):
         resource = simple_resource_class.from_dict(
-            client, {"_id": "id-1", "name": "name-1"}
+            client, {"id": "id-1", "name": "name-1"}
         )
         requests_mock.delete(f"{API_BASE}/endpoint/id-1", status_code=204)
 
@@ -229,7 +227,7 @@ class TestTaskListResource:
 
     def test_task_list_saves_task(self, requests_mock, client):
         task_list = TaskList.from_dict(client, TASK_LIST_EXAMPLE_DATA)
-        new_task = Task(client, "Test")
+        new_task = Task(client, title="Test")
 
         expected_body = {k: v for k, v in new_task.to_dict().items() if v is not None}
         requests_mock.post(
@@ -248,7 +246,7 @@ class TestTaskListResource:
 
 class TestTaskResource:
     def test_minimum_task(self):
-        task = Task(None, "Title")
+        task = Task(None, title="Title")
 
         assert task.id is None
         assert task.title == "Title"
@@ -295,13 +293,13 @@ class TestTaskResource:
         assert requests_mock.called is True
 
     def test_task_create_raises_when_no_tasklist_id(self):
-        task = Task(None, "Test")
+        task = Task(None, title="Test")
 
         with pytest.raises(TaskListNotSpecifiedError):
             task.create()
 
     def test_task_managing_endpoint_raises_when_no_tasklist_id(self):
-        task = Task(None, "Test")
+        task = Task(None, title="Test")
 
         with pytest.raises(TaskListNotSpecifiedError):
             task.managing_endpoint

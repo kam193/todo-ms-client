@@ -1,19 +1,18 @@
 from abc import ABC
-from datetime import datetime
 
 from furl import furl
 
-from .attributes import Importance, Status
-from .convertable import BaseConvertableObject
-from .converters.basic import (
-    AttributeConverter,
-    ContentAttrConverter,
-    DatetimeAttrConverter,
-    ImportanceAttrConverter,
-    IsoTimeAttrConverter,
-    StatusAttrConverter,
+from .attributes import Status
+from .convertable import BaseConvertableFieldsObject
+from .converters.field import (
+    Attribute,
+    Content,
+    Datetime,
+    ImportanceField,
+    IsoTime,
+    RecurrenceField,
+    StatusField,
 )
-from .converters.recurrence import RecurrenceAttrConverter
 from .filters import and_, ne
 
 
@@ -25,13 +24,13 @@ class TaskListNotSpecifiedError(Exception):
     """TaskList id must be set before create task"""
 
 
-class Resource(BaseConvertableObject, ABC):
+class Resource(BaseConvertableFieldsObject, ABC):
     """Base Resource for any other"""
 
     ENDPOINT = ""
-    ATTRIBUTES = ()
 
-    def __init__(self, client):
+    def __init__(self, client, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._client = client
 
     def create(self):
@@ -76,17 +75,11 @@ class TaskList(Resource):
     """Represent a list of tasks"""
 
     ENDPOINT = "todo/lists"
-    ATTRIBUTES = (
-        AttributeConverter("id", "_id"),
-        AttributeConverter("displayName", "name"),
-        AttributeConverter("isShared", "_is_shared"),
-        AttributeConverter("isOwner", "_is_owner"),
-        AttributeConverter("wellknownListName", "_well_known_name"),
-    )
-
-    def __init__(self, client, name: str):
-        super().__init__(client)
-        self.name = name
+    _id = Attribute("id")
+    name = Attribute("displayName")
+    _is_shared = Attribute("isShared")
+    _is_owner = Attribute("isOwner")
+    _well_known_name = Attribute("wellknownListName")
 
     def __repr__(self):
         return f"<TaskList '{self.name}'>"
@@ -111,49 +104,24 @@ class Task(Resource):
     """Represent a task."""
 
     ENDPOINT = "tasks"
-    ATTRIBUTES = (
-        AttributeConverter("id", "_id"),
-        ContentAttrConverter("body", "body"),
-        StatusAttrConverter("status", "status"),
-        "title",
-        RecurrenceAttrConverter("recurrence", "recurrence"),
-        ImportanceAttrConverter("importance", "importance"),
-        AttributeConverter("isReminderOn", "is_reminder_on"),
-        IsoTimeAttrConverter("createdDateTime", "created_datetime"),
-        DatetimeAttrConverter("dueDateTime", "due_datetime"),
-        DatetimeAttrConverter("completedDateTime", "completed_datetime"),
-        IsoTimeAttrConverter("lastModifiedDateTime", "last_modified_datetime"),
-        DatetimeAttrConverter("reminderDateTime", "reminder_datetime"),
-    )
+
+    _id = Attribute("id")
+    body = Content("body")
+    title = Attribute("title")
+    status = StatusField("status")
+    importance = ImportanceField("importance")
+    recurrence = RecurrenceField("recurrence")
+    is_reminder_on = Attribute("isReminderOn")
+    created_datetime = IsoTime("createdDateTime")
+    due_datetime = Datetime("dueDateTime")
+    completed_datetime = Datetime("completedDateTime")
+    last_modified_datetime = IsoTime("lastModifiedDateTime")
+    reminder_datetime = Datetime("reminderDateTime")
 
     def __init__(
-        self,
-        client,
-        title: str,
-        body: str = None,
-        status: Status = None,
-        importance: Importance = None,
-        recurrence: dict = None,
-        is_reminder_on: bool = False,
-        created_datetime: datetime = None,
-        due_datetime: datetime = None,
-        completed_datetime: datetime = None,
-        last_modified_datetime: datetime = None,
-        reminder_datetime: datetime = None,
-        task_list: TaskList = None,
+        self, *args, task_list: TaskList = None, **kwargs,
     ):
-        super().__init__(client)
-        self.body = body
-        self.title = title
-        self.status = status
-        self.importance = importance
-        self.recurrence = recurrence
-        self.is_reminder_on = is_reminder_on
-        self.created_datetime = created_datetime
-        self.due_datetime = due_datetime
-        self.completed_datetime = completed_datetime
-        self.last_modified_datetime = last_modified_datetime
-        self.reminder_datetime = reminder_datetime
+        super().__init__(*args, **kwargs)
         self.task_list = task_list
 
     def __repr__(self):

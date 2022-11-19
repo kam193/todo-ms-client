@@ -1,7 +1,6 @@
 from abc import ABC
 
-from .converters import BaseConverter
-from .converters.field import Field
+from .converters import BaseConverter, Field
 
 
 class BaseConvertableObject(ABC):
