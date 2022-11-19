@@ -1,10 +1,9 @@
-from todoms.attributes import RecurrencePatternType
+from todoms.attributes import RecurrencePatternType, Weekday
 from todoms.recurrence.patterns import (
     BaseRecurrencePattern,
     Daily,
     MonthlyAbsolute,
     MonthlyRelative,
-    Weekday,
     Weekly,
     YearlyAbsolute,
     YearlyRelative,
@@ -12,13 +11,15 @@ from todoms.recurrence.patterns import (
 
 
 def test_base_pattern_to_dict():
-    pattern = BaseRecurrencePattern(RecurrencePatternType.WEEKLY, 101)
+    pattern = BaseRecurrencePattern(
+        _pattern_type=RecurrencePatternType.WEEKLY, interval=101
+    )
 
     assert pattern.to_dict() == {"type": "weekly", "interval": 101}
 
 
 def test_daily_recurrence_pattern_to_dict():
-    pattern = Daily(3)
+    pattern = Daily(interval=3)
 
     assert pattern.to_dict() == {"type": "daily", "interval": 3}
 

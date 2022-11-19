@@ -1,47 +1,28 @@
-from datetime import datetime
+from todoms.converters.field import Attribute, Date, RecurrenceRangeTypeField
 
 from ..attributes import RecurrenceRangeType
-from ..convertable import BaseConvertableObject
-from ..converters.basic import (
-    AttributeConverter,
-    DateAttrConverter,
-    RecurrenceRangeTypeAttrConverter,
-)
+from ..convertable import BaseConvertableFieldsObject
 
 
-class BaseRecurrenceRange(BaseConvertableObject):
-    ATTRIBUTES = (
-        RecurrenceRangeTypeAttrConverter("type", "_range_type"),
-        DateAttrConverter("startDate", "start_date"),
-    )
-
-    def __init__(self, range_type: RecurrenceRangeType, start_date: datetime):
-        self._range_type = range_type
-        self.start_date = start_date
+class BaseRecurrenceRange(BaseConvertableFieldsObject):
+    _range_type = RecurrenceRangeTypeField("type")
+    start_date = Date("startDate")
 
 
 class EndDate(BaseRecurrenceRange):
-    ATTRIBUTES = (
-        *BaseRecurrenceRange.ATTRIBUTES,
-        DateAttrConverter("endDate", "end_date"),
-    )
+    end_date = Date("endDate")
 
-    def __init__(self, start_date: datetime, end_date: datetime):
-        super().__init__(RecurrenceRangeType.END_DATE, start_date)
-        self.end_date = end_date
+    def __init__(self, *args, **kwargs):
+        super().__init__(_range_type=RecurrenceRangeType.END_DATE, *args, **kwargs)
 
 
 class NoEnd(BaseRecurrenceRange):
-    def __init__(self, start_date: datetime):
-        super().__init__(RecurrenceRangeType.NO_END, start_date)
+    def __init__(self, *args, **kwargs):
+        super().__init__(_range_type=RecurrenceRangeType.NO_END, *args, **kwargs)
 
 
 class Numbered(BaseRecurrenceRange):
-    ATTRIBUTES = (
-        *BaseRecurrenceRange.ATTRIBUTES,
-        AttributeConverter("numberOfOccurrences", "occurrences"),
-    )
+    occurrences = Attribute("numberOfOccurrences")
 
-    def __init__(self, start_date: datetime, occurrences: int):
-        super().__init__(RecurrenceRangeType.NUMBERED, start_date)
-        self.occurrences = occurrences
+    def __init__(self, *args, **kwargs):
+        super().__init__(_range_type=RecurrenceRangeType.NUMBERED, *args, **kwargs)

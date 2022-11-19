@@ -31,6 +31,9 @@ class Field(ABC):
     def __set__(self, instance, value):
         self._set_value(instance, value)
 
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} [{self.name}]>"
+
     def from_dict(self, instance, data: dict):
         if self.dict_name not in data:
             return

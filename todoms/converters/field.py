@@ -16,7 +16,6 @@ from .basic import (
     StatusAttrConverter,
     WeekdayAttrConverter,
 )
-from .recurrence import RecurrenceAttrConverter
 
 
 class Attribute(Field):
@@ -37,10 +36,6 @@ class IsoTime(Field):
 
 class Date(Field):
     _converter = DateAttrConverter
-
-
-class RecurrenceField(Field):
-    _converter = RecurrenceAttrConverter
 
 
 class List(Field):

@@ -15,7 +15,7 @@ class ComplexObjectWithConverting(BaseConvertableFieldsObject):
     new = Content("old")
 
 
-class TestBaseConvertableObject:
+class TestBaseConvertableFieldsObject:
     def test_convertable_object_creates_obj_from_data(self):
         obj = SimpleObject.from_dict(
             {"name": "name-1", "other": "val-1", "not_attr": "ignore"}

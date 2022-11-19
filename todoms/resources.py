@@ -10,9 +10,9 @@ from .converters.field import (
     Datetime,
     ImportanceField,
     IsoTime,
-    RecurrenceField,
     StatusField,
 )
+from .converters.recurrence import RecurrenceField
 from .filters import and_, ne
 
 

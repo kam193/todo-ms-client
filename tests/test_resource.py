@@ -8,7 +8,7 @@ from todoms.converters.field import Attribute
 from todoms.filters import and_, eq
 from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import (
-    ContentAttrConverter,
+    Content,
     Resource,
     ResourceAlreadyCreatedError,
     Task,
@@ -97,12 +97,8 @@ class TestDefaultResource:
     def test_default_resource_update_client_call(self, client, requests_mock):
         class ComplexResource(Resource):
             ENDPOINT = "fake"
-            ATTRIBUTES = (ContentAttrConverter("old", "new"), "id")
-
-            def __init__(self, client, new, id):
-                super().__init__(client)
-                self.new = new
-                self._id = id
+            id = Attribute("id")
+            new = Content("old")
 
         resource = ComplexResource(client, new="data", id="id-1")
 

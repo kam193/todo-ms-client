@@ -6,7 +6,7 @@ from todoms.recurrence.ranges import BaseRecurrenceRange, EndDate, NoEnd, Number
 
 def test_base_range_to_dict():
     range = BaseRecurrenceRange(
-        RecurrenceRangeType.END_DATE, start_date=date(2020, 4, 8)
+        _range_type=RecurrenceRangeType.END_DATE, start_date=date(2020, 4, 8)
     )
 
     assert range.to_dict() == {"type": "endDate", "startDate": "2020-04-08"}

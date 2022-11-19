@@ -71,7 +71,7 @@ class TestRecurrencePatternConverter:
 
     def test_recurrence_pattern_back_converter(self):
         converter = RecurrencePatternAttrConverter("", "")
-        data = patterns.Daily(3)
+        data = patterns.Daily(interval=3)
 
         assert converter.back_converter(data) == {"type": "daily", "interval": 3}
 
@@ -163,7 +163,9 @@ class TestRecurrenceConverter:
 
     def test_recurrence_back_converter(self):
         converter = RecurrenceAttrConverter("", "")
-        data = Recurrence(patterns.Daily(1), ranges.NoEnd(date(2020, 5, 16)))
+        data = Recurrence(
+            patterns.Daily(interval=1), ranges.NoEnd(start_date=date(2020, 5, 16))
+        )
         assert converter.back_converter(data) == {
             "range": {"type": "noEnd", "startDate": "2020-05-16"},
             "pattern": {"type": "daily", "interval": 1},
