@@ -3,12 +3,10 @@ from typing import Any
 
 
 class BaseConverter(ABC):
-    @classmethod
     @abstractmethod
-    def obj_converter(cls, data: Any) -> Any:
+    def obj_converter(self, data: Any) -> Any:
         pass
 
-    @classmethod
     @abstractmethod
-    def back_converter(cls, data: Any) -> Any:
+    def back_converter(self, data: Any) -> Any:
         pass

@@ -1,72 +1,55 @@
 # TODO: Type hints
 
+from enum import Enum
 from typing import Type, Union
 
 from ..converters import BaseConverter
 from ..converters.basic import (
     AttributeConverter,
-    ContentAttrConverter,
-    DateAttrConverter,
-    DatetimeAttrConverter,
-    ImportanceAttrConverter,
-    IsoTimeAttrConverter,
+    ContentConverter,
+    DateConverter,
+    DatetimeConverter,
+    EnumConverter,
+    IsoTimeConverter,
     ListConverter,
-    RecurrencePatternTypeAttrConverter,
-    RecurrenceRangeTypeAttrConverter,
-    StatusAttrConverter,
-    WeekdayAttrConverter,
 )
 from . import Field
 
 
 class Attribute(Field):
-    _converter = AttributeConverter
+    _converter = AttributeConverter()
 
 
 class Datetime(Field):
-    _converter = DatetimeAttrConverter
+    _converter = DatetimeConverter()
 
 
 class Content(Field):
-    _converter = ContentAttrConverter
+    _converter = ContentConverter()
 
 
 class IsoTime(Field):
-    _converter = IsoTimeAttrConverter
+    _converter = IsoTimeConverter()
 
 
 class Date(Field):
-    _converter = DateAttrConverter
+    _converter = DateConverter()
 
 
 class List(Field):
-    _converter = ListConverter
+    _converter = None
 
-    def __init__(
-        self, dict_name: str, inner_field: Union[Type[Field], Type[BaseConverter]]
-    ):
+    def __init__(self, dict_name: str, inner_field: Union[Type[Field], BaseConverter]):
         super().__init__(dict_name)
-        if issubclass(inner_field, Field):
-            self._converter = ListConverter(inner_field._converter)
-        else:
+        if isinstance(inner_field, BaseConverter):
             self._converter = ListConverter(inner_field)
+        else:
+            self._converter = ListConverter(inner_field._converter)
 
 
-class ImportanceField(Field):
-    _converter = ImportanceAttrConverter
+class EnumField(Field):
+    _converter = None
 
-
-class StatusField(Field):
-    _converter = StatusAttrConverter
-
-
-class RecurrencePatternTypeField(Field):
-    _converter = RecurrencePatternTypeAttrConverter
-
-
-class RecurrenceRangeTypeField(Field):
-    _converter = RecurrenceRangeTypeAttrConverter
-
-
-class WeekdayField(Field):
-    _converter = WeekdayAttrConverter
+    def __init__(self, dict_name: str, enum_class: Type[Enum]):
+        super().__init__(dict_name)
+        self._converter = EnumConverter(enum_class)

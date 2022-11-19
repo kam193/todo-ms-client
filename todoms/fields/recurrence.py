@@ -1,6 +1,6 @@
-from ..converters.recurrence import RecurrenceAttrConverter
+from ..converters.recurrence import RecurrenceConverter
 from . import Field
 
 
 class RecurrenceField(Field):
-    _converter = RecurrenceAttrConverter
+    _converter = RecurrenceConverter()

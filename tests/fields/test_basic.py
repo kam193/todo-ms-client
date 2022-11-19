@@ -1,3 +1,5 @@
+from enum import Enum
+
 import pytest
 
 from todoms.convertable import BaseConvertableFieldsObject
@@ -7,25 +9,22 @@ from todoms.fields.basic import (
     Content,
     Date,
     Datetime,
+    EnumField,
     Field,
-    ImportanceField,
     IsoTime,
-    StatusField,
 )
 
 
 class DummyConverter(BaseConverter):
-    @classmethod
-    def obj_converter(cls, data):
+    def obj_converter(self, data):
         return f"some_object+{data}"
 
-    @classmethod
-    def back_converter(cls, data):
+    def back_converter(self, data):
         return f"some_back+{data}"
 
 
 class DummyField(Field):
-    _converter = DummyConverter
+    _converter = DummyConverter()
 
 
 class ExampleClass:
@@ -84,8 +83,6 @@ class TestCommonBehavior:
         Content,
         IsoTime,
         Date,
-        ImportanceField,
-        StatusField,
     ]
 
     def get_container_class(self, field_class):
@@ -112,3 +109,29 @@ class TestCommonBehavior:
     @pytest.mark.parametrize("data", [{}, None])
     def test_field_to_dict_when_no_data(self, data, field_class):
         assert self.to_dict(data, field_class) is None
+
+
+class ExampleEnum(Enum):
+    a = "aa"
+    b = "bb"
+
+
+class ExampleEnumClass:
+    f1 = EnumField("f1", ExampleEnum)
+
+
+class TestEnumField:
+    def test_field_from_dict(self):
+        obj = ExampleEnumClass()
+
+        ExampleEnumClass.f1.from_dict(obj, {"f1": "aa"})
+        assert obj.f1 == ExampleEnum.a
+
+        ExampleEnumClass.f1.from_dict(obj, {"f1": "bb"})
+        assert obj.f1 == ExampleEnum.b
+
+    def test_field_to_dict(self):
+        obj = ExampleEnumClass()
+        obj.f1 = ExampleEnum.a
+
+        assert ExampleEnumClass.f1.to_dict(obj) == {"f1": "aa"}

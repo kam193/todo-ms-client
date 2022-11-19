@@ -2,16 +2,9 @@ from abc import ABC
 
 from furl import furl
 
-from .attributes import Status
+from .attributes import Importance, Status
 from .convertable import BaseConvertableFieldsObject
-from .fields.basic import (
-    Attribute,
-    Content,
-    Datetime,
-    ImportanceField,
-    IsoTime,
-    StatusField,
-)
+from .fields.basic import Attribute, Content, Datetime, EnumField, IsoTime
 from .fields.recurrence import RecurrenceField
 from .filters import and_, ne
 
@@ -108,8 +101,8 @@ class Task(Resource):
     _id = Attribute("id")
     body = Content("body")
     title = Attribute("title")
-    status = StatusField("status")
-    importance = ImportanceField("importance")
+    status = EnumField("status", Status)
+    importance = EnumField("importance", Importance)
     recurrence = RecurrenceField("recurrence")
     is_reminder_on = Attribute("isReminderOn")
     created_datetime = IsoTime("createdDateTime")

@@ -1,11 +1,13 @@
+from todoms.converters.basic import EnumConverter
+
 from ..attributes import RecurrencePatternType, Weekday
 from ..convertable import BaseConvertableFieldsObject
-from ..fields.basic import Attribute, List, RecurrencePatternTypeField, WeekdayField
+from ..fields.basic import Attribute, EnumField, List
 
 
 class BaseRecurrencePattern(BaseConvertableFieldsObject):
     interval = Attribute("interval")
-    _pattern_type = RecurrencePatternTypeField("type")
+    _pattern_type = EnumField("type", RecurrencePatternType)
 
 
 class Daily(BaseRecurrencePattern):
@@ -14,8 +16,8 @@ class Daily(BaseRecurrencePattern):
 
 
 class Weekly(BaseRecurrencePattern):
-    week_start = WeekdayField("firstDayOfWeek")
-    days_of_week = List("daysOfWeek", WeekdayField)
+    week_start = EnumField("firstDayOfWeek", Weekday)
+    days_of_week = List("daysOfWeek", EnumConverter(Weekday))
 
     def __init__(self, *args, week_start: Weekday = Weekday.SUNDAY, **kwargs):
         super().__init__(
@@ -36,7 +38,7 @@ class MonthlyAbsolute(BaseRecurrencePattern):
 
 
 class MonthlyRelative(BaseRecurrencePattern):
-    days_of_week = List("daysOfWeek", WeekdayField)
+    days_of_week = List("daysOfWeek", EnumConverter(Weekday))
 
     def __init__(self, *args, **kwargs):
         super().__init__(
@@ -55,7 +57,7 @@ class YearlyAbsolute(BaseRecurrencePattern):
 
 
 class YearlyRelative(BaseRecurrencePattern):
-    days_of_week = List("daysOfWeek", WeekdayField)
+    days_of_week = List("daysOfWeek", EnumConverter(Weekday))
     month = Attribute("month")
 
     def __init__(self, *args, **kwargs):

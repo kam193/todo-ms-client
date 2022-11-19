@@ -1,38 +1,22 @@
 from abc import ABC
-from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
 from typing import Any, List
 
 from dateutil import parser, tz
 
-from ..attributes import (
-    Importance,
-    RecurrencePatternType,
-    RecurrenceRangeType,
-    Status,
-    Weekday,
-)
 from . import BaseConverter
 
 
-@dataclass
 class AttributeConverter(BaseConverter):
-    original_name: str
-    local_name: str
-
-    @classmethod
-    def obj_converter(cls, data: Any) -> Any:
+    def obj_converter(self, data: Any) -> Any:
         return data
 
-    @classmethod
-    def back_converter(cls, data: Any) -> Any:
+    def back_converter(self, data: Any) -> Any:
         return data
 
 
-@dataclass
-class DatetimeAttrConverter(AttributeConverter):
-    @classmethod
+class DatetimeConverter(AttributeConverter):
     def obj_converter(self, data: dict) -> datetime:
         if not data:
             return None
@@ -40,7 +24,6 @@ class DatetimeAttrConverter(AttributeConverter):
         date = parser.parse(data["dateTime"])
         return datetime.combine(date.date(), date.time(), tz.gettz(data["timeZone"]))
 
-    @classmethod
     def back_converter(self, data: datetime) -> dict:
         if not data:
             return None
@@ -51,39 +34,30 @@ class DatetimeAttrConverter(AttributeConverter):
         }
 
 
-@dataclass
-class ContentAttrConverter(AttributeConverter):
-    @classmethod
+class ContentConverter(AttributeConverter):
     def obj_converter(self, data: dict) -> str:
         if not data:
             return ""
         return data["content"]
 
-    @classmethod
     def back_converter(self, data: str) -> dict:
         return {"content": data, "contentType": "html"}
 
 
-@dataclass
-class IsoTimeAttrConverter(AttributeConverter):
-    @classmethod
+class IsoTimeConverter(AttributeConverter):
     def obj_converter(self, data: str) -> datetime:
         return parser.isoparse(data)
 
-    @classmethod
     def back_converter(self, data: datetime) -> str:
         if not data:
             return None
         return data.astimezone(tz.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-@dataclass
-class DateAttrConverter(AttributeConverter):
-    @classmethod
+class DateConverter(AttributeConverter):
     def obj_converter(self, data: str) -> date:
         return parser.parse(data).date()
 
-    @classmethod
     def back_converter(self, data: date) -> str:
         if not data:
             return None
@@ -113,43 +87,18 @@ class ListConverter(AttributeConverter):
         return self._converter.local_name
 
 
-@dataclass
-class EnumAttrConverter(AttributeConverter, ABC):
+class EnumConverter(AttributeConverter, ABC):
     _ENUM = None
 
-    @classmethod
+    def __init__(self, enum: Enum):
+        self._ENUM = enum
+
     def obj_converter(self, data: str) -> Enum:
         if not data:
             return None
         return self._ENUM(data)
 
-    @classmethod
     def back_converter(self, data: Enum) -> str:
         if not data:
             return None
         return data.value
-
-
-@dataclass
-class ImportanceAttrConverter(EnumAttrConverter):
-    _ENUM = Importance
-
-
-@dataclass
-class StatusAttrConverter(EnumAttrConverter):
-    _ENUM = Status
-
-
-@dataclass
-class RecurrencePatternTypeAttrConverter(EnumAttrConverter):
-    _ENUM = RecurrencePatternType
-
-
-@dataclass
-class RecurrenceRangeTypeAttrConverter(EnumAttrConverter):
-    _ENUM = RecurrenceRangeType
-
-
-@dataclass
-class WeekdayAttrConverter(EnumAttrConverter):
-    _ENUM = Weekday

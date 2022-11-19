@@ -3,9 +3,9 @@ from datetime import date
 import pytest
 
 from todoms.converters.recurrence import (
-    RecurrenceAttrConverter,
-    RecurrencePatternAttrConverter,
-    RecurrenceRangeAttrConverter,
+    RecurrenceConverter,
+    RecurrencePatternConverter,
+    RecurrenceRangeConverter,
 )
 from todoms.recurrence import Recurrence, patterns, ranges
 
@@ -57,26 +57,26 @@ class TestRecurrencePatternConverter:
         ],
     )
     def test_recurrence_patterns_converter(self, data, expected_class):
-        converter = RecurrencePatternAttrConverter("", "")
+        converter = RecurrencePatternConverter()
         assert isinstance(converter.obj_converter(data), expected_class) is True
 
     def test_recurrence_patterns_converter_when_invalid(self):
-        converter = RecurrencePatternAttrConverter("", "")
+        converter = RecurrencePatternConverter()
         with pytest.raises(ValueError):
             converter.obj_converter({"type": "some invalid"})
 
     def test_recurrence_patterns_converter_when_none(self):
-        converter = RecurrencePatternAttrConverter("", "")
+        converter = RecurrencePatternConverter()
         assert converter.obj_converter(None) is None
 
     def test_recurrence_pattern_back_converter(self):
-        converter = RecurrencePatternAttrConverter("", "")
+        converter = RecurrencePatternConverter()
         data = patterns.Daily(interval=3)
 
         assert converter.back_converter(data) == {"type": "daily", "interval": 3}
 
     def test_recurrence_pattern_back_converter_when_none(self):
-        converter = RecurrencePatternAttrConverter("", "")
+        converter = RecurrencePatternConverter()
         assert converter.back_converter(None) is None
 
 
@@ -104,20 +104,20 @@ class TestRecurrenceRangeConverter:
         ],
     )
     def test_recurrence_range_converter(self, data, expected_class):
-        converter = RecurrenceRangeAttrConverter("", "")
+        converter = RecurrenceRangeConverter()
         assert isinstance(converter.obj_converter(data), expected_class) is True
 
     def test_recurrence_range_converter_when_invalid(self):
-        converter = RecurrenceRangeAttrConverter("", "")
+        converter = RecurrenceRangeConverter()
         with pytest.raises(ValueError):
             converter.obj_converter({"type": "invalid"})
 
     def test_recurrence_range_converter_when_none(self):
-        converter = RecurrenceRangeAttrConverter("", "")
+        converter = RecurrenceRangeConverter()
         assert converter.obj_converter(None) is None
 
     def test_recurrence_range_back_converter(self):
-        converter = RecurrenceRangeAttrConverter("", "")
+        converter = RecurrenceRangeConverter()
         data = ranges.EndDate(start_date=date(2020, 4, 8), end_date=date(2022, 4, 8),)
         assert converter.back_converter(data) == {
             "type": "endDate",
@@ -126,13 +126,13 @@ class TestRecurrenceRangeConverter:
         }
 
     def test_recurrence_range_back_converter_when_none(self):
-        converter = RecurrenceRangeAttrConverter("", "")
+        converter = RecurrenceRangeConverter()
         assert converter.back_converter(None) is None
 
 
 class TestRecurrenceConverter:
     def test_recurrence_converter(self):
-        converter = RecurrenceAttrConverter("", "")
+        converter = RecurrenceConverter()
 
         data = {
             "pattern": {
@@ -158,11 +158,11 @@ class TestRecurrenceConverter:
         assert isinstance(recurrence.range, ranges.NoEnd) is True
 
     def test_recurrence_converter_when_none(self):
-        converter = RecurrenceAttrConverter("", "")
+        converter = RecurrenceConverter()
         assert converter.obj_converter(None) is None
 
     def test_recurrence_back_converter(self):
-        converter = RecurrenceAttrConverter("", "")
+        converter = RecurrenceConverter()
         data = Recurrence(
             patterns.Daily(interval=1), ranges.NoEnd(start_date=date(2020, 5, 16))
         )
@@ -172,5 +172,5 @@ class TestRecurrenceConverter:
         }
 
     def test_recurrence_back_converter_when_none(self):
-        converter = RecurrenceAttrConverter("", "")
+        converter = RecurrenceConverter()
         assert converter.back_converter(None) is None

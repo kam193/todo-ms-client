@@ -1,11 +1,11 @@
-from todoms.fields.basic import Attribute, Date, RecurrenceRangeTypeField
+from todoms.fields.basic import Attribute, Date, EnumField
 
 from ..attributes import RecurrenceRangeType
 from ..convertable import BaseConvertableFieldsObject
 
 
 class BaseRecurrenceRange(BaseConvertableFieldsObject):
-    _range_type = RecurrenceRangeTypeField("type")
+    _range_type = EnumField("type", RecurrenceRangeType)
     start_date = Date("startDate")
 
 

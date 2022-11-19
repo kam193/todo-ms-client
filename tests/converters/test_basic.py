@@ -7,32 +7,32 @@ from dateutil import tz
 
 from todoms.converters.basic import (
     AttributeConverter,
-    ContentAttrConverter,
-    DateAttrConverter,
-    DatetimeAttrConverter,
-    EnumAttrConverter,
-    IsoTimeAttrConverter,
+    ContentConverter,
+    DateConverter,
+    DatetimeConverter,
+    EnumConverter,
+    IsoTimeConverter,
     ListConverter,
 )
 
 
 class TestAttributeConverter:
     def test_default_converter_returns_input(self):
-        attr_converter = AttributeConverter("original", "new name")
+        attr_converter = AttributeConverter()
         data = Mock()
 
         assert attr_converter.obj_converter(data) == data
 
     def test_default_converter_back_returns_input(self):
-        attr_converter = AttributeConverter("original", "new name")
+        attr_converter = AttributeConverter()
         data = Mock()
 
         assert attr_converter.back_converter(data) == data
 
 
-class TestDatetimeAttrConverter:
-    def test_datetime_attr_converter_from(self):
-        converter = DatetimeAttrConverter("", "")
+class TestDatetimeConverter:
+    def test_datetime_converter_from(self):
+        converter = DatetimeConverter()
         data = {"dateTime": "2020-05-21T10:00:00.0000000", "timeZone": "America/Bogota"}
 
         result = converter.obj_converter(data)
@@ -43,12 +43,12 @@ class TestDatetimeAttrConverter:
         assert expected_utc == result_utc
 
     @pytest.mark.parametrize("data", [{}, None])
-    def test_datetime_attr_converter_when_no_data(self, data):
-        converter = DatetimeAttrConverter("", "")
+    def test_datetime_converter_when_no_data(self, data):
+        converter = DatetimeConverter()
         assert converter.obj_converter(data) is None
 
-    def test_datetime_attr_converter_back(self):
-        converter = DatetimeAttrConverter("", "")
+    def test_datetime_converter_back(self):
+        converter = DatetimeConverter()
         data = datetime(2020, 5, 21, 15, tzinfo=tz.UTC)
 
         result = converter.back_converter(data)
@@ -58,66 +58,66 @@ class TestDatetimeAttrConverter:
         assert expected == result
 
     @pytest.mark.parametrize("data", [{}, None])
-    def test_datetime_attr_converter_back_when_no_data(self, data):
-        converter = DatetimeAttrConverter("", "")
+    def test_datetime_converter_back_when_no_data(self, data):
+        converter = DatetimeConverter()
         assert converter.back_converter(data) is None
 
 
-class TestContentAttrConverter:
+class TestContentConverter:
     @pytest.mark.parametrize("data", [{}, None])
-    def test_content_attr_converter_when_no_data(self, data):
-        converter = ContentAttrConverter("", "")
+    def test_content_converter_when_no_data(self, data):
+        converter = ContentConverter()
         assert converter.obj_converter(data) == ""
 
-    def test_content_attr_converter(self):
-        converter = ContentAttrConverter("", "")
+    def test_content_converter(self):
+        converter = ContentConverter()
         data = {"content": "The description"}
         assert converter.obj_converter(data) == "The description"
 
-    def test_content_attr_converter_back(self):
-        converter = ContentAttrConverter("", "")
+    def test_content_converter_back(self):
+        converter = ContentConverter()
         expected = {"content": "The description", "contentType": "html"}
         assert converter.back_converter("The description") == expected
 
-    def test_content_attr_converter_back_when_no_data(self):
-        converter = ContentAttrConverter("", "")
+    def test_content_converter_back_when_no_data(self):
+        converter = ContentConverter()
         expected = {"content": None, "contentType": "html"}
         assert converter.back_converter(None) == expected
 
 
-class TestIsoTimeAttrConverter:
-    def test_isotime_attr_converter(self):
-        converter = IsoTimeAttrConverter("", "")
+class TestIsoTimeConverter:
+    def test_isotime_converter(self):
+        converter = IsoTimeConverter()
         data = "2020-01-01T18:00:00Z"
         expected_time = datetime(2020, 1, 1, 18, tzinfo=timezone.utc)
 
         assert converter.obj_converter(data) == expected_time
 
-    def test_isotime_attr_converter_back(self):
-        converter = IsoTimeAttrConverter("", "")
+    def test_isotime_converter_back(self):
+        converter = IsoTimeConverter()
         data = datetime(2020, 1, 1, 18, tzinfo=tz.gettz("UTC+2"))
         assert converter.back_converter(data) == "2020-01-01T16:00:00Z"
 
-    def test_isotime_attr_converter_back_when_no_data(self):
-        converter = IsoTimeAttrConverter("", "")
+    def test_isotime_converter_back_when_no_data(self):
+        converter = IsoTimeConverter()
         assert converter.back_converter(None) is None
 
 
-class TestDateAttrConverter:
-    def test_date_attr_converter(self):
-        converter = DateAttrConverter("", "")
+class TestDateConverter:
+    def test_date_converter(self):
+        converter = DateConverter()
         data = "2020-01-01"
         expected_time = date(2020, 1, 1)
 
         assert converter.obj_converter(data) == expected_time
 
-    def test_date_attr_converter_back(self):
-        converter = DateAttrConverter("", "")
+    def test_date_converter_back(self):
+        converter = DateConverter()
         data = date(2020, 1, 1)
         assert converter.back_converter(data) == "2020-01-01"
 
-    def test_date_attr_converter_back_when_no_data(self):
-        converter = DateAttrConverter("", "")
+    def test_date_converter_back_when_no_data(self):
+        converter = DateConverter()
         assert converter.back_converter(None) is None
 
 
@@ -128,35 +128,26 @@ class ExampleEnum(Enum):
 
 @pytest.fixture
 def enum_converter():
-    class ExampleEnumConverter(EnumAttrConverter):
-        _ENUM = ExampleEnum
-
-    return ExampleEnumConverter("", "")
+    return EnumConverter(enum=ExampleEnum)
 
 
-class TestEnumAttrConverter:
+class TestEnumConverter:
     @pytest.mark.parametrize(
         "data,expected",
         [("val1", ExampleEnum.VAL_1), ("val2", ExampleEnum.VAL_2), (None, None)],
     )
-    def test_enum_attr_converter(self, enum_converter, data, expected):
+    def test_enum_converter(self, enum_converter, data, expected):
         assert enum_converter.obj_converter(data) == expected
 
     @pytest.mark.parametrize(
         "data,expected",
         [(ExampleEnum.VAL_1, "val1"), (ExampleEnum.VAL_2, "val2"), (None, None)],
     )
-    def test_enum_attr_back_converter(self, enum_converter, data, expected):
+    def test_enum_back_converter(self, enum_converter, data, expected):
         assert enum_converter.back_converter(data) == expected
 
 
 class TestListConverter:
-    def test_list_converter_proxy_attribute_names(self):
-        converter = ListConverter(AttributeConverter("original", "local"))
-
-        assert converter.original_name == "original"
-        assert converter.local_name == "local"
-
     @pytest.mark.parametrize(
         "data,expected",
         [
