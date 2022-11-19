@@ -1,5 +1,5 @@
 from todoms.convertable import BaseConvertableFieldsObject
-from todoms.converters.field import Attribute, Content
+from todoms.fields.basic import Attribute, Content
 
 
 class SimpleObject(BaseConvertableFieldsObject):

@@ -1,4 +1,4 @@
-from todoms.converters.field import Attribute, Date, RecurrenceRangeTypeField
+from todoms.fields.basic import Attribute, Date, RecurrenceRangeTypeField
 
 from ..attributes import RecurrenceRangeType
 from ..convertable import BaseConvertableFieldsObject

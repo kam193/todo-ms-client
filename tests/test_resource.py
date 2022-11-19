@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import pytest
 
 from todoms.attributes import Importance, Status
-from todoms.converters.field import Attribute
+from todoms.fields.basic import Attribute
 from todoms.filters import and_, eq
 from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import (

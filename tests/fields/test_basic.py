@@ -2,7 +2,7 @@ import pytest
 
 from todoms.convertable import BaseConvertableFieldsObject
 from todoms.converters import BaseConverter
-from todoms.converters.field import (
+from todoms.fields.basic import (
     Attribute,
     Content,
     Date,
@@ -12,17 +12,6 @@ from todoms.converters.field import (
     IsoTime,
     StatusField,
 )
-
-
-@pytest.fixture
-def prepare_container():
-    def _prepare_container(field_class):
-        class FieldContainer(BaseConvertableFieldsObject):
-            field = field_class("old")
-
-        return FieldContainer()
-
-    return _prepare_container
 
 
 class DummyConverter(BaseConverter):
@@ -121,5 +110,5 @@ class TestCommonBehavior:
 
     @pytest.mark.parametrize("field_class", field_classes)
     @pytest.mark.parametrize("data", [{}, None])
-    def test_datetime_to_dict_when_no_data(self, data, field_class):
+    def test_field_to_dict_when_no_data(self, data, field_class):
         assert self.to_dict(data, field_class) is None

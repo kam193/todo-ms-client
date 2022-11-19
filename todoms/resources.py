@@ -4,7 +4,7 @@ from furl import furl
 
 from .attributes import Status
 from .convertable import BaseConvertableFieldsObject
-from .converters.field import (
+from .fields.basic import (
     Attribute,
     Content,
     Datetime,
@@ -12,7 +12,7 @@ from .converters.field import (
     IsoTime,
     StatusField,
 )
-from .converters.recurrence import RecurrenceField
+from .fields.recurrence import RecurrenceField
 from .filters import and_, ne
 
 

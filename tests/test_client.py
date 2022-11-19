@@ -1,7 +1,7 @@
 from pytest import fixture, mark, raises
 
 from todoms.client import ResourceNotFoundError, ResponseError
-from todoms.converters.field import Attribute
+from todoms.fields.basic import Attribute
 from todoms.resources import Resource
 
 from .utils.constants import API_BASE

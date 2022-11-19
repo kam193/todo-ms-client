@@ -2,8 +2,8 @@
 
 from typing import Type, Union
 
-from . import BaseConverter, Field
-from .basic import (
+from ..converters import BaseConverter
+from ..converters.basic import (
     AttributeConverter,
     ContentAttrConverter,
     DateAttrConverter,
@@ -16,6 +16,7 @@ from .basic import (
     StatusAttrConverter,
     WeekdayAttrConverter,
 )
+from . import Field
 
 
 class Attribute(Field):

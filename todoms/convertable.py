@@ -1,7 +1,7 @@
 import inspect
 from abc import ABC
 
-from .converters import Field
+from .fields import Field
 
 
 class BaseConvertableFieldsObject(ABC):

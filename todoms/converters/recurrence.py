@@ -1,6 +1,5 @@
 from ..attributes import RecurrencePatternType, RecurrenceRangeType
 from ..recurrence import Recurrence, patterns, ranges
-from . import Field
 from .basic import AttributeConverter
 
 
@@ -79,7 +78,3 @@ class RecurrenceAttrConverter(AttributeConverter):
             return None
 
         return data.to_dict()
-
-
-class RecurrenceField(Field):
-    _converter = RecurrenceAttrConverter

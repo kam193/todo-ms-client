@@ -1,6 +1,6 @@
 from ..attributes import RecurrencePatternType, Weekday
 from ..convertable import BaseConvertableFieldsObject
-from ..converters.field import Attribute, List, RecurrencePatternTypeField, WeekdayField
+from ..fields.basic import Attribute, List, RecurrencePatternTypeField, WeekdayField
 
 
 class BaseRecurrencePattern(BaseConvertableFieldsObject):
