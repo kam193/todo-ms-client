@@ -13,7 +13,10 @@ def test_base_range_to_dict():
 
 
 def test_end_date_to_dict():
-    range = EndDate(start_date=date(2020, 4, 8), end_date=date(2022, 4, 8),)
+    range = EndDate(
+        start_date=date(2020, 4, 8),
+        end_date=date(2022, 4, 8),
+    )
 
     assert range.to_dict() == {
         "type": "endDate",

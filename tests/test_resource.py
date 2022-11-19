@@ -71,14 +71,16 @@ def task_list(client):
 
 
 @pytest.mark.parametrize(
-    "resource,endpoint", [(TaskList, "todo/lists"), (Task, "tasks")],
+    "resource,endpoint",
+    [(TaskList, "todo/lists"), (Task, "tasks")],
 )
 def test_resource_has_proper_endpoint(resource, endpoint):
     assert resource.ENDPOINT == endpoint
 
 
 @pytest.mark.parametrize(
-    "resource,data", [(TaskList, TASK_LIST_EXAMPLE_DATA), (Task, TASK_EXAMPLE_DATA)],
+    "resource,data",
+    [(TaskList, TASK_LIST_EXAMPLE_DATA), (Task, TASK_EXAMPLE_DATA)],
 )
 def test_resource_is_proper_converted_back_to_dict(resource, data):
     obj = resource.from_dict(None, data)
@@ -190,7 +192,9 @@ class TestDefaultResource:
 
 
 class TestTaskListResource:
-    def test_create_tasklist_object_from_data(self,):
+    def test_create_tasklist_object_from_data(
+        self,
+    ):
         task_list = TaskList.from_dict(None, TASK_LIST_EXAMPLE_DATA)
 
         assert task_list.id == "id-1"

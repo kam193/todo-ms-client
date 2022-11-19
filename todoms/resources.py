@@ -112,7 +112,10 @@ class Task(Resource):
     reminder_datetime = Datetime("reminderDateTime")
 
     def __init__(
-        self, *args, task_list: TaskList = None, **kwargs,
+        self,
+        *args,
+        task_list: TaskList = None,
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.task_list = task_list

@@ -51,7 +51,8 @@ def test_list_resource_returns_all_when_parted(client, resource_class, requests_
         json={"value": [{"name": "res-2"}], "@odata.nextLink": "http://next/part/2"},
     )
     requests_mock.get(
-        "http://next/part/2", json={"value": [{"name": "res-3"}]},
+        "http://next/part/2",
+        json={"value": [{"name": "res-3"}]},
     )
 
     results = client.list(resource_class)
@@ -63,7 +64,8 @@ def test_list_resource_returns_all_when_parted(client, resource_class, requests_
 
 def test_list_use_custom_endpoint(client, resource_class, requests_mock):
     requests_mock.get(
-        f"{API_BASE}/my-endpoint/all", json={"value": [{"name": "res-1"}]},
+        f"{API_BASE}/my-endpoint/all",
+        json={"value": [{"name": "res-1"}]},
     )
 
     results = client.list(resource_class, endpoint="my-endpoint/all")
@@ -76,7 +78,8 @@ def test_list_resources_sends_filters(client, resource_class, requests_mock):
         json={"value": [{"name": "res-1"}], "@odata.nextLink": "http://next/part/1"},
     )
     requests_mock.get(
-        "http://next/part/1", json={"value": [{"name": "res-2"}]},
+        "http://next/part/1",
+        json={"value": [{"name": "res-2"}]},
     )
 
     results = client.list(resource_class, filter="test")
@@ -97,7 +100,8 @@ def test_list_resource_raises_on_http_error(
 
 def test_get_resource_returns_obj(client, resource_class, requests_mock):
     requests_mock.get(
-        f"{API_BASE}/{resource_class.ENDPOINT}/id-1", json={"name": "res-1"},
+        f"{API_BASE}/{resource_class.ENDPOINT}/id-1",
+        json={"name": "res-1"},
     )
     result = client.get(resource_class, "id-1")
 
@@ -107,7 +111,8 @@ def test_get_resource_returns_obj(client, resource_class, requests_mock):
 
 def test_get_uses_provided_endpoint(client, resource_class, requests_mock):
     requests_mock.get(
-        f"{API_BASE}/precreated-endpoint", json={"name": "res-1"},
+        f"{API_BASE}/precreated-endpoint",
+        json={"name": "res-1"},
     )
     result = client.get(resource_class, endpoint="precreated-endpoint")
 

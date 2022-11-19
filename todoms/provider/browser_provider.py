@@ -47,7 +47,7 @@ class WebBrowserProvider(AbstractProvider):
         """Run authorization workflow. Call webbrowser login, get response and token
 
         'local_port' - on this port we wait for redirection from sing-in page.
-        Address http://localhost:<local_port>/ must be allowed as redirect URL. """
+        Address http://localhost:<local_port>/ must be allowed as redirect URL."""
 
         redirect_url = f"http://localhost:{local_port}"
 

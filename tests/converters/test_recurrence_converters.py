@@ -118,7 +118,10 @@ class TestRecurrenceRangeConverter:
 
     def test_recurrence_range_back_converter(self):
         converter = RecurrenceRangeConverter()
-        data = ranges.EndDate(start_date=date(2020, 4, 8), end_date=date(2022, 4, 8),)
+        data = ranges.EndDate(
+            start_date=date(2020, 4, 8),
+            end_date=date(2022, 4, 8),
+        )
         assert converter.back_converter(data) == {
             "type": "endDate",
             "startDate": "2020-04-08",
