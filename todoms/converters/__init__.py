@@ -1,5 +1,14 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+from typing import Any
 
 
 class BaseConverter(ABC):
-    pass
+    @classmethod
+    @abstractmethod
+    def obj_converter(cls, data: Any) -> Any:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def back_converter(cls, data: Any) -> Any:
+        pass

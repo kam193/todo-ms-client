@@ -21,7 +21,7 @@ class RecurrencePatternAttrConverter(AttributeConverter):
         if not pattern_class:
             raise ValueError
 
-        return pattern_class.create_from_dict(data)
+        return pattern_class.from_dict(data)
 
     def back_converter(self, data: patterns.BaseRecurrencePattern) -> dict:
         if not data:
@@ -46,7 +46,7 @@ class RecurrenceRangeAttrConverter(AttributeConverter):
         if not pattern_class:
             raise ValueError
 
-        return pattern_class.create_from_dict(data)
+        return pattern_class.from_dict(data)
 
     def back_converter(self, data: ranges.BaseRecurrenceRange) -> dict:
         if not data:

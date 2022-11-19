@@ -32,7 +32,7 @@ def task_data(generate_id):
 
 @pytest.fixture
 def task(client, task_list, task_data, clean_up):
-    task = Task.create_from_dict(client, task_data)
+    task = Task.from_dict(client, task_data)
     task_list.save_task(task)
     clean_up(task)
     return task
@@ -40,14 +40,14 @@ def task(client, task_list, task_data, clean_up):
 
 @pytest.fixture
 def task_list(client, task_list_data, clean_up):
-    task_list = TaskList.create_from_dict(client, task_list_data)
+    task_list = TaskList.from_dict(client, task_list_data)
     task_list.create()
     clean_up(task_list)
     return task_list
 
 
 def test_creating_task_list(client, task_list_data, clean_up):
-    task_list = TaskList.create_from_dict(client, task_list_data)
+    task_list = TaskList.from_dict(client, task_list_data)
 
     task_list.create()
     clean_up(task_list)
@@ -77,7 +77,7 @@ def test_listing_task_lists(client, task_list):
 
 
 def test_creating_task(client, task_list, task_data, clean_up):
-    task = Task.create_from_dict(client, task_data)
+    task = Task.from_dict(client, task_data)
     task_list.save_task(task)
     clean_up(task)
 

@@ -34,7 +34,7 @@ class ToDoClient(object):
             url = data.get("@odata.nextLink", None)
             params = {}
 
-        return [resource_class.create_from_dict(self, element) for element in elements]
+        return [resource_class.from_dict(self, element) for element in elements]
 
     def get(
         self,
@@ -49,7 +49,7 @@ class ToDoClient(object):
         logger.debug("Getting %s", url)
         response = self._provider.get(url)
         self._map_http_errors(response, codes.ok)
-        return resource_class.create_from_dict(self, response.json())
+        return resource_class.from_dict(self, response.json())
 
     def delete(self, resource: Resource):
         url = (self._url / resource.managing_endpoint).url

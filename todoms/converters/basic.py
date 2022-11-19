@@ -14,7 +14,6 @@ from ..attributes import (
     Weekday,
 )
 from . import BaseConverter
-from .field import *  # noqa: F401, F403
 
 
 @dataclass
@@ -22,15 +21,18 @@ class AttributeConverter(BaseConverter):
     original_name: str
     local_name: str
 
-    def obj_converter(self, data: Any) -> Any:
+    @classmethod
+    def obj_converter(cls, data: Any) -> Any:
         return data
 
-    def back_converter(self, data: Any) -> Any:
+    @classmethod
+    def back_converter(cls, data: Any) -> Any:
         return data
 
 
 @dataclass
 class DatetimeAttrConverter(AttributeConverter):
+    @classmethod
     def obj_converter(self, data: dict) -> datetime:
         if not data:
             return None
@@ -38,6 +40,7 @@ class DatetimeAttrConverter(AttributeConverter):
         date = parser.parse(data["dateTime"])
         return datetime.combine(date.date(), date.time(), tz.gettz(data["timeZone"]))
 
+    @classmethod
     def back_converter(self, data: datetime) -> dict:
         if not data:
             return None
@@ -50,20 +53,24 @@ class DatetimeAttrConverter(AttributeConverter):
 
 @dataclass
 class ContentAttrConverter(AttributeConverter):
+    @classmethod
     def obj_converter(self, data: dict) -> str:
         if not data:
             return ""
         return data["content"]
 
+    @classmethod
     def back_converter(self, data: str) -> dict:
         return {"content": data, "contentType": "html"}
 
 
 @dataclass
 class IsoTimeAttrConverter(AttributeConverter):
+    @classmethod
     def obj_converter(self, data: str) -> datetime:
         return parser.isoparse(data)
 
+    @classmethod
     def back_converter(self, data: datetime) -> str:
         if not data:
             return None
@@ -72,9 +79,11 @@ class IsoTimeAttrConverter(AttributeConverter):
 
 @dataclass
 class DateAttrConverter(AttributeConverter):
+    @classmethod
     def obj_converter(self, data: str) -> date:
         return parser.parse(data).date()
 
+    @classmethod
     def back_converter(self, data: date) -> str:
         if not data:
             return None
@@ -108,11 +117,13 @@ class ListConverter(AttributeConverter):
 class EnumAttrConverter(AttributeConverter, ABC):
     _ENUM = None
 
+    @classmethod
     def obj_converter(self, data: str) -> Enum:
         if not data:
             return None
         return self._ENUM(data)
 
+    @classmethod
     def back_converter(self, data: Enum) -> str:
         if not data:
             return None

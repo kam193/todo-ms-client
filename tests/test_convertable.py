@@ -1,21 +1,15 @@
 from todoms.convertable import BaseConvertableFieldsObject, BaseConvertableObject
-from todoms.converters.basic import AttributeConverter, ContentAttrConverter
-from todoms.converters.field import Field
+from todoms.converters.basic import ContentAttrConverter
+from todoms.converters.field import Attribute
 
 
 class SimpleObject(BaseConvertableFieldsObject):
-    name = Field("name")
-    other = Field("other")
-
-    def __init__(self, other=None):
-        self.other = other
+    name = Attribute("name")
+    other = Attribute("other")
 
 
-class ComplexObject(BaseConvertableObject):
-    ATTRIBUTES = (AttributeConverter("old", "new"),)
-
-    def __init__(self, new):
-        self.new = new
+class ComplexObject(BaseConvertableFieldsObject):
+    new = Attribute("old")
 
 
 class ComplexObjectWithConverting(BaseConvertableObject):
@@ -27,7 +21,7 @@ class ComplexObjectWithConverting(BaseConvertableObject):
 
 class TestBaseConvertableObject:
     def test_convertable_object_creates_obj_from_data(self):
-        obj = SimpleObject.create_from_dict(
+        obj = SimpleObject.from_dict(
             {"name": "name-1", "other": "val-1", "not_attr": "ignore"}
         )
 
@@ -36,27 +30,23 @@ class TestBaseConvertableObject:
         assert getattr(obj, "not_attr", None) is None
 
     def test_convertable_object_create_translates_attributes(self):
-        obj_1 = ComplexObject.create_from_dict({"old": "data"})
+        obj_1 = ComplexObject.from_dict({"old": "data"})
 
         assert obj_1.new == "data"
 
     def test_convertable_object_create_converts_attributes_format(self):
-        obj_1 = ComplexObjectWithConverting.create_from_dict(
-            {"old": {"content": "converted"}}
-        )
+        obj_1 = ComplexObjectWithConverting.from_dict({"old": {"content": "converted"}})
 
         assert obj_1.new == "converted"
 
     def test_convertable_object_from_dict_pass_additional_arguments(self):
-        obj = SimpleObject.create_from_dict({"name": "name-1"}, other="passed-implicit")
+        obj = SimpleObject.from_dict({"name": "name-1"}, other="passed-implicit")
 
         assert obj.name == "name-1"
         assert obj.other == "passed-implicit"
 
     def test_convertable_object_simple_to_dict(self):
-        convertable = SimpleObject.create_from_dict(
-            {"name": "name-1", "other": "val-1"}
-        )
+        convertable = SimpleObject.from_dict({"name": "name-1", "other": "val-1"})
 
         data_dict = convertable.to_dict()
 

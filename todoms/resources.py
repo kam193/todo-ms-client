@@ -60,8 +60,8 @@ class Resource(BaseConvertableObject, ABC):
         return getattr(self, "_id", None)
 
     @classmethod
-    def create_from_dict(cls, client, data_dict):
-        return super().create_from_dict(data_dict, client=client)
+    def from_dict(cls, client, data_dict):
+        return super().from_dict(data_dict, client=client)
 
     @classmethod
     def handle_list_filters(cls, *args, **kwargs):
