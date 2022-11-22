@@ -20,7 +20,7 @@ setup(
     install_requires=requirements(),
     url="https://github.com/kam193/todo-ms-client",
     author="Kamil Mańkowski",
-    author_email="kam193@wp.pl",
+    author_email="gh.welcome@tools.kam193.eu",
     license="MIT",
     packages=find_packages(exclude=["*tests*"]),
     zip_safe=False,
