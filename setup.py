@@ -7,7 +7,7 @@ def readme():
 
 
 def requirements():
-    with open("requirements.in") as file:
+    with open("requirements/requirements.txt") as file:
         return file.read().splitlines()
 
 

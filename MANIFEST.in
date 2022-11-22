@@ -1,6 +1,6 @@
 graft todoms
 
-include requirements.in
+include requirements/requirements.txt
 
 include AUTHORS.rst
 include CHANGELOG.rst
