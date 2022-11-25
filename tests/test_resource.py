@@ -121,6 +121,26 @@ class TestDefaultResource:
 
         assert resource.id == "id-1"
 
+    def test_resources_are_equal_when_have_equal_id(self, simple_resource_class):
+        resource_1 = simple_resource_class.from_dict(None, {"id": "id-1"})
+        resource_2 = simple_resource_class.from_dict(None, {"id": "id-1"})
+
+        assert resource_1 == resource_2
+
+    def test_resources_are_not_equal_when_have_different_id(
+        self, simple_resource_class
+    ):
+        resource_1 = simple_resource_class.from_dict(None, {"id": "id-1"})
+        resource_2 = simple_resource_class.from_dict(None, {"id": "id-2"})
+
+        assert resource_1 != resource_2
+
+    def test_resources_are_not_equal_when_dont_have_id(self, simple_resource_class):
+        resource_1 = simple_resource_class.from_dict(None, {"name": "name-1"})
+        resource_2 = simple_resource_class.from_dict(None, {"name": "name-1"})
+
+        assert resource_1 != resource_2
+
     def test_default_resource_managing_endpoint(self, simple_resource_class):
         resource = simple_resource_class.from_dict(
             None, {"id": "id-1", "name": "name-1"}

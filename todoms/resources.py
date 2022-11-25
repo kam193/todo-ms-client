@@ -63,6 +63,11 @@ class Resource(BaseConvertableFieldsObject, ABC):
         params = {"$filter": and_(*args, **not_empty_kwargs)}
         return params
 
+    def __eq__(self, other):
+        if not self.id or not other.id:
+            return False
+        return self.id == other.id
+
 
 class TaskList(Resource):
     """Represent a list of tasks"""
