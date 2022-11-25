@@ -95,9 +95,9 @@ class WebBrowserProvider(AbstractProvider):
 
         self._session = self._build_session(redirect_url)
 
-        code_veryfier = secrets.token_bytes(32).hex()
+        code_verifier = secrets.token_bytes(32).hex()
         code_challenge = str(
-            urlsafe_b64encode(hashlib.sha256(code_veryfier.encode("ascii")).digest()),
+            urlsafe_b64encode(hashlib.sha256(code_verifier.encode("ascii")).digest()),
             "utf-8",
         ).replace("=", "")
 
@@ -132,7 +132,7 @@ class WebBrowserProvider(AbstractProvider):
             authorization_response=self._replace_http_into_https(
                 response_app.callback_url
             ),
-            code_verifier=code_veryfier,
+            code_verifier=code_verifier,
             headers=headers,
         )
 

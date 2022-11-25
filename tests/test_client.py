@@ -111,16 +111,16 @@ def test_get_resource_returns_obj(client, resource_class, requests_mock):
 
 def test_get_uses_provided_endpoint(client, resource_class, requests_mock):
     requests_mock.get(
-        f"{API_BASE}/precreated-endpoint",
+        f"{API_BASE}/pre-created-endpoint",
         json={"name": "res-1"},
     )
-    result = client.get(resource_class, endpoint="precreated-endpoint")
+    result = client.get(resource_class, endpoint="pre-created-endpoint")
 
     assert result.name == "res-1"
     assert isinstance(result, resource_class)
 
 
-def test_get_raises_when_not_endpint_and_id(client, resource_class):
+def test_get_raises_when_not_endpoint_and_id(client, resource_class):
     with raises(ValueError):
         client.get(resource_class)
 
@@ -180,25 +180,25 @@ def test_patch_sends_data(client, resource_obj, requests_mock):
 
 def test_raw_post(client, requests_mock):
     requests_mock.post(
-        f"{API_BASE}/my-endpoint/sendind",
+        f"{API_BASE}/my-endpoint/sending",
         json={"result": "ok"},
         status_code=201,
         additional_matcher=match_body({"my": "body"}),
     )
-    result = client.raw_post("my-endpoint/sendind", data={"my": "body"})
+    result = client.raw_post("my-endpoint/sending", data={"my": "body"})
 
     assert result == {"result": "ok"}
 
 
-def test_raw_post_with_nondefault_status_code(client, requests_mock):
+def test_raw_post_with_non_default_status_code(client, requests_mock):
     requests_mock.post(
-        f"{API_BASE}/my-endpoint/sendind",
+        f"{API_BASE}/my-endpoint/sending",
         json={"result": "ok"},
         status_code=205,
         additional_matcher=match_body({"my": "body"}),
     )
     result = client.raw_post(
-        "my-endpoint/sendind", data={"my": "body"}, expected_code=205
+        "my-endpoint/sending", data={"my": "body"}, expected_code=205
     )
 
     assert result == {"result": "ok"}
@@ -207,8 +207,8 @@ def test_raw_post_with_nondefault_status_code(client, requests_mock):
 @mark.parametrize("error_code,exception", EXPECTED_ERRORS)
 def test_raw_post_raises_on_error(client, requests_mock, error_code, exception):
     requests_mock.post(
-        f"{API_BASE}/my-endpoint/sendind", json={"result": "ok"}, status_code=error_code
+        f"{API_BASE}/my-endpoint/sending", json={"result": "ok"}, status_code=error_code
     )
 
     with raises(exception):
-        client.raw_post("my-endpoint/sendind", data={})
+        client.raw_post("my-endpoint/sending", data={})

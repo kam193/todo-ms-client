@@ -239,7 +239,7 @@ class TestTaskListResource:
         assert tasks[0].id == "task-1"
         assert tasks[0].task_list == task_list
 
-    def test_task_list_delete_themselfs(self, requests_mock, client):
+    def test_task_list_delete_themselves(self, requests_mock, client):
         requests_mock.delete(f"{API_BASE}/todo/lists/id-1", status_code=204)
         task_list = TaskList.from_dict(client, TASK_LIST_EXAMPLE_DATA)
         task_list.delete()
@@ -313,7 +313,7 @@ class TestTaskResource:
         filters = Task.handle_list_filters(status="my-filter")
         assert filters == {"$filter": "status my-filter"}
 
-    def test_task_delete_themselfs(self, requests_mock, client, task_list):
+    def test_task_delete_themselves(self, requests_mock, client, task_list):
         requests_mock.delete(
             f"{API_BASE}/todo/lists/id-1/tasks/task-1", status_code=204
         )

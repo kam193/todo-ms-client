@@ -26,7 +26,7 @@ This is the matrix of main features supported by the official API and this libra
 | Task lists - CRUD  | :heavy_check_mark:        | :large_orange_diamond:      | Updating may not work properly                                |
 | Well-known lists   | :heavy_check_mark:        | :large_orange_diamond:      | By regular listing, no special support yet                   |
 | My day             | ?                         | :x:                         |                                                               |
-| Tasks - CRUD       | :heavy_check_mark:        | :large_orange_diamond:      | Updating may not work properly, some fields not supproted yet |
+| Tasks - CRUD       | :heavy_check_mark:        | :large_orange_diamond:      | Updating may not work properly, some fields not supported yet |
 | Tasks - recurrence | :heavy_check_mark:        | :large_orange_diamond:      | Read only so far                                              |
 | Subtasks - CRUD    | :heavy_check_mark:        | :x:                         |                                                               |
 | Reminders - CRUD   | :heavy_check_mark:        | :x:                         |                                                               |

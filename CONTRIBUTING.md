@@ -28,7 +28,7 @@ Docs are generated using Sphinx. You can build it using tox:
 
     tox -e docs
 
-## Pre-commi hook
+## Pre-commit hook
 
 Keeping code style is supported by pre-commit hooks. It's recommended to use them.
 To configure, install requirements from `requirements-dev.txt` and run:
