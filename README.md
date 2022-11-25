@@ -24,7 +24,7 @@ This is the matrix of main features supported by the official API and this libra
 | Feature            | Supported by official API | Supported by ToDo-MS-client | Known limitations                                             |
 | ------------------ | ------------------------- | --------------------------- | ------------------------------------------------------------- |
 | Task lists - CRUD  | :heavy_check_mark:        | :large_orange_diamond:      | Updating may not work properly                                |
-| Well-known lists   | :heavy_check_mark:        | :large_orange_diamond:      | By regullar listing, no special support yet                   |
+| Well-known lists   | :heavy_check_mark:        | :large_orange_diamond:      | By regular listing, no special support yet                   |
 | My day             | ?                         | :x:                         |                                                               |
 | Tasks - CRUD       | :heavy_check_mark:        | :large_orange_diamond:      | Updating may not work properly, some fields not supproted yet |
 | Tasks - recurrence | :heavy_check_mark:        | :large_orange_diamond:      | Read only so far                                              |

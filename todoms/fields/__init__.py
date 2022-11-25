@@ -9,11 +9,12 @@ from ..converters import BaseConverter
 class Field(ABC):
     _converter = BaseConverter
 
-    def __init__(self, dict_name: str):
+    def __init__(self, dict_name: str, default=None):
         self.dict_name = dict_name
+        self._default = default
 
     def _get_value(self, instance):
-        return instance.__dict__.get(self.name)
+        return instance.__dict__.get(self.name, self._default)
 
     def __get__(self, instance, _=None):
         if not instance:

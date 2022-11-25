@@ -28,7 +28,7 @@ class DummyField(Field):
 
 
 class ExampleClass:
-    f1 = DummyField("f1")
+    f1 = DummyField("f1", default="default")
     f2 = DummyField("another_name")
 
 
@@ -58,7 +58,7 @@ class TestField:
         ExampleClass.f1.from_dict(obj, {"another_name": 2})
         ExampleClass.f2.from_dict(obj, {"f1": 1})
 
-        assert obj.f1 is None
+        assert obj.f1 == "default"
         assert obj.f2 is None
 
     @pytest.mark.parametrize("data", [{}, None])
@@ -74,6 +74,14 @@ class TestField:
 
         assert ExampleClass.f1.to_dict(obj) == {"f1": "some_back+1"}
         assert ExampleClass.f2.to_dict(obj) == {"another_name": "some_back+2"}
+
+    def test_field_default_value(self):
+        obj = ExampleClass()
+
+        assert obj.f1 == "default"
+        assert obj.f2 is None
+
+        assert ExampleClass.f1.to_dict(obj) == {"f1": "some_back+default"}
 
 
 class TestCommonBehavior:

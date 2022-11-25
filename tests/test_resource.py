@@ -272,6 +272,18 @@ class TestTaskResource:
         assert task.title == "Title"
         assert task.task_list is None
 
+        # Default values
+        assert task.status == Status.NOT_STARTED
+        assert task.importance == Importance.NORMAL
+        assert task.is_reminder_on is False
+        assert task.body is None
+        assert task.recurrence is None
+        assert task.due_datetime is None
+        assert task.completed_datetime is None
+        assert task.last_modified_datetime is None
+        assert task.created_datetime is None
+        assert task.reminder_datetime is None
+
     def test_create_task_object_from_dict(self):
         task = Task.from_dict(None, TASK_EXAMPLE_DATA)
 

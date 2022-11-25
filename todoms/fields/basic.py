@@ -50,6 +50,6 @@ class List(Field):
 class EnumField(Field):
     _converter = None
 
-    def __init__(self, dict_name: str, enum_class: Type[Enum]):
-        super().__init__(dict_name)
+    def __init__(self, dict_name: str, enum_class: Type[Enum], **kwargs):
+        super().__init__(dict_name, **kwargs)
         self._converter = EnumConverter(enum_class)
