@@ -10,6 +10,28 @@ from .resources import Resource
 logger = logging.getLogger(__name__)
 
 
+class ResponseError(Exception):
+    """Response returned an error"""
+
+    MESSAGE = None
+
+    def __init__(self, response: Response):
+        self.response = response
+
+    def __str__(self):
+        if self.MESSAGE:
+            return self.MESSAGE
+
+        details = f"{self.response.status_code} {self.response.reason}"
+        return f"Server returned an error: {details}"
+
+
+class ResourceNotFoundError(ResponseError):
+    """Requested resource not exists"""
+
+    MESSAGE = "404 Resource not found"
+
+
 class ToDoClient(object):
     def __init__(
         self,
@@ -19,6 +41,16 @@ class ToDoClient(object):
     ):
         self._provider = provider
         self._url = furl(api_url) / api_prefix
+
+    def _map_http_errors(self, response, expected):
+        if response.status_code == codes.not_found:
+            raise ResourceNotFoundError(response)
+
+        if response.status_code != expected:
+            logger.debug(
+                "Unexpected response %s: %s", response.status_code, response.text
+            )
+            raise ResponseError(response)
 
     def list(self, resource_class: Type[Resource], endpoint: str = None, **kwargs):
         url = (self._url / (endpoint or resource_class.ENDPOINT)).url
@@ -72,35 +104,3 @@ class ToDoClient(object):
         response = self._provider.post(url, json_data=data)
         self._map_http_errors(response, expected_code)
         return response.json()
-
-    def _map_http_errors(self, response, expected):
-        if response.status_code == codes.not_found:
-            raise ResourceNotFoundError(response)
-
-        if response.status_code != expected:
-            logger.debug(
-                "Unexpected response %s: %s", response.status_code, response.text
-            )
-            raise ResponseError(response)
-
-
-class ResponseError(Exception):
-    """Response returned an error"""
-
-    MESSAGE = None
-
-    def __init__(self, response: Response):
-        self.response = response
-
-    def __str__(self):
-        if self.MESSAGE:
-            return self.MESSAGE
-
-        details = f"{self.response.status_code} {self.response.reason}"
-        return f"Server returned an error: {details}"
-
-
-class ResourceNotFoundError(ResponseError):
-    """Requested resource not exists"""
-
-    MESSAGE = "404 Resource not found"

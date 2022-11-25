@@ -74,12 +74,6 @@ class TaskList(Resource):
     _is_owner = Attribute("isOwner")
     _well_known_name = Attribute("wellknownListName")
 
-    def __repr__(self):
-        return f"<TaskList '{self.name}'>"
-
-    def __str__(self):
-        return f"List '{self.name}'"
-
     def get_tasks(self, *args, **kwargs):
         """Get list of tasks in given list. Default returns only non-completed tasks."""
         tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
@@ -91,6 +85,12 @@ class TaskList(Resource):
     def save_task(self, task):
         task.task_list = self
         task.create()
+
+    def __repr__(self):
+        return f"<TaskList '{self.name}'>"
+
+    def __str__(self):
+        return f"List '{self.name}'"
 
 
 class Task(Resource):
@@ -120,12 +120,6 @@ class Task(Resource):
         super().__init__(*args, **kwargs)
         self.task_list = task_list
 
-    def __repr__(self):
-        return f"<Task '{self.title}'>"
-
-    def __str__(self):
-        return f"Task '{self.title}'"
-
     def create(self):
         if not self.task_list:
             raise TaskListNotSpecifiedError
@@ -141,3 +135,9 @@ class Task(Resource):
         if not self.task_list:
             raise TaskListNotSpecifiedError
         return (furl(self.task_list.managing_endpoint) / super().managing_endpoint).url
+
+    def __repr__(self):
+        return f"<Task '{self.title}'>"
+
+    def __str__(self):
+        return f"Task '{self.title}'"

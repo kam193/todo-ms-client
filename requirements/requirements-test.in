@@ -6,3 +6,4 @@ pytest
 pytest-html
 pytest-cov
 requests-mock
+ssort
