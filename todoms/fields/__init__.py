@@ -9,10 +9,11 @@ from ..converters import BaseConverter
 class Field(ABC):
     _converter = BaseConverter
 
-    def __init__(self, dict_name: str, default=None, read_only=False):
+    def __init__(self, dict_name: str, default=None, read_only=False, export=True):
         self.dict_name = dict_name
         self._default = default
         self._read_only = read_only
+        self._export = export
 
     def _get_value(self, instance):
         return instance.__dict__.get(self.name, self._default)
@@ -39,6 +40,8 @@ class Field(ABC):
         self._set_value(instance, self.convert_from_dict(data))
 
     def to_dict(self, instance) -> dict:
+        if not self._export:
+            return {}
         return {self.dict_name: self.convert_to_dict(instance)}
 
     def convert_from_dict(self, data: dict):

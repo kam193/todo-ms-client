@@ -1,7 +1,7 @@
 from abc import ABC
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, List
+from typing import Any, List, Type
 
 from dateutil import parser, tz
 
@@ -90,7 +90,7 @@ class ListConverter(AttributeConverter):
 class EnumConverter(AttributeConverter, ABC):
     _ENUM = None
 
-    def __init__(self, enum: Enum):
+    def __init__(self, enum: Type[Enum]):
         self._ENUM = enum
 
     def obj_converter(self, data: str) -> Enum:

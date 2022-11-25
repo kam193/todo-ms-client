@@ -32,12 +32,12 @@ class Resource(BaseConvertableFieldsObject, ABC):
             raise ResourceAlreadyCreatedError
         data_dict = {k: v for k, v in self.to_dict().items() if v is not None}
         result = self._client.raw_post(self.managing_endpoint, data_dict, 201)
-        # TODO: update object from result
-        self._id = result.get("id", None)
+        self._from_dict(result)
 
     def update(self):
         """Update resource in API"""
-        self._client.patch(self)
+        response = self._client.patch(self)
+        self._from_dict(response)
 
     def delete(self):
         """Delete object in API"""
@@ -75,7 +75,7 @@ class TaskList(Resource):
     ENDPOINT = "todo/lists"
     _id = Attribute("id", read_only=True)
     name = Attribute("displayName")
-    _is_shared = Attribute("isShared")
+    _is_shared = Attribute("isShared", read_only=True, export=False)
     _is_owner = Attribute("isOwner")
     _well_known_name = Attribute("wellknownListName", read_only=True)
 

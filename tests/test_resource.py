@@ -79,12 +79,13 @@ def test_resource_has_proper_endpoint(resource, endpoint):
 
 
 @pytest.mark.parametrize(
-    "resource,data",
-    [(TaskList, TASK_LIST_EXAMPLE_DATA), (Task, TASK_EXAMPLE_DATA)],
+    "resource,data,to_omit",
+    [(TaskList, TASK_LIST_EXAMPLE_DATA, ["isShared"]), (Task, TASK_EXAMPLE_DATA, [])],
 )
-def test_resource_is_proper_converted_back_to_dict(resource, data):
+def test_resource_is_proper_converted_back_to_dict(resource, data, to_omit):
     obj = resource.from_dict(None, data)
-    assert data == obj.to_dict()
+    expected = {k: v for k, v in data.items() if k not in to_omit}
+    assert expected == obj.to_dict()
 
 
 class TestDefaultResource:
@@ -96,23 +97,27 @@ class TestDefaultResource:
         assert resource._client == client
         assert resource.name == "name-1"
 
-    def test_default_resource_update_client_call(self, client, requests_mock):
+    def test_default_resource_update_client_call_and_refresh_data_from_response(
+        self, client, requests_mock
+    ):
         class ComplexResource(Resource):
             ENDPOINT = "fake"
-            id = Attribute("id")
+            _id = Attribute("id")
             new = Content("old")
+            last_updated = Attribute("last_updated")
 
-        resource = ComplexResource(client, new="data", id="id-1")
+        resource = ComplexResource(client, new="data", _id="id-1")
 
         requests_mock.patch(
             f"{API_BASE}/fake/id-1",
-            json={},
+            json={"last_updated": "2020-01-01T18:00:00Z"},
             status_code=200,
             additional_matcher=match_body(resource.to_dict()),
         )
 
         resource.update()
         assert requests_mock.called is True
+        assert resource.last_updated == "2020-01-01T18:00:00Z"
 
     def test_default_resource_id(self, simple_resource_class):
         resource = simple_resource_class.from_dict(

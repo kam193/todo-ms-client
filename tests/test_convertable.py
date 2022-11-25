@@ -25,6 +25,17 @@ class TestBaseConvertableFieldsObject:
         assert obj.other == "val-1"
         assert getattr(obj, "not_attr", None) is None
 
+    def test_convertable_object_updated_from_dict(self):
+        obj = SimpleObject.from_dict({"name": "name-1", "other": "val-1"})
+
+        assert obj.name == "name-1"
+        assert obj.other == "val-1"
+
+        obj._from_dict({"name": "name-2"})
+
+        assert obj.name == "name-2"
+        assert obj.other == "val-1"
+
     def test_convertable_object_create_translates_attributes(self):
         obj_1 = ComplexObject.from_dict({"old": "data"})
 

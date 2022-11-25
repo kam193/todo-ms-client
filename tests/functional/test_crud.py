@@ -51,6 +51,7 @@ def test_creating_task_list(client, task_list_data, clean_up):
 
     task_list.create()
     clean_up(task_list)
+    assert task_list.id is not None
 
     downloaded_task_list = client.get(TaskList, task_list.id)
     assert downloaded_task_list is not None
@@ -82,7 +83,8 @@ def test_creating_task(client, task_list, task_data, clean_up):
     clean_up(task)
 
     tasks = task_list.get_tasks()
-    assert task.title in [t.title for t in tasks]
+    task = next(t for t in tasks if t.title == task_data["title"])
+    assert task.created_datetime is not None
 
 
 def test_updating_task(client, task, task_list, run_id):

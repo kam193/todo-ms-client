@@ -26,9 +26,12 @@ class BaseConvertableFieldsObject(ABC):
         cls, data: dict, **additional_kwargs
     ) -> "BaseConvertableFieldsObject":
         instance = cls(**additional_kwargs)
-        for field in instance._fields:
-            field.from_dict(instance, data)
+        instance._from_dict(data)
         return instance
+
+    def _from_dict(self, data: dict):
+        for field in self._fields:
+            field.from_dict(self, data)
 
     def to_dict(self) -> dict:
         data = {}

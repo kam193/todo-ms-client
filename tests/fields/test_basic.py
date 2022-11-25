@@ -95,6 +95,18 @@ class TestField:
         ReadOnlyField.f1.from_dict(obj, {"f1": 1})
         assert obj.f1 == "some_object+1"
 
+    def test_field_is_not_exported_to_dict(self):
+        class TestClass:
+            f1 = DummyField("f1")
+            f2 = DummyField("f2", export=False)
+
+        obj = TestClass()
+        obj.f1 = 1
+        obj.f2 = 2
+
+        assert TestClass.f1.to_dict(obj) == {"f1": "some_back+1"}
+        assert TestClass.f2.to_dict(obj) == {}
+
 
 class TestCommonBehavior:
     field_classes = [
