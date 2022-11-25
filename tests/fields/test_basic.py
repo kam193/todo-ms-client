@@ -83,6 +83,18 @@ class TestField:
 
         assert ExampleClass.f1.to_dict(obj) == {"f1": "some_back+default"}
 
+    def test_field_read_only(self):
+        class ReadOnlyField:
+            f1 = DummyField("f1", read_only=True)
+
+        obj = ReadOnlyField()
+
+        with pytest.raises(AttributeError):
+            obj.f1 = 1
+
+        ReadOnlyField.f1.from_dict(obj, {"f1": 1})
+        assert obj.f1 == "some_object+1"
+
 
 class TestCommonBehavior:
     field_classes = [

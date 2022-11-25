@@ -73,11 +73,11 @@ class TaskList(Resource):
     """Represent a list of tasks"""
 
     ENDPOINT = "todo/lists"
-    _id = Attribute("id")
+    _id = Attribute("id", read_only=True)
     name = Attribute("displayName")
     _is_shared = Attribute("isShared")
     _is_owner = Attribute("isOwner")
-    _well_known_name = Attribute("wellknownListName")
+    _well_known_name = Attribute("wellknownListName", read_only=True)
 
     def get_tasks(self, *args, **kwargs):
         """Get list of tasks in given list. Default returns only non-completed tasks."""
@@ -110,10 +110,10 @@ class Task(Resource):
     importance = EnumField("importance", Importance, default=Importance.NORMAL)
     recurrence = RecurrenceField("recurrence")
     is_reminder_on = Attribute("isReminderOn", default=False)
-    created_datetime = IsoTime("createdDateTime")
+    created_datetime = IsoTime("createdDateTime", read_only=True)
     due_datetime = Datetime("dueDateTime")
-    completed_datetime = Datetime("completedDateTime")
-    last_modified_datetime = IsoTime("lastModifiedDateTime")
+    completed_datetime = Datetime("completedDateTime", read_only=True)
+    last_modified_datetime = IsoTime("lastModifiedDateTime", read_only=True)
     reminder_datetime = Datetime("reminderDateTime")
 
     def __init__(

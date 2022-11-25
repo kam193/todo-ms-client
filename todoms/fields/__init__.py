@@ -9,9 +9,10 @@ from ..converters import BaseConverter
 class Field(ABC):
     _converter = BaseConverter
 
-    def __init__(self, dict_name: str, default=None):
+    def __init__(self, dict_name: str, default=None, read_only=False):
         self.dict_name = dict_name
         self._default = default
+        self._read_only = read_only
 
     def _get_value(self, instance):
         return instance.__dict__.get(self.name, self._default)
@@ -25,6 +26,8 @@ class Field(ABC):
         instance.__dict__[self.name] = value
 
     def __set__(self, instance, value):
+        if self._read_only:
+            raise AttributeError("This field is read-only.")
         self._set_value(instance, value)
 
     def __set_name__(self, _, name):
