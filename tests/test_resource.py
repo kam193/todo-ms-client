@@ -119,6 +119,33 @@ class TestDefaultResource:
         assert requests_mock.called is True
         assert resource.last_updated == "2020-01-01T18:00:00Z"
 
+    def test_default_resource_refresh_clearing_old_data(self, client, requests_mock):
+        class ComplexResource(Resource):
+            ENDPOINT = "fake"
+            _id = Attribute("id")
+            new = Attribute("old")
+            to_clear = Attribute("to_clear")
+            last_updated = Attribute("last_updated", read_only=True)
+
+        resource = ComplexResource(client, new="data", _id="id-1", to_clear="data")
+
+        requests_mock.get(
+            f"{API_BASE}/fake/id-1",
+            json={
+                "last_updated": "2020-01-01T18:00:00Z",
+                "id": "id-1",
+                "old": "new-data",
+            },
+            status_code=200,
+        )
+
+        resource.refresh()
+
+        assert resource.new == "new-data"
+        assert resource.last_updated == "2020-01-01T18:00:00Z"
+        assert resource.id == "id-1"
+        assert resource.to_clear is None
+
     def test_default_resource_id(self, simple_resource_class):
         resource = simple_resource_class.from_dict(
             None, {"id": "id-1", "name": "name-1"}

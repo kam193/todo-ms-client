@@ -55,6 +55,15 @@ class Resource(BaseConvertableFieldsObject, ABC):
     def from_dict(cls, client, data_dict):
         return super().from_dict(data_dict, client=client)
 
+    def _clear(self):
+        for field in self._fields:
+            delattr(self, field.name)
+
+    def refresh(self):
+        new_data = self._client.raw_get(endpoint=self.managing_endpoint)
+        self._clear()
+        self._from_dict(new_data)
+
     @classmethod
     def handle_list_filters(cls, *args, **kwargs):
         not_empty_kwargs = {k: v for k, v in kwargs.items() if v is not None}

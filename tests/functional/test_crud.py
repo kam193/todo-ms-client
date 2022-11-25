@@ -65,6 +65,19 @@ def test_updating_task_list(client, task_list):
     assert downloaded_task_list.name == "New name"
 
 
+def test_refreshing_task_and_task_list(client, task, task_list):
+    old_title = task.title
+    task.title = "New title"
+    old_name = task_list.name
+    task_list.name = "New name"
+
+    task.refresh()
+    task_list.refresh()
+
+    assert task.title == old_title
+    assert task_list.name == old_name
+
+
 def test_deleting_task_list(client, task_list):
     task_list.delete()
 

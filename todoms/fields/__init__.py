@@ -31,6 +31,10 @@ class Field(ABC):
             raise AttributeError("This field is read-only.")
         self._set_value(instance, value)
 
+    def __delete__(self, instance):
+        if self.name in instance.__dict__:
+            del instance.__dict__[self.name]
+
     def __set_name__(self, _, name):
         self.name = name
 

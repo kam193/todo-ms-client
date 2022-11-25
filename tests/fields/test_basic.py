@@ -107,6 +107,20 @@ class TestField:
         assert TestClass.f1.to_dict(obj) == {"f1": "some_back+1"}
         assert TestClass.f2.to_dict(obj) == {}
 
+    def test_field_can_be_cleared_by_delattr(self):
+        obj = ExampleClass()
+        obj.f1 = 1
+        obj.f2 = 2
+
+        assert obj.f1 == 1
+        assert obj.f2 == 2
+
+        delattr(obj, "f1")
+        delattr(obj, "f2")
+
+        assert obj.f1 == "default"  # return to default value
+        assert obj.f2 is None
+
 
 class TestCommonBehavior:
     field_classes = [

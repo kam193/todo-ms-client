@@ -77,11 +77,16 @@ class ToDoClient(object):
         if not endpoint and not resource_id:
             raise ValueError("Either endpoint or resource_id must be provided")
 
-        url = (self._url / (endpoint or f"{resource_class.ENDPOINT}/{resource_id}")).url
+        endpoint = endpoint or f"{resource_class.ENDPOINT}/{resource_id}"
+        response = self.raw_get(endpoint)
+        return resource_class.from_dict(self, response)
+
+    def raw_get(self, endpoint: str):
+        url = (self._url / endpoint).url
         logger.debug("Getting %s", url)
         response = self._provider.get(url)
         self._map_http_errors(response, codes.ok)
-        return resource_class.from_dict(self, response.json())
+        return response.json()
 
     def delete(self, resource: Resource):
         url = (self._url / resource.managing_endpoint).url
