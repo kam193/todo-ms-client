@@ -1,6 +1,9 @@
+from datetime import date, timedelta
+
 import pytest
 
 from todoms.client import ResourceNotFoundError
+from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import Task, TaskList
 
 from ..test_resource import TASK_EXAMPLE_DATA, TASK_LIST_EXAMPLE_DATA
@@ -113,3 +116,15 @@ def test_deleting_task(client, task, task_list):
 
     tasks = task_list.get_tasks()
     assert task.title not in [t.title for t in tasks]
+
+
+def test_task_setting_recurrence_numbered_rule(task):
+    del task.due_datetime
+    task.recurrence = Recurrence(
+        patterns.Daily(interval=1),
+        ranges.Numbered(occurrences=5, start_date=date.today() + timedelta(days=5)),
+    )
+    task.update()
+
+    assert task.recurrence is not None
+    assert task.due_datetime.date() == date.today() + timedelta(days=5)

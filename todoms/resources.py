@@ -5,7 +5,7 @@ from furl import furl
 from .attributes import Importance, Status
 from .convertable import BaseConvertableFieldsObject
 from .fields.basic import Attribute, Content, Datetime, EnumField, IsoTime
-from .fields.recurrence import RecurrenceField
+from .fields.recurrence import DueDatetime, RecurrenceField
 from .filters import and_, ne
 
 
@@ -120,7 +120,7 @@ class Task(Resource):
     recurrence = RecurrenceField("recurrence")
     is_reminder_on = Attribute("isReminderOn", default=False)
     created_datetime = IsoTime("createdDateTime", read_only=True)
-    due_datetime = Datetime("dueDateTime")
+    due_datetime = DueDatetime("dueDateTime")
     completed_datetime = Datetime("completedDateTime", read_only=True)
     last_modified_datetime = IsoTime("lastModifiedDateTime", read_only=True)
     reminder_datetime = Datetime("reminderDateTime")

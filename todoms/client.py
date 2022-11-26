@@ -44,9 +44,9 @@ class ToDoClient(object):
 
     def _map_http_errors(self, response, expected):
         logger.debug(
-            "Got response with code %s",
+            "Got response with code %s: %s",
             response.status_code,
-            extra={"data": response},
+            response.text,
         )
 
         if response.status_code == codes.not_found:

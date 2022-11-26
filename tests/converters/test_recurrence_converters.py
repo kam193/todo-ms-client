@@ -122,10 +122,9 @@ class TestRecurrenceRangeConverter:
             start_date=date(2020, 4, 8),
             end_date=date(2022, 4, 8),
         )
+        # API requires omitting dates, see #104
         assert converter.back_converter(data) == {
             "type": "endDate",
-            "startDate": "2020-04-08",
-            "endDate": "2022-04-08",
         }
 
     def test_recurrence_range_back_converter_when_none(self):
@@ -170,7 +169,7 @@ class TestRecurrenceConverter:
             patterns.Daily(interval=1), ranges.NoEnd(start_date=date(2020, 5, 16))
         )
         assert converter.back_converter(data) == {
-            "range": {"type": "noEnd", "startDate": "2020-05-16"},
+            "range": {"type": "noEnd"},
             "pattern": {"type": "daily", "interval": 1},
         }
 

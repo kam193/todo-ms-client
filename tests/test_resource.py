@@ -60,7 +60,7 @@ TASK_EXAMPLE_DATA = {
             "month": 7,
             "dayOfMonth": 5,
         },
-        "range": {"type": "noEnd", "startDate": "2020-07-05"},
+        "range": {"type": "noEnd"},
     },
 }
 

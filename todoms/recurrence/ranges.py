@@ -6,11 +6,14 @@ from ..convertable import BaseConvertableFieldsObject
 
 class BaseRecurrenceRange(BaseConvertableFieldsObject):
     _range_type = EnumField("type", RecurrenceRangeType)
-    start_date = Date("startDate")
+    start_date = Date("startDate", export=False)
 
 
+# TODO: Remove?
 class EndDate(BaseRecurrenceRange):
-    end_date = Date("endDate")
+    """This range is most probably not supported by the API"""
+
+    end_date = Date("endDate", export=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(_range_type=RecurrenceRangeType.END_DATE, *args, **kwargs)
