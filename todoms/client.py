@@ -43,11 +43,17 @@ class ToDoClient(object):
         self._url = furl(api_url) / api_prefix
 
     def _map_http_errors(self, response, expected):
+        logger.debug(
+            "Got response with code %s",
+            response.status_code,
+            extra={"data": response},
+        )
+
         if response.status_code == codes.not_found:
             raise ResourceNotFoundError(response)
 
         if response.status_code != expected:
-            logger.debug(
+            logger.warning(
                 "Unexpected response %s: %s", response.status_code, response.text
             )
             raise ResponseError(response)
