@@ -18,6 +18,14 @@ class AttributeConverter(BaseConverter):
         return data
 
 
+class BooleanConverter(BaseConverter):
+    def obj_converter(self, data: bool) -> bool:
+        return True if data else False
+
+    def back_converter(self, data: bool) -> bool:
+        return data
+
+
 class DatetimeConverter(AttributeConverter):
     def obj_converter(self, data: dict) -> datetime:
         if not data:

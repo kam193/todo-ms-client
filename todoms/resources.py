@@ -4,7 +4,15 @@ from furl import furl
 
 from .attributes import Importance, Status
 from .convertable import BaseConvertableFieldsObject
-from .fields.basic import Attribute, Content, Datetime, EnumField, IsoTime
+from .fields.basic import (
+    Attribute,
+    Boolean,
+    Content,
+    Datetime,
+    EnumField,
+    IsoTime,
+    List,
+)
 from .fields.recurrence import DueDatetime, RecurrenceField
 from .filters import and_, ne
 
@@ -84,9 +92,9 @@ class TaskList(Resource):
     ENDPOINT = "todo/lists"
     _id = Attribute("id", read_only=True)
     name = Attribute("displayName")
-    _is_shared = Attribute("isShared", read_only=True, export=False)
-    _is_owner = Attribute("isOwner")
-    _well_known_name = Attribute("wellknownListName", read_only=True)
+    is_shared = Boolean("isShared", read_only=True, export=False)
+    is_owner = Boolean("isOwner", read_only=True)
+    well_known_name = Attribute("wellknownListName", read_only=True)
 
     def get_tasks(self, *args, **kwargs):
         """Get list of tasks in given list. Default returns only non-completed tasks."""
@@ -118,12 +126,15 @@ class Task(Resource):
     status = EnumField("status", Status, default=Status.NOT_STARTED)
     importance = EnumField("importance", Importance, default=Importance.NORMAL)
     recurrence = RecurrenceField("recurrence")
-    is_reminder_on = Attribute("isReminderOn", default=False)
+    is_reminder_on = Boolean("isReminderOn", default=False)
     created_datetime = IsoTime("createdDateTime", read_only=True)
     due_datetime = DueDatetime("dueDateTime")
     completed_datetime = Datetime("completedDateTime", read_only=True)
     last_modified_datetime = IsoTime("lastModifiedDateTime", read_only=True)
     reminder_datetime = Datetime("reminderDateTime")
+    categories = List("categories", Attribute)
+    has_attachments = Boolean("hasAttachments", default=False, read_only=True)
+    start_datetime = Datetime("startDateTime", read_only=True)
 
     def __init__(
         self,

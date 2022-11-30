@@ -6,6 +6,7 @@ from typing import Type, Union
 from ..converters import BaseConverter
 from ..converters.basic import (
     AttributeConverter,
+    BooleanConverter,
     ContentConverter,
     DateConverter,
     DatetimeConverter,
@@ -18,6 +19,10 @@ from . import Field
 
 class Attribute(Field):
     _converter = AttributeConverter()
+
+
+class Boolean(Field):
+    _converter = BooleanConverter()
 
 
 class Datetime(Field):

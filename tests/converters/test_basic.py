@@ -8,6 +8,7 @@ from dateutil import tz
 from todoms.attributes import Content, ContentType
 from todoms.converters.basic import (
     AttributeConverter,
+    BooleanConverter,
     ContentConverter,
     DateConverter,
     DatetimeConverter,
@@ -29,6 +30,19 @@ class TestAttributeConverter:
         data = Mock()
 
         assert attr_converter.back_converter(data) == data
+
+
+class TestBooleanConverter:
+    def test_obj_converter(self):
+        bool_converter = BooleanConverter()
+        assert bool_converter.obj_converter(True) is True
+        assert bool_converter.obj_converter(False) is False
+        assert bool_converter.obj_converter(None) is False
+
+    def test_back_converter(self):
+        bool_converter = BooleanConverter()
+        assert bool_converter.back_converter(True) is True
+        assert bool_converter.back_converter(False) is False
 
 
 class TestDatetimeConverter:

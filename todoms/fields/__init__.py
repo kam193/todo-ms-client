@@ -40,7 +40,7 @@ class Field(ABC):
 
     def from_dict(self, instance, data: dict):
         if self.dict_name not in data:
-            return
+            return None
         self._set_value(instance, self.convert_from_dict(data))
 
     def to_dict(self, instance) -> dict:
@@ -49,13 +49,13 @@ class Field(ABC):
         return {self.dict_name: self.convert_to_dict(instance)}
 
     def convert_from_dict(self, data: dict):
-        if not data.get(self.dict_name):
+        if data.get(self.dict_name) is None:
             return None
 
         return self._converter.obj_converter(data[self.dict_name])
 
     def convert_to_dict(self, instance):
-        if not self._get_value(instance):
+        if self._get_value(instance) is None:
             return None
 
         return self._converter.back_converter(self._get_value(instance))

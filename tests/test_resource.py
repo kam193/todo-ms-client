@@ -63,6 +63,9 @@ TASK_EXAMPLE_DATA = {
         },
         "range": {"type": "noEnd"},
     },
+    "categories": ["category-1", "category-2"],
+    "hasAttachments": False,
+    "startDateTime": {"dateTime": "2020-03-02T00:00:00.000000", "timeZone": "UTC"},
 }
 
 
@@ -252,9 +255,9 @@ class TestTaskListResource:
 
         assert task_list.id == "id-1"
         assert task_list.name == "list-name"
-        assert task_list._is_owner is True
-        assert task_list._is_shared is True
-        assert task_list._well_known_name == "none"
+        assert task_list.is_owner is True
+        assert task_list.is_shared is True
+        assert task_list.well_known_name == "none"
 
     def test_tasklist_get_tasks_returns_default_not_completed_tasks(
         self, client, requests_mock
@@ -316,6 +319,9 @@ class TestTaskResource:
         assert task.last_modified_datetime is None
         assert task.created_datetime is None
         assert task.reminder_datetime is None
+        assert task.start_datetime is None
+        assert task.categories is None
+        assert task.has_attachments is False
 
     def test_create_task_object_from_dict(self):
         task = Task.from_dict(None, TASK_EXAMPLE_DATA)
@@ -326,7 +332,9 @@ class TestTaskResource:
         assert task.title == "My new task"
         assert task.importance == Importance.HIGH
         assert task.is_reminder_on is True
+        assert task.has_attachments is False
         assert task.task_list is None
+        assert task.categories == ["category-1", "category-2"]
         assert task.last_modified_datetime == datetime(
             2021, 1, 1, 18, tzinfo=timezone.utc
         )
@@ -334,6 +342,7 @@ class TestTaskResource:
         assert task.completed_datetime == datetime(2020, 5, 1, tzinfo=timezone.utc)
         assert task.due_datetime == datetime(2020, 5, 2, tzinfo=timezone.utc)
         assert task.reminder_datetime == datetime(2020, 5, 3, tzinfo=timezone.utc)
+        assert task.start_datetime == datetime(2020, 3, 2, tzinfo=timezone.utc)
         assert isinstance(task.recurrence, Recurrence) is True
         assert isinstance(task.recurrence.pattern, patterns.YearlyAbsolute)
         assert isinstance(task.recurrence.range, ranges.NoEnd)

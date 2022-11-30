@@ -61,10 +61,9 @@ class TestField:
         assert obj.f1 == "default"
         assert obj.f2 is None
 
-    @pytest.mark.parametrize("data", [{}, None])
-    def test_datetime_to_dict_when_no_data(self, data):
+    def test_field_to_dict_when_no_data(self):
         obj = ExampleClass()
-        obj.f1 = data
+        obj.f1 = None
         assert ExampleClass.f1.to_dict(obj) == {"f1": None}
 
     def test_field_to_dict_uses_converter(self):
@@ -147,14 +146,12 @@ class TestCommonBehavior:
         return obj.to_dict()["old"]
 
     @pytest.mark.parametrize("field_class", field_classes)
-    @pytest.mark.parametrize("data", [{}, None])
-    def test_field_from_dict_when_no_data(self, data, field_class):
-        assert self.from_dict(data, field_class) is None
+    def test_field_from_dict_when_no_data(self, field_class):
+        assert self.from_dict(None, field_class) is None
 
     @pytest.mark.parametrize("field_class", field_classes)
-    @pytest.mark.parametrize("data", [{}, None])
-    def test_field_to_dict_when_no_data(self, data, field_class):
-        assert self.to_dict(data, field_class) is None
+    def test_field_to_dict_when_no_data(self, field_class):
+        assert self.to_dict(None, field_class) is None
 
 
 class ExampleEnum(Enum):
