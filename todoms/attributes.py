@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 
 
@@ -38,3 +39,14 @@ class Weekday(Enum):
     THURSDAY = "thursday"
     FRIDAY = "friday"
     SATURDAY = "saturday"
+
+
+class ContentType(Enum):
+    TEXT = "text"
+    HTML = "html"
+
+
+@dataclass
+class Content:
+    value: str
+    type: ContentType = ContentType.HTML

@@ -5,6 +5,7 @@ from unittest.mock import Mock
 import pytest
 from dateutil import tz
 
+from todoms.attributes import Content, ContentType
 from todoms.converters.basic import (
     AttributeConverter,
     ContentConverter,
@@ -67,22 +68,31 @@ class TestContentConverter:
     @pytest.mark.parametrize("data", [{}, None])
     def test_content_converter_when_no_data(self, data):
         converter = ContentConverter()
-        assert converter.obj_converter(data) == ""
+        assert converter.obj_converter(data) == Content(None, ContentType.HTML)
 
-    def test_content_converter(self):
+    @pytest.mark.parametrize("type", [ContentType.HTML, ContentType.TEXT])
+    def test_content_converter(self, type):
         converter = ContentConverter()
-        data = {"content": "The description"}
-        assert converter.obj_converter(data) == "The description"
+        data = {"content": "The description", "contentType": type.value}
+        assert converter.obj_converter(data) == Content("The description", type)
 
-    def test_content_converter_back(self):
+    def test_content_converter_back_html(self):
         converter = ContentConverter()
+        data = Content("The description", ContentType.HTML)
         expected = {"content": "The description", "contentType": "html"}
-        assert converter.back_converter("The description") == expected
+        assert converter.back_converter(data) == expected
 
-    def test_content_converter_back_when_no_data(self):
+    def test_content_converter_back_text(self):
+        converter = ContentConverter()
+        data = Content("The description", ContentType.TEXT)
+        expected = {"content": "The description", "contentType": "text"}
+        assert converter.back_converter(data) == expected
+
+    @pytest.mark.parametrize("data", [None, Content(None, ContentType.HTML)])
+    def test_content_converter_back_when_no_data(self, data):
         converter = ContentConverter()
         expected = {"content": None, "contentType": "html"}
-        assert converter.back_converter(None) == expected
+        assert converter.back_converter(data) == expected
 
 
 class TestIsoTimeConverter:

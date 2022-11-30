@@ -5,6 +5,8 @@ from typing import Any, List, Type
 
 from dateutil import parser, tz
 
+from todoms.attributes import Content, ContentType
+
 from . import BaseConverter
 
 
@@ -37,11 +39,13 @@ class DatetimeConverter(AttributeConverter):
 class ContentConverter(AttributeConverter):
     def obj_converter(self, data: dict) -> str:
         if not data:
-            return ""
-        return data["content"]
+            return Content(None, ContentType.HTML)
+        return Content(data["content"], ContentType(data.get("contentType", "html")))
 
-    def back_converter(self, data: str) -> dict:
-        return {"content": data, "contentType": "html"}
+    def back_converter(self, data: Content) -> dict:
+        value = data.value if data else None
+        type_ = data.type if data else ContentType.HTML
+        return {"content": value, "contentType": type_.value}
 
 
 class IsoTimeConverter(AttributeConverter):

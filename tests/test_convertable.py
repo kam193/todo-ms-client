@@ -1,3 +1,4 @@
+from todoms.attributes import Content as ContentAttr
 from todoms.convertable import BaseConvertableFieldsObject
 from todoms.fields.basic import Attribute, Content
 
@@ -44,7 +45,7 @@ class TestBaseConvertableFieldsObject:
     def test_convertable_object_create_converts_attributes_format(self):
         obj_1 = ComplexObjectWithConverting.from_dict({"old": {"content": "converted"}})
 
-        assert obj_1.new == "converted"
+        assert obj_1.new.value == "converted"
 
     def test_convertable_object_from_dict_pass_additional_arguments(self):
         obj = SimpleObject.from_dict({"name": "name-1"}, other="passed-implicit")
@@ -67,7 +68,7 @@ class TestBaseConvertableFieldsObject:
         assert data_dict == {"old": "data"}
 
     def test_convertable_object_complex_to_dict_with_converter(self):
-        obj = ComplexObjectWithConverting(new="data")
+        obj = ComplexObjectWithConverting(new=ContentAttr("data"))
 
         data_dict = obj.to_dict()
 

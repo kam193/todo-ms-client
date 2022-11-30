@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 import pytest
 
+from todoms.attributes import Content as ContentAttr
 from todoms.attributes import Importance, Status
 from todoms.fields.basic import Attribute
 from todoms.filters import and_, eq
@@ -106,7 +107,7 @@ class TestDefaultResource:
             new = Content("old")
             last_updated = Attribute("last_updated")
 
-        resource = ComplexResource(client, new="data", _id="id-1")
+        resource = ComplexResource(client, new=ContentAttr("data"), _id="id-1")
 
         requests_mock.patch(
             f"{API_BASE}/fake/id-1",
@@ -320,7 +321,7 @@ class TestTaskResource:
         task = Task.from_dict(None, TASK_EXAMPLE_DATA)
 
         assert task.id == "task-1"
-        assert task.body == "task-body"
+        assert task.body == ContentAttr("task-body")
         assert task.status == Status.NOT_STARTED
         assert task.title == "My new task"
         assert task.importance == Importance.HIGH
