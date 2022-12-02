@@ -2,7 +2,7 @@ from pytest import fixture, mark, raises
 
 from todoms.client import ResourceNotFoundError, ResponseError
 from todoms.fields.basic import Attribute
-from todoms.resources import Resource
+from todoms.resources import Resource, TaskList
 
 from .utils.constants import API_BASE
 from .utils.helpers import match_body
@@ -34,7 +34,7 @@ def test_list_resource_returns_all(client, resource_class, requests_mock):
         f"{API_BASE}/{resource_class.ENDPOINT}",
         json={"value": [{"name": "res-1"}, {"name": "res-2"}]},
     )
-    results = client.list(resource_class)
+    results = list(client.list(resource_class))
 
     assert len(results) == 2
     assert list(filter(lambda e: e.name == "res-1", results)) is not []
@@ -55,7 +55,7 @@ def test_list_resource_returns_all_when_parted(client, resource_class, requests_
         json={"value": [{"name": "res-3"}]},
     )
 
-    results = client.list(resource_class)
+    results = list(client.list(resource_class))
     assert len(results) == 3
     assert list(filter(lambda e: e.name == "res-1", results)) is not []
     assert list(filter(lambda e: e.name == "res-2", results)) is not []
@@ -68,8 +68,19 @@ def test_list_use_custom_endpoint(client, resource_class, requests_mock):
         json={"value": [{"name": "res-1"}]},
     )
 
-    results = client.list(resource_class, endpoint="my-endpoint/all")
+    results = list(client.list(resource_class, endpoint="my-endpoint/all"))
     assert len(results) == 1
+
+
+def test_client_task_lists_property_works(client, requests_mock):
+    requests_mock.get(
+        f"{API_BASE}/{TaskList.ENDPOINT}",
+        json={"value": [{"id": "list-1"}, {"id": "list-2"}]},
+    )
+    results = list(client.task_lists)
+
+    assert len(results) == 2
+    assert isinstance(results[0], TaskList)
 
 
 def test_list_resources_sends_filters(client, resource_class, requests_mock):
@@ -82,7 +93,7 @@ def test_list_resources_sends_filters(client, resource_class, requests_mock):
         json={"value": [{"name": "res-2"}]},
     )
 
-    results = client.list(resource_class, filter="test")
+    results = list(client.list(resource_class, filter="test"))
     assert len(results) == 2
     assert list(filter(lambda e: e.name == "res-1", results)) is not []
     assert list(filter(lambda e: e.name == "res-2", results)) is not []
@@ -95,7 +106,7 @@ def test_list_resource_raises_on_http_error(
     requests_mock.get(f"{API_BASE}/{resource_class.ENDPOINT}", status_code=error_code)
 
     with raises(exception):
-        client.list(resource_class)
+        list(client.list(resource_class))
 
 
 def test_get_resource_returns_obj(client, resource_class, requests_mock):

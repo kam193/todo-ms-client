@@ -5,7 +5,7 @@ from furl import furl
 from requests import Response, codes
 
 from .provider import AbstractProvider
-from .resources import Resource
+from .resources import Resource, TaskList
 
 logger = logging.getLogger(__name__)
 
@@ -62,17 +62,15 @@ class ToDoClient(object):
         url = (self._url / (endpoint or resource_class.ENDPOINT)).url
         params = resource_class.handle_list_filters(**kwargs)
 
-        elements = []
         while url:
             logger.debug("Listing %s", url)
             response = self._provider.get(url, params=params)
             self._map_http_errors(response, codes.ok)
             data = response.json()
-            elements += data["value"]
             url = data.get("@odata.nextLink", None)
             params = {}
-
-        return [resource_class.from_dict(self, element) for element in elements]
+            for element in data["value"]:
+                yield resource_class.from_dict(self, element)
 
     def get(
         self,
@@ -115,3 +113,7 @@ class ToDoClient(object):
         response = self._provider.post(url, json_data=data)
         self._map_http_errors(response, expected_code)
         return response.json()
+
+    @property
+    def task_lists(self):
+        return self.list(TaskList)

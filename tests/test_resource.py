@@ -270,7 +270,21 @@ class TestTaskListResource:
             complete_qs=True,
         )
         task_list = TaskList.from_dict(client, TASK_LIST_EXAMPLE_DATA)
-        tasks = task_list.get_tasks()
+        tasks = list(task_list.get_tasks())
+
+        assert len(tasks) == 1
+        assert tasks[0].id == "task-1"
+        assert tasks[0].task_list == task_list
+        assert tasks == list(task_list.open_tasks)
+
+    def test_tasklist_prop_all_tasks_returns_all(self, client, requests_mock):
+        requests_mock.get(
+            f"{API_BASE}/todo/lists/id-1/tasks",
+            json={"value": [TASK_EXAMPLE_DATA]},
+            complete_qs=True,
+        )
+        task_list = TaskList.from_dict(client, TASK_LIST_EXAMPLE_DATA)
+        tasks = list(task_list.tasks)
 
         assert len(tasks) == 1
         assert tasks[0].id == "task-1"

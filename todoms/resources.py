@@ -101,12 +101,24 @@ class TaskList(Resource):
     well_known_name = Attribute("wellknownListName", read_only=True)
 
     def get_tasks(self, *args, **kwargs):
-        """Get list of tasks in given list. Default returns only non-completed tasks."""
+        """Iterate over tasks in the list. Default returns only non-completed tasks."""
         tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
-        tasks = self._client.list(Task, endpoint=tasks_endpoint.url, *args, **kwargs)
-        for task in tasks:
+        tasks_gen = self._client.list(
+            Task, endpoint=tasks_endpoint.url, *args, **kwargs
+        )
+        for task in tasks_gen:
             task.task_list = self
-        return tasks
+            yield task
+
+    @property
+    def open_tasks(self):
+        """Iterate over opened tasks"""
+        return self.get_tasks(status=ne(Status.COMPLETED))
+
+    @property
+    def tasks(self):
+        """Iterate over all tasks in this list"""
+        return self.get_tasks(status=None)
 
     def save_task(self, task):
         task.task_list = self

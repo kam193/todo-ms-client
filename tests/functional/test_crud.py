@@ -89,8 +89,7 @@ def test_deleting_task_list(client, task_list):
 
 
 def test_listing_task_lists(client, task_list):
-    task_lists = client.list(TaskList)
-    assert task_list.name in [t.name for t in task_lists]
+    assert task_list.name in [t.name for t in client.task_lists]
 
 
 def test_creating_task(client, task_list, task_data, clean_up):
@@ -98,8 +97,7 @@ def test_creating_task(client, task_list, task_data, clean_up):
     task_list.save_task(task)
     clean_up(task)
 
-    tasks = task_list.get_tasks()
-    task = next(t for t in tasks if t.title == task_data["title"])
+    task = next(t for t in task_list.tasks if t.title == task_data["title"])
     assert task.created_datetime is not None
 
 
@@ -108,8 +106,9 @@ def test_updating_task(client, task, task_list, run_id):
     task.importance = Importance.LOW
     task.update()
 
-    tasks = task_list.get_tasks()
-    downloaded_task = next(t for t in tasks if t.title == f"New title-{run_id}")
+    downloaded_task = next(
+        t for t in task_list.tasks if t.title == f"New title-{run_id}"
+    )
     assert downloaded_task.importance == Importance.LOW
 
 
