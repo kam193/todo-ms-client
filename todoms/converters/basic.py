@@ -1,7 +1,7 @@
 from abc import ABC
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional, Type, TypeVar
 
 from dateutil import parser, tz
 
@@ -10,7 +10,7 @@ from todoms.attributes import Content, ContentType
 from . import BaseConverter
 
 
-class AttributeConverter(BaseConverter):
+class AttributeConverter(BaseConverter[Any]):
     def obj_converter(self, data: Any) -> Any:
         return data
 
@@ -18,15 +18,15 @@ class AttributeConverter(BaseConverter):
         return data
 
 
-class BooleanConverter(BaseConverter):
+class BooleanConverter(BaseConverter[bool]):
     def obj_converter(self, data: bool) -> bool:
         return True if data else False
 
-    def back_converter(self, data: bool) -> bool:
+    def back_converter(self, data: Optional[bool]) -> Optional[bool]:
         return data
 
 
-class DatetimeConverter(AttributeConverter):
+class DatetimeConverter(BaseConverter[datetime]):
     def obj_converter(self, data: dict) -> Optional[datetime]:
         if not data:
             return None
@@ -44,39 +44,39 @@ class DatetimeConverter(AttributeConverter):
         }
 
 
-class ContentConverter(AttributeConverter):
+class ContentConverter(BaseConverter[Content]):
     def obj_converter(self, data: dict) -> Content:
         if not data:
             return Content(None, ContentType.HTML)
         return Content(data["content"], ContentType(data.get("contentType", "html")))
 
-    def back_converter(self, data: Content) -> dict:
+    def back_converter(self, data: Optional[Content]) -> dict:
         value = data.value if data else None
         type_ = data.type if data else ContentType.HTML
         return {"content": value, "contentType": type_.value}
 
 
-class IsoTimeConverter(AttributeConverter):
+class IsoTimeConverter(BaseConverter[datetime]):
     def obj_converter(self, data: str) -> datetime:
         return parser.isoparse(data)
 
-    def back_converter(self, data: datetime) -> Optional[str]:
+    def back_converter(self, data: Optional[datetime]) -> Optional[str]:
         if not data:
             return None
         return data.astimezone(tz.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-class DateConverter(AttributeConverter):
+class DateConverter(BaseConverter[date]):
     def obj_converter(self, data: str) -> date:
         return parser.parse(data).date()
 
-    def back_converter(self, data: date) -> Optional[str]:
+    def back_converter(self, data: Optional[date]) -> Optional[str]:
         if not data:
             return None
         return data.isoformat()
 
 
-class ListConverter(AttributeConverter):
+class ListConverter(BaseConverter[List[Any]]):
     def __init__(self, obj_converter: BaseConverter):
         self._converter = obj_converter
 
@@ -92,18 +92,21 @@ class ListConverter(AttributeConverter):
         return [self._converter.back_converter(element) for element in data]
 
 
-class EnumConverter(AttributeConverter, ABC):
-    _ENUM: Type[Enum]
+TEnum = TypeVar("TEnum", bound=Enum)
 
-    def __init__(self, enum: Type[Enum]):
+
+class EnumConverter(BaseConverter[TEnum], ABC):
+    _ENUM: Type[TEnum]
+
+    def __init__(self, enum: Type[TEnum]):
         self._ENUM = enum
 
-    def obj_converter(self, data: str) -> Optional[Enum]:
+    def obj_converter(self, data: str) -> Optional[TEnum]:
         if not data:
             return None
         return self._ENUM(data)
 
-    def back_converter(self, data: Enum) -> Optional[str]:
+    def back_converter(self, data: Optional[TEnum]) -> Optional[str]:
         if not data:
             return None
-        return data.value
+        return str(data.value)

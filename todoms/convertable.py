@@ -19,20 +19,20 @@ class BaseConvertableFieldsObject(ABC):
             )
         ]
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: dict) -> None:
         for field in self._fields:
             if field.name in kwargs:
                 setattr(self, field.name, kwargs[field.name])
 
     @classmethod
     def from_dict(
-        cls: Type[ConvertableType], data: dict, **additional_kwargs
+        cls: Type[ConvertableType], data: dict, **additional_kwargs: dict
     ) -> ConvertableType:
         instance = cls(**additional_kwargs)
         instance._from_dict(data)
         return instance
 
-    def _from_dict(self, data: dict):
+    def _from_dict(self, data: dict) -> None:
         for field in self._fields:
             field.from_dict(self, data)
 
@@ -42,10 +42,10 @@ class BaseConvertableFieldsObject(ABC):
             data.update(field.to_dict(self))
         return data
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, self.__class__):
             return False
         return self.__dict__ == other.__dict__
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.__dict__})"

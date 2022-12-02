@@ -65,9 +65,10 @@ class TestRecurrencePatternConverter:
         with pytest.raises(ValueError):
             converter.obj_converter({"type": "some invalid"})
 
-    def test_recurrence_patterns_converter_when_none(self):
+    def test_recurrence_patterns_converter_raises_when_none(self):
         converter = RecurrencePatternConverter()
-        assert converter.obj_converter(None) is None
+        with pytest.raises(ValueError):
+            converter.obj_converter(None)
 
     def test_recurrence_pattern_back_converter(self):
         converter = RecurrencePatternConverter()
@@ -112,9 +113,10 @@ class TestRecurrenceRangeConverter:
         with pytest.raises(ValueError):
             converter.obj_converter({"type": "invalid"})
 
-    def test_recurrence_range_converter_when_none(self):
+    def test_recurrence_range_converter_raises_when_none(self):
         converter = RecurrenceRangeConverter()
-        assert converter.obj_converter(None) is None
+        with pytest.raises(ValueError):
+            converter.obj_converter(None)
 
     def test_recurrence_range_back_converter(self):
         converter = RecurrenceRangeConverter()

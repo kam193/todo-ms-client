@@ -8,7 +8,9 @@ from ..converters import BaseConverter
 class Field(ABC):
     _converter: BaseConverter
 
-    def __init__(self, dict_name: str, default=None, read_only=False, export=True):
+    def __init__(
+        self, dict_name: str, default=None, read_only: bool = False, export: bool = True
+    ) -> None:
         self.dict_name = dict_name
         self._default = default
         self._read_only = read_only

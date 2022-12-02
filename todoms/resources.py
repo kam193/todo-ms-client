@@ -1,10 +1,10 @@
 from abc import ABC
-from typing import Optional
+from typing import TYPE_CHECKING, Optional, TypeVar
 
 from furl import furl  # type: ignore
 
 from .attributes import Importance, Status
-from .convertable import BaseConvertableFieldsObject
+from .convertable import BaseConvertableFieldsObject, ConvertableType
 from .fields.basic import (
     Attribute,
     Boolean,
@@ -16,6 +16,9 @@ from .fields.basic import (
 )
 from .fields.recurrence import DueDatetime, RecurrenceField
 from .filters import and_, ne
+
+if TYPE_CHECKING:
+    from .client import ToDoClient
 
 
 class ResourceAlreadyCreatedError(Exception):
@@ -30,16 +33,19 @@ class UnsupportedOperationError(Exception):
     """This operation is not supported"""
 
 
+ResourceType = TypeVar("ResourceType", bound="Resource")
+
+
 class Resource(BaseConvertableFieldsObject, ABC):
     """Base Resource for any other"""
 
     ENDPOINT = ""
 
-    def __init__(self, client=None, *args, **kwargs):
+    def __init__(self, client: Optional[ToDoClient] = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._client = client
 
-    def create(self):
+    def create(self) -> None:
         """Create object in API"""
         if self.id:
             raise ResourceAlreadyCreatedError
@@ -47,45 +53,45 @@ class Resource(BaseConvertableFieldsObject, ABC):
         result = self._client.raw_post(self.managing_endpoint, data_dict, 201)
         self._from_dict(result)
 
-    def update(self):
+    def update(self) -> None:
         """Update resource in API"""
         response = self._client.patch(self)
         self._from_dict(response)
 
-    def delete(self):
+    def delete(self) -> None:
         """Delete object in API"""
         self._client.delete(self)
 
     @property
-    def managing_endpoint(self):
+    def managing_endpoint(self) -> str:
         return (furl(self.ENDPOINT) / (self.id or "")).url
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return getattr(self, "_id", None)
 
     @classmethod
-    def from_dict(cls, client, data_dict):
+    def from_dict(cls, client: ToDoClient, data_dict: dict) -> ConvertableType:
         return super().from_dict(data_dict, client=client)
 
-    def _clear(self):
+    def _clear(self) -> None:
         for field in self._fields:
             delattr(self, field.name)
 
-    def refresh(self):
+    def refresh(self) -> None:
         new_data = self._client.raw_get(endpoint=self.managing_endpoint)
         self._clear()
         self._from_dict(new_data)
 
     @classmethod
-    def handle_list_filters(cls, *args, **kwargs):
+    def handle_list_filters(cls, *args, **kwargs) -> dict:
         not_empty_kwargs = {k: v for k, v in kwargs.items() if v is not None}
         if len(args) + len(not_empty_kwargs) == 0:
             return {}
         params = {"$filter": and_(*args, **not_empty_kwargs)}
         return params
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not self.id or not other.id:
             return False
         return self.id == other.id
