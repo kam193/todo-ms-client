@@ -9,7 +9,7 @@ from todoms.fields.basic import Attribute
 from todoms.filters import and_, eq
 from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import (
-    Content,
+    ContentField,
     Resource,
     ResourceAlreadyCreatedError,
     Task,
@@ -108,7 +108,7 @@ class TestDefaultResource:
         class ComplexResource(Resource):
             ENDPOINT = "fake"
             _id = Attribute("id")
-            new = Content("old")
+            new = ContentField("old")
             last_updated = Attribute("last_updated")
 
         resource = ComplexResource(client, new=ContentAttr("data"), _id="id-1")

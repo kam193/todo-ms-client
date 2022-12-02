@@ -50,3 +50,6 @@ class ContentType(Enum):
 class Content:
     value: str
     type: ContentType = ContentType.HTML
+
+    def __str__(self) -> str:
+        return self.value

@@ -7,7 +7,7 @@ from .convertable import BaseConvertableFieldsObject
 from .fields.basic import (
     Attribute,
     Boolean,
-    Content,
+    ContentField,
     Datetime,
     EnumField,
     IsoTime,
@@ -125,7 +125,7 @@ class Task(Resource):
     ENDPOINT = "tasks"
 
     _id = Attribute("id")
-    body = Content("body")
+    body = ContentField("body")
     title = Attribute("title")
     status = EnumField("status", Status, default=Status.NOT_STARTED)
     importance = EnumField("importance", Importance, default=Importance.NORMAL)

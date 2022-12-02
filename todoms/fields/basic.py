@@ -3,6 +3,7 @@
 from enum import Enum
 from typing import Type, Union
 
+from ..attributes import Content
 from ..converters import BaseConverter
 from ..converters.basic import (
     AttributeConverter,
@@ -29,8 +30,15 @@ class Datetime(Field):
     _converter = DatetimeConverter()
 
 
-class Content(Field):
+class ContentField(Field):
     _converter = ContentConverter()
+
+    def _set_value(self, instance, value):
+        if isinstance(value, str):
+            obj = self._get_value(instance) or Content(value)
+            obj.value = value
+            value = obj
+        instance.__dict__[self.name] = value
 
 
 class IsoTime(Field):

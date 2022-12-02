@@ -1,6 +1,6 @@
 from todoms.attributes import Content as ContentAttr
 from todoms.convertable import BaseConvertableFieldsObject
-from todoms.fields.basic import Attribute, Content
+from todoms.fields.basic import Attribute, ContentField
 
 
 class SimpleObject(BaseConvertableFieldsObject):
@@ -13,7 +13,7 @@ class ComplexObject(BaseConvertableFieldsObject):
 
 
 class ComplexObjectWithConverting(BaseConvertableFieldsObject):
-    new = Content("old")
+    new = ContentField("old")
 
 
 class TestBaseConvertableFieldsObject:

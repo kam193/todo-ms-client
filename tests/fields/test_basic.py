@@ -2,11 +2,12 @@ from enum import Enum
 
 import pytest
 
+from todoms.attributes import Content, ContentType
 from todoms.convertable import BaseConvertableFieldsObject
 from todoms.converters import BaseConverter
 from todoms.fields.basic import (
     Attribute,
-    Content,
+    ContentField,
     Date,
     Datetime,
     EnumField,
@@ -125,7 +126,7 @@ class TestCommonBehavior:
     field_classes = [
         Attribute,
         Datetime,
-        Content,
+        ContentField,
         IsoTime,
         Date,
     ]
@@ -178,3 +179,33 @@ class TestEnumField:
         obj.f1 = ExampleEnum.a
 
         assert ExampleEnumClass.f1.to_dict(obj) == {"f1": "aa"}
+
+
+class TestContentField:
+    class ExampleContentClass:
+        f1 = ContentField("f1")
+
+    def test_set_content_from_str(self):
+        obj = self.ExampleContentClass()
+        obj.f1 = "some content"
+
+        assert obj.f1.value == "some content"
+
+        obj.f1.type = ContentType.TEXT
+        obj.f1 = "new content"
+        assert obj.f1.value == "new content"
+        assert obj.f1.type == ContentType.TEXT
+
+    def test_set_content_from_object(self):
+        obj = self.ExampleContentClass()
+        obj.f1 = Content("some content")
+
+        assert obj.f1.value == "some content"
+        assert str(obj.f1) == "some content"
+
+    def test_set_content_type(self):
+        obj = self.ExampleContentClass()
+        obj.f1 = Content("some content")
+        obj.f1.type = ContentType.TEXT
+
+        assert obj.f1.type == ContentType.TEXT
