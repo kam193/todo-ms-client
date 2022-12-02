@@ -15,6 +15,7 @@ from todoms.resources import (
     Task,
     TaskList,
     TaskListNotSpecifiedError,
+    UnsupportedOperationError,
 )
 
 from .utils.constants import API_BASE
@@ -295,7 +296,7 @@ class TestTaskListResource:
 
         task_list.save_task(new_task)
 
-        assert new_task.task_list is task_list
+        assert new_task._task_list is task_list
         assert new_task.id == "new_id"
         assert requests_mock.called is True
 
@@ -306,7 +307,7 @@ class TestTaskResource:
 
         assert task.id is None
         assert task.title == "Title"
-        assert task.task_list is None
+        assert task._task_list is None
 
         # Default values
         assert task.status == Status.NOT_STARTED
@@ -377,3 +378,14 @@ class TestTaskResource:
 
         with pytest.raises(TaskListNotSpecifiedError):
             task.managing_endpoint
+
+    def test_task_raises_when_try_to_change_list(self, task_list):
+        task = Task.from_dict(None, TASK_EXAMPLE_DATA)
+        task.task_list = task_list
+
+        # Allow assign once more the same
+        task.task_list = task_list
+
+        task_list_2 = TaskList.from_dict(None, {"id": "id-2"})
+        with pytest.raises(UnsupportedOperationError):
+            task.task_list = task_list_2

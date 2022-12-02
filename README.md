@@ -21,19 +21,19 @@ To learn more about MS ToDo API look into Microsoft docs on [Microsoft Docs page
 
 This is the matrix of main features supported by the official API and this library.
 
-| Feature            | Supported by official API | Supported by ToDo-MS-client | Known limitations                       |
-| ------------------ | ------------------------- | --------------------------- | --------------------------------------- |
-| Task lists - CRUD  | :heavy_check_mark:        | :heavy_check_mark:          |                                         |
-| My day             | :x:                       | -                           |                                         |
-| Tasks - CRUD       | :heavy_check_mark:        | :heavy_check_mark:          |                                         |
-| Tasks - recurrence | :heavy_check_mark:        | :large_orange_diamond:      | API is a bit unclear here, need testing |
-| Subtasks - CRUD    | :heavy_check_mark:        | :x:                         |                                         |
-| Reminders - CRUD   | :heavy_check_mark:        | :x:                         |                                         |
-| Attachments - CRUD | :heavy_check_mark:        | :x:                         |                                         |
-| Linked resources   | :heavy_check_mark:        | :x:                         | Not planned at the moment               |
-| Categories         | :heavy_check_mark:        | :x:                         |                                         |
-| Searching          | :heavy_check_mark:        | :large_orange_diamond:      |                                         |
-| Delta updates      | :heavy_check_mark:        | :x:                         |                                         |
+| Feature            | Supported by official API | Supported by ToDo-MS-client | Known limitations                             |
+| ------------------ | ------------------------- | --------------------------- | --------------------------------------------- |
+| Task lists - CRUD  | :heavy_check_mark:        | :heavy_check_mark:          |                                               |
+| My day             | :x:                       | -                           |                                               |
+| Tasks - CRUD       | :heavy_check_mark:        | :heavy_check_mark:          | API doesn't support moving task between lists |
+| Tasks - recurrence | :heavy_check_mark:        | :large_orange_diamond:      | API is a bit unclear here, need testing       |
+| Subtasks - CRUD    | :heavy_check_mark:        | :x:                         |                                               |
+| Reminders - CRUD   | :heavy_check_mark:        | :x:                         |                                               |
+| Attachments - CRUD | :heavy_check_mark:        | :x:                         |                                               |
+| Linked resources   | :heavy_check_mark:        | :x:                         | Not planned at the moment                     |
+| Categories         | :heavy_check_mark:        | :x:                         |                                               |
+| Searching          | :heavy_check_mark:        | :large_orange_diamond:      |                                               |
+| Delta updates      | :heavy_check_mark:        | :x:                         |                                               |
 
 ---
 

@@ -25,6 +25,10 @@ class TaskListNotSpecifiedError(Exception):
     """TaskList id must be set before create task"""
 
 
+class UnsupportedOperationError(Exception):
+    """This operation is not supported"""
+
+
 class Resource(BaseConvertableFieldsObject, ABC):
     """Base Resource for any other"""
 
@@ -143,10 +147,10 @@ class Task(Resource):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.task_list = task_list
+        self._task_list = task_list
 
     def create(self):
-        if not self.task_list:
+        if not self._task_list:
             raise TaskListNotSpecifiedError
         return super().create()
 
@@ -157,9 +161,21 @@ class Task(Resource):
 
     @property
     def managing_endpoint(self):
-        if not self.task_list:
+        if not self._task_list:
             raise TaskListNotSpecifiedError
-        return (furl(self.task_list.managing_endpoint) / super().managing_endpoint).url
+        return (furl(self._task_list.managing_endpoint) / super().managing_endpoint).url
+
+    @property
+    def task_list(self):
+        return self._task_list
+
+    @task_list.setter
+    def task_list(self, value: TaskList):
+        if self._task_list and self._task_list.id != value.id:
+            raise UnsupportedOperationError(
+                "Moving task between lists is not supported by the API"
+            )
+        self._task_list = value
 
     def __repr__(self):
         return f"<Task '{self.title}'>"
