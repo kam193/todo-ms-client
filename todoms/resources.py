@@ -1,6 +1,7 @@
 from abc import ABC
+from typing import Optional
 
-from furl import furl
+from furl import furl  # type: ignore
 
 from .attributes import Importance, Status
 from .convertable import BaseConvertableFieldsObject
@@ -155,7 +156,7 @@ class Task(Resource):
     def __init__(
         self,
         *args,
-        task_list: TaskList = None,
+        task_list: Optional[TaskList] = None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)

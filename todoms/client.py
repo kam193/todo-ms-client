@@ -1,7 +1,7 @@
 import logging
-from typing import Type
+from typing import Optional, Type
 
-from furl import furl
+from furl import furl  # type: ignore
 from requests import Response, codes
 
 from .provider import AbstractProvider
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class ResponseError(Exception):
     """Response returned an error"""
 
-    MESSAGE = None
+    MESSAGE: str
 
     def __init__(self, response: Response):
         self.response = response
@@ -58,7 +58,9 @@ class ToDoClient(object):
             )
             raise ResponseError(response)
 
-    def list(self, resource_class: Type[Resource], endpoint: str = None, **kwargs):
+    def list(
+        self, resource_class: Type[Resource], endpoint: Optional[str] = None, **kwargs
+    ):
         url = (self._url / (endpoint or resource_class.ENDPOINT)).url
         params = resource_class.handle_list_filters(**kwargs)
 
@@ -67,6 +69,8 @@ class ToDoClient(object):
             response = self._provider.get(url, params=params)
             self._map_http_errors(response, codes.ok)
             data = response.json()
+            if not data:
+                return
             url = data.get("@odata.nextLink", None)
             params = {}
             for element in data["value"]:
@@ -75,8 +79,8 @@ class ToDoClient(object):
     def get(
         self,
         resource_class: Type[Resource],
-        resource_id: str = None,
-        endpoint: str = None,
+        resource_id: Optional[str] = None,
+        endpoint: Optional[str] = None,
     ):
         if not endpoint and not resource_id:
             raise ValueError("Either endpoint or resource_id must be provided")

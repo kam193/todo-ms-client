@@ -7,3 +7,8 @@ pytest-html
 pytest-cov
 requests-mock
 ssort
+mypy
+
+# Type stubs
+types-requests
+types-python-dateutil

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 
 class Importance(Enum):
@@ -48,8 +49,8 @@ class ContentType(Enum):
 
 @dataclass
 class Content:
-    value: str
+    value: Optional[str] = None
     type: ContentType = ContentType.HTML
 
     def __str__(self) -> str:
-        return self.value
+        return self.value or ""

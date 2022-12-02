@@ -1,7 +1,7 @@
 from abc import ABC
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, List, Type
+from typing import Any, List, Optional, Type
 
 from dateutil import parser, tz
 
@@ -27,14 +27,14 @@ class BooleanConverter(BaseConverter):
 
 
 class DatetimeConverter(AttributeConverter):
-    def obj_converter(self, data: dict) -> datetime:
+    def obj_converter(self, data: dict) -> Optional[datetime]:
         if not data:
             return None
 
         date = parser.parse(data["dateTime"])
         return datetime.combine(date.date(), date.time(), tz.gettz(data["timeZone"]))
 
-    def back_converter(self, data: datetime) -> dict:
+    def back_converter(self, data: Optional[datetime]) -> Optional[dict]:
         if not data:
             return None
 
@@ -45,7 +45,7 @@ class DatetimeConverter(AttributeConverter):
 
 
 class ContentConverter(AttributeConverter):
-    def obj_converter(self, data: dict) -> str:
+    def obj_converter(self, data: dict) -> Content:
         if not data:
             return Content(None, ContentType.HTML)
         return Content(data["content"], ContentType(data.get("contentType", "html")))
@@ -60,7 +60,7 @@ class IsoTimeConverter(AttributeConverter):
     def obj_converter(self, data: str) -> datetime:
         return parser.isoparse(data)
 
-    def back_converter(self, data: datetime) -> str:
+    def back_converter(self, data: datetime) -> Optional[str]:
         if not data:
             return None
         return data.astimezone(tz.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -70,47 +70,40 @@ class DateConverter(AttributeConverter):
     def obj_converter(self, data: str) -> date:
         return parser.parse(data).date()
 
-    def back_converter(self, data: date) -> str:
+    def back_converter(self, data: date) -> Optional[str]:
         if not data:
             return None
         return data.isoformat()
 
 
 class ListConverter(AttributeConverter):
-    def __init__(self, obj_converter: AttributeConverter):
+    def __init__(self, obj_converter: BaseConverter):
         self._converter = obj_converter
 
-    def obj_converter(self, data: List[Any]) -> List[Any]:
+    # TODO: Generic type
+    def obj_converter(self, data: Optional[List[Any]]) -> Optional[List[Any]]:
         if data is None:
             return None
         return [self._converter.obj_converter(element) for element in data]
 
-    def back_converter(self, data: List[Any]) -> List[Any]:
+    def back_converter(self, data: Optional[List[Any]]) -> Optional[List[Any]]:
         if data is None:
             return None
         return [self._converter.back_converter(element) for element in data]
 
-    @property
-    def original_name(self) -> str:
-        return self._converter.original_name
-
-    @property
-    def local_name(self) -> str:
-        return self._converter.local_name
-
 
 class EnumConverter(AttributeConverter, ABC):
-    _ENUM = None
+    _ENUM: Type[Enum]
 
     def __init__(self, enum: Type[Enum]):
         self._ENUM = enum
 
-    def obj_converter(self, data: str) -> Enum:
+    def obj_converter(self, data: str) -> Optional[Enum]:
         if not data:
             return None
         return self._ENUM(data)
 
-    def back_converter(self, data: Enum) -> str:
+    def back_converter(self, data: Enum) -> Optional[str]:
         if not data:
             return None
         return data.value

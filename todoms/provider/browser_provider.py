@@ -4,9 +4,10 @@ import webbrowser
 import wsgiref.simple_server
 import wsgiref.util
 from base64 import urlsafe_b64encode
+from typing import Optional
 
-from furl import furl
-from requests_oauthlib import OAuth2Session
+from furl import furl  # type: ignore
+from requests_oauthlib import OAuth2Session  # type: ignore
 
 from .base import AbstractProvider
 
@@ -54,11 +55,11 @@ class WebBrowserProvider(AbstractProvider):
         self._open_message = open_message
         self._finish_message = finish_message
 
-        authority = furl(authority)
-        self._authorize_url = (authority / authorize_endpoint).url
-        self._token_url = (authority / token_endpoint).url
+        authority_url = furl(authority)
+        self._authorize_url = (authority_url / authorize_endpoint).url
+        self._token_url = (authority_url / token_endpoint).url
 
-        self._session = None
+        self._session: OAuth2Session
 
     def _save_token(self, token):
         self._token = token
@@ -69,7 +70,7 @@ class WebBrowserProvider(AbstractProvider):
             return url.replace("http", "https", 1)
         return url
 
-    def _build_session(self, redirect_url: str):
+    def _build_session(self, redirect_url: str) -> OAuth2Session:
         refresh_params = {"client_id": self._app_id, "client_secret": self._app_secret}
 
         session = OAuth2Session(
@@ -136,7 +137,7 @@ class WebBrowserProvider(AbstractProvider):
             headers=headers,
         )
 
-    def get(self, url: str, params: dict = None):
+    def get(self, url: str, params: Optional[dict] = None):
         if not self._token:
             raise RequestBeforeAuthenticatedError
 

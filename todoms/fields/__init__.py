@@ -3,11 +3,10 @@ from abc import ABC
 from ..converters import BaseConverter
 
 # TODO: Type hinting
-# TODO: Add support for default values
 
 
 class Field(ABC):
-    _converter = BaseConverter
+    _converter: BaseConverter
 
     def __init__(self, dict_name: str, default=None, read_only=False, export=True):
         self.dict_name = dict_name

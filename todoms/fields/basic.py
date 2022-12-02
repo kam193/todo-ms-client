@@ -50,8 +50,6 @@ class Date(Field):
 
 
 class List(Field):
-    _converter = None
-
     def __init__(self, dict_name: str, inner_field: Union[Type[Field], BaseConverter]):
         super().__init__(dict_name)
         if isinstance(inner_field, BaseConverter):
@@ -61,8 +59,6 @@ class List(Field):
 
 
 class EnumField(Field):
-    _converter = None
-
     def __init__(self, dict_name: str, enum_class: Type[Enum], **kwargs):
         super().__init__(dict_name, **kwargs)
         self._converter = EnumConverter(enum_class)

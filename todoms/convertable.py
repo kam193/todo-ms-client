@@ -1,7 +1,10 @@
 import inspect
 from abc import ABC
+from typing import Type, TypeVar
 
 from .fields import Field
+
+ConvertableType = TypeVar("ConvertableType", bound="BaseConvertableFieldsObject")
 
 
 class BaseConvertableFieldsObject(ABC):
@@ -23,8 +26,8 @@ class BaseConvertableFieldsObject(ABC):
 
     @classmethod
     def from_dict(
-        cls, data: dict, **additional_kwargs
-    ) -> "BaseConvertableFieldsObject":
+        cls: Type[ConvertableType], data: dict, **additional_kwargs
+    ) -> ConvertableType:
         instance = cls(**additional_kwargs)
         instance._from_dict(data)
         return instance

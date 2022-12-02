@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from requests import Response
 
 
 class AbstractProvider(ABC):
     @abstractmethod
-    def get(self, url: str, params: dict = None) -> Response:
+    def get(self, url: str, params: Optional[dict] = None) -> Response:
         pass
 
     @abstractmethod
