@@ -59,6 +59,12 @@ def test_creating_task_list(client, task_list_data, clean_up):
     downloaded_task_list = client.get(TaskList, task_list.id)
     assert downloaded_task_list is not None
 
+    simple_list = TaskList(name="Simple")
+    client.save_list(simple_list)
+    clean_up(simple_list)
+
+    assert simple_list.id is not None
+
 
 def test_updating_task_list(client, task_list):
     task_list.name = "New name"

@@ -83,6 +83,21 @@ def test_client_task_lists_property_works(client, requests_mock):
     assert isinstance(results[0], TaskList)
 
 
+def test_client_saves_task_list(client, requests_mock):
+    requests_mock.post(
+        f"{API_BASE}/{TaskList.ENDPOINT}",
+        json={"id": "list-1"},
+        status_code=201,
+    )
+
+    task_list = TaskList(name="list-1")
+    result = client.save_list(task_list)
+
+    assert task_list.id == "list-1"
+    assert task_list._client is client
+    assert result is task_list
+
+
 def test_list_resources_sends_filters(client, resource_class, requests_mock):
     requests_mock.get(
         f"{API_BASE}/{resource_class.ENDPOINT}?filter=test-parsed",

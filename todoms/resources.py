@@ -34,7 +34,7 @@ class Resource(BaseConvertableFieldsObject, ABC):
 
     ENDPOINT = ""
 
-    def __init__(self, client, *args, **kwargs):
+    def __init__(self, client=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._client = client
 

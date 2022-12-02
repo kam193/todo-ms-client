@@ -117,3 +117,8 @@ class ToDoClient(object):
     @property
     def task_lists(self):
         return self.list(TaskList)
+
+    def save_list(self, task_list: TaskList):
+        task_list._client = self
+        task_list.create()
+        return task_list
