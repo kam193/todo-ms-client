@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 import pytest
 
+from todoms.attributes import Importance
 from todoms.client import ResourceNotFoundError
 from todoms.recurrence import Recurrence, patterns, ranges
 from todoms.resources import Task, TaskList
@@ -104,10 +105,12 @@ def test_creating_task(client, task_list, task_data, clean_up):
 
 def test_updating_task(client, task, task_list, run_id):
     task.title = f"New title-{run_id}"
+    task.importance = Importance.LOW
     task.update()
 
     tasks = task_list.get_tasks()
-    assert f"New title-{run_id}" in [t.title for t in tasks]
+    downloaded_task = next(t for t in tasks if t.title == f"New title-{run_id}")
+    assert downloaded_task.importance == Importance.LOW
 
 
 def test_deleting_task(client, task, task_list):
