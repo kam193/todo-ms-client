@@ -36,9 +36,9 @@ TASK_LIST_EXAMPLE_DATA = {
     # "@odata.context": "https://graph.microsoft.com/beta/$metadata#lists/$entity",
     # "@odata.etag": "xxx",
     "displayName": "list-name",
-    "isOwner": True,  # TODO:
-    "isShared": True,  # TODO:
-    "wellknownListName": "none",  # TODO:
+    "isOwner": True,
+    "isShared": True,
+    "wellknownListName": "none",
     "id": "id-1",
 }
 

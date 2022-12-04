@@ -12,7 +12,7 @@ class RecurrenceField(Field):
     _converter = RecurrenceConverter()
 
 
-class DueDatetime(Field[datetime]):
+class DueDatetime(Field[datetime, dict]):
     _converter = DatetimeConverter()
 
     def _find_recurrence_start_date(

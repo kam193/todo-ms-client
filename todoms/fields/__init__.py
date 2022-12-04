@@ -1,18 +1,17 @@
 from abc import ABC
 from typing import TYPE_CHECKING, Generic, Optional, TypeVar, Union
 
-from ..converters import BaseConverter, JSONableTypes
+from ..converters import BaseConverter, KSourceType
 
 if TYPE_CHECKING:
     from ..convertable import BaseConvertableFieldsObject, ConvertableType
 
-# TODO: Type hinting
 
 T = TypeVar("T")
 
 
-class Field(ABC, Generic[T]):
-    _converter: BaseConverter[T]
+class Field(ABC, Generic[T, KSourceType]):
+    _converter: BaseConverter[T, KSourceType]
 
     def __init__(
         self,
@@ -26,12 +25,12 @@ class Field(ABC, Generic[T]):
         self._read_only = read_only
         self._export = export
 
-    def _get_value(self, instance: ConvertableType) -> Optional[T]:
+    def _get_value(self, instance: "ConvertableType") -> Optional[T]:
         return instance.__dict__.get(self.name, self._default)
 
     def __get__(
         self, instance: "BaseConvertableFieldsObject", _: object = None
-    ) -> "Union[Optional[T], Field[T]]":
+    ) -> "Union[Optional[T], Field[T, KSourceType]]":
         if not instance:
             return self
         return self._get_value(instance)
@@ -71,7 +70,9 @@ class Field(ABC, Generic[T]):
 
         return self._converter.obj_converter(data[self.dict_name])
 
-    def convert_to_dict(self, instance: "BaseConvertableFieldsObject") -> JSONableTypes:
+    def convert_to_dict(
+        self, instance: "BaseConvertableFieldsObject"
+    ) -> Optional[KSourceType]:
         if self._get_value(instance) is None:
             return None
 

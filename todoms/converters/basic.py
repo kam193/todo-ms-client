@@ -10,24 +10,24 @@ from todoms.attributes import Content, ContentType
 from . import BaseConverter, JSONableTypes
 
 
-class AttributeConverter(BaseConverter[JSONableTypes]):
-    def obj_converter(self, data: JSONableTypes) -> JSONableTypes:
+class AttributeConverter(BaseConverter[JSONableTypes, JSONableTypes]):
+    def obj_converter(self, data: Optional[JSONableTypes]) -> JSONableTypes:
         return data
 
-    def back_converter(self, data: JSONableTypes) -> JSONableTypes:
+    def back_converter(self, data: JSONableTypes) -> Optional[JSONableTypes]:
         return data
 
 
-class BooleanConverter(BaseConverter[bool]):
-    def obj_converter(self, data: bool) -> bool:
+class BooleanConverter(BaseConverter[bool, bool]):
+    def obj_converter(self, data: Optional[bool]) -> bool:
         return True if data else False
 
     def back_converter(self, data: Optional[bool]) -> Optional[bool]:
         return data
 
 
-class DatetimeConverter(BaseConverter[datetime]):
-    def obj_converter(self, data: dict) -> Optional[datetime]:
+class DatetimeConverter(BaseConverter[datetime, dict]):
+    def obj_converter(self, data: Optional[dict]) -> Optional[datetime]:
         if not data:
             return None
 
@@ -44,20 +44,22 @@ class DatetimeConverter(BaseConverter[datetime]):
         }
 
 
-class ContentConverter(BaseConverter[Content]):
-    def obj_converter(self, data: dict) -> Content:
+class ContentConverter(BaseConverter[Content, dict]):
+    def obj_converter(self, data: Optional[dict]) -> Content:
         if not data:
             return Content(None, ContentType.HTML)
         return Content(data["content"], ContentType(data.get("contentType", "html")))
 
-    def back_converter(self, data: Optional[Content]) -> dict:
+    def back_converter(self, data: Optional[Content]) -> Optional[dict]:
         value = data.value if data else None
         type_ = data.type if data else ContentType.HTML
         return {"content": value, "contentType": type_.value}
 
 
-class IsoTimeConverter(BaseConverter[datetime]):
-    def obj_converter(self, data: str) -> datetime:
+class IsoTimeConverter(BaseConverter[datetime, str]):
+    def obj_converter(self, data: Optional[str]) -> Optional[datetime]:
+        if not data:
+            return None
         return parser.isoparse(data)
 
     def back_converter(self, data: Optional[datetime]) -> Optional[str]:
@@ -66,8 +68,10 @@ class IsoTimeConverter(BaseConverter[datetime]):
         return data.astimezone(tz.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-class DateConverter(BaseConverter[date]):
-    def obj_converter(self, data: str) -> date:
+class DateConverter(BaseConverter[date, str]):
+    def obj_converter(self, data: Optional[str]) -> Optional[date]:
+        if not data:
+            return None
         return parser.parse(data).date()
 
     def back_converter(self, data: Optional[date]) -> Optional[str]:
@@ -79,16 +83,17 @@ class DateConverter(BaseConverter[date]):
 T = TypeVar("T")
 
 
-class ListConverter(Generic[T], BaseConverter[List[T]]):
-    def __init__(self, obj_converter: BaseConverter[T]):
+class ListConverter(Generic[T], BaseConverter[List[T], list]):
+    def __init__(self, obj_converter: BaseConverter[T, JSONableTypes]):
         self._converter = obj_converter
 
-    # TODO: Generic type
-    def obj_converter(self, data: Optional[List[T]]) -> Optional[List[T]]:
+    def obj_converter(self, data: Optional[List[JSONableTypes]]) -> Optional[List[T]]:
         if data is None:
             return None
-        return [  # type: ignore
-            self._converter.obj_converter(element) for element in data
+        return [
+            self._converter.obj_converter(element)  # type: ignore
+            for element in data
+            if data  # The incompatible type None is filtered out here
         ]
 
     def back_converter(self, data: Optional[List[T]]) -> Optional[List[JSONableTypes]]:
@@ -100,13 +105,13 @@ class ListConverter(Generic[T], BaseConverter[List[T]]):
 TEnum = TypeVar("TEnum", bound=Enum)
 
 
-class EnumConverter(BaseConverter[TEnum], ABC):
+class EnumConverter(BaseConverter[TEnum, str], ABC):
     _ENUM: Type[TEnum]
 
     def __init__(self, enum: Type[TEnum]):
         self._ENUM = enum
 
-    def obj_converter(self, data: str) -> Optional[TEnum]:
+    def obj_converter(self, data: Optional[str]) -> Optional[TEnum]:
         if not data:
             return None
         return self._ENUM(data)

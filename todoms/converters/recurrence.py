@@ -5,7 +5,7 @@ from ..recurrence import Recurrence, patterns, ranges
 from . import BaseConverter
 
 
-class RecurrencePatternConverter(BaseConverter[patterns.BaseRecurrencePattern]):
+class RecurrencePatternConverter(BaseConverter[patterns.BaseRecurrencePattern, dict]):
     _CONVERTING_TABLE: dict[str, type[patterns.BaseRecurrencePattern]] = {
         RecurrencePatternType.DAILY.value: patterns.Daily,
         RecurrencePatternType.WEEKLY.value: patterns.Weekly,
@@ -35,9 +35,7 @@ class RecurrencePatternConverter(BaseConverter[patterns.BaseRecurrencePattern]):
         return data.to_dict()
 
 
-class RecurrenceRangeConverter(BaseConverter[ranges.BaseRecurrenceRange]):
-    # TODO: #104 - Support the way the recurrence is updated in the API
-    # until then, updating the recurrence will not work
+class RecurrenceRangeConverter(BaseConverter[ranges.BaseRecurrenceRange, dict]):
     _CONVERTING_TABLE: dict[str, type[ranges.BaseRecurrenceRange]] = {
         RecurrenceRangeType.END_DATE.value: ranges.EndDate,
         RecurrenceRangeType.NO_END.value: ranges.NoEnd,
@@ -64,11 +62,11 @@ class RecurrenceRangeConverter(BaseConverter[ranges.BaseRecurrenceRange]):
         return data.to_dict()
 
 
-class RecurrenceConverter(BaseConverter[Recurrence]):
+class RecurrenceConverter(BaseConverter[Recurrence, dict]):
     _range_converter = RecurrenceRangeConverter()
     _pattern_converter = RecurrencePatternConverter()
 
-    def obj_converter(self, data: dict) -> Optional[Recurrence]:
+    def obj_converter(self, data: Optional[dict]) -> Optional[Recurrence]:
         if not data:
             return None
 
