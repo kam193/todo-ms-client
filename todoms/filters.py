@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from itertools import chain
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from dateutil import tz
 
@@ -25,18 +25,18 @@ def _format_comparable(value: Comparable) -> str:
         return f"'{value}'"
 
 
-def _generate_operator(op, args, kwargs) -> str:
+def _generate_operator(op: str, args: tuple, kwargs: dict[str, Comparable]) -> str:
     if len(args) + len(kwargs) == 1:
         return "".join(chain(args, _format_kwargs(kwargs)))
     condition = f" {op} ".join(chain(args, _format_kwargs(kwargs)))
     return f"({condition.strip()})"
 
 
-def and_(*args, **kwargs) -> str:
+def and_(*args: Any, **kwargs: Comparable) -> str:
     return _generate_operator("and", args, kwargs)
 
 
-def or_(*args, **kwargs) -> str:
+def or_(*args: Any, **kwargs: Comparable) -> str:
     return _generate_operator("or", args, kwargs)
 
 

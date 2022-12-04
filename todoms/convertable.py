@@ -1,6 +1,6 @@
 import inspect
 from abc import ABC
-from typing import Type, TypeVar
+from typing import Any, Type, TypeVar
 
 from .fields import Field
 
@@ -19,14 +19,14 @@ class BaseConvertableFieldsObject(ABC):
             )
         ]
 
-    def __init__(self, **kwargs: dict) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         for field in self._fields:
             if field.name in kwargs:
                 setattr(self, field.name, kwargs[field.name])
 
     @classmethod
     def from_dict(
-        cls: Type[ConvertableType], data: dict, **additional_kwargs: dict
+        cls: Type[ConvertableType], data: dict, **additional_kwargs: Any
     ) -> ConvertableType:
         instance = cls(**additional_kwargs)
         instance._from_dict(data)

@@ -1,3 +1,5 @@
+from typing import Any
+
 from todoms.fields.basic import Attribute, Date, EnumField
 
 from ..attributes import RecurrenceRangeType
@@ -15,17 +17,17 @@ class EndDate(BaseRecurrenceRange):
 
     end_date = Date("endDate", export=False)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(_range_type=RecurrenceRangeType.END_DATE, *args, **kwargs)
 
 
 class NoEnd(BaseRecurrenceRange):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(_range_type=RecurrenceRangeType.NO_END, *args, **kwargs)
 
 
 class Numbered(BaseRecurrenceRange):
     occurrences = Attribute("numberOfOccurrences")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(_range_type=RecurrenceRangeType.NUMBERED, *args, **kwargs)

@@ -2,10 +2,10 @@ from typing import Optional
 
 from ..attributes import RecurrencePatternType, RecurrenceRangeType
 from ..recurrence import Recurrence, patterns, ranges
-from .basic import AttributeConverter
+from . import BaseConverter
 
 
-class RecurrencePatternConverter(AttributeConverter):
+class RecurrencePatternConverter(BaseConverter[patterns.BaseRecurrencePattern]):
     _CONVERTING_TABLE: dict[str, type[patterns.BaseRecurrencePattern]] = {
         RecurrencePatternType.DAILY.value: patterns.Daily,
         RecurrencePatternType.WEEKLY.value: patterns.Weekly,
@@ -27,13 +27,15 @@ class RecurrencePatternConverter(AttributeConverter):
 
         return pattern_class.from_dict(data)
 
-    def back_converter(self, data: patterns.BaseRecurrencePattern) -> Optional[dict]:
+    def back_converter(
+        self, data: Optional[patterns.BaseRecurrencePattern]
+    ) -> Optional[dict]:
         if not data:
             return None
         return data.to_dict()
 
 
-class RecurrenceRangeConverter(AttributeConverter):
+class RecurrenceRangeConverter(BaseConverter[ranges.BaseRecurrenceRange]):
     # TODO: #104 - Support the way the recurrence is updated in the API
     # until then, updating the recurrence will not work
     _CONVERTING_TABLE: dict[str, type[ranges.BaseRecurrenceRange]] = {
@@ -54,13 +56,15 @@ class RecurrenceRangeConverter(AttributeConverter):
 
         return pattern_class.from_dict(data)
 
-    def back_converter(self, data: ranges.BaseRecurrenceRange) -> Optional[dict]:
+    def back_converter(
+        self, data: Optional[ranges.BaseRecurrenceRange]
+    ) -> Optional[dict]:
         if not data:
             return None
         return data.to_dict()
 
 
-class RecurrenceConverter(AttributeConverter):
+class RecurrenceConverter(BaseConverter[Recurrence]):
     _range_converter = RecurrenceRangeConverter()
     _pattern_converter = RecurrencePatternConverter()
 
@@ -73,7 +77,7 @@ class RecurrenceConverter(AttributeConverter):
             self._range_converter.obj_converter(data.get("range")),
         )
 
-    def back_converter(self, data: Recurrence) -> Optional[dict]:
+    def back_converter(self, data: Optional[Recurrence]) -> Optional[dict]:
         if not data:
             return None
 

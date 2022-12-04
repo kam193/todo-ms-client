@@ -9,5 +9,5 @@ class Recurrence:
     pattern: BaseRecurrencePattern
     range: BaseRecurrenceRange
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {"pattern": self.pattern.to_dict(), "range": self.range.to_dict()}

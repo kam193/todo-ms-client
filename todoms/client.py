@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, Optional, Type, TypeVar
+from typing import Any, Iterable, Optional, Type, TypeVar
 
 from furl import furl  # type: ignore
 from requests import Response, codes
@@ -65,7 +65,7 @@ class ToDoClient:
         self,
         resource_class: Type[ResourceType],
         endpoint: Optional[str] = None,
-        **kwargs: dict,
+        **kwargs: Any,
     ) -> Iterable[ResourceType]:
         url = (self._url / (endpoint or resource_class.ENDPOINT)).url
         params = resource_class.handle_list_filters(**kwargs)
@@ -80,7 +80,7 @@ class ToDoClient:
             url = data.get("@odata.nextLink", None)
             params = {}
             for element in data["value"]:
-                yield resource_class.from_dict(self, element)
+                yield resource_class.from_dict(element, client=self)
 
     def get(
         self,
@@ -93,7 +93,7 @@ class ToDoClient:
 
         endpoint = endpoint or f"{resource_class.ENDPOINT}/{resource_id}"
         response = self.raw_get(endpoint)
-        return resource_class.from_dict(self, response)
+        return resource_class.from_dict(response, client=self)
 
     def raw_get(self, endpoint: str) -> dict:
         url = (self._url / endpoint).url

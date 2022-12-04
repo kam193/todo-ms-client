@@ -1,20 +1,20 @@
 from abc import ABC
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, List, Optional, Type, TypeVar
+from typing import Generic, List, Optional, Type, TypeVar
 
 from dateutil import parser, tz
 
 from todoms.attributes import Content, ContentType
 
-from . import BaseConverter
+from . import BaseConverter, JSONableTypes
 
 
-class AttributeConverter(BaseConverter[Any]):
-    def obj_converter(self, data: Any) -> Any:
+class AttributeConverter(BaseConverter[JSONableTypes]):
+    def obj_converter(self, data: JSONableTypes) -> JSONableTypes:
         return data
 
-    def back_converter(self, data: Any) -> Any:
+    def back_converter(self, data: JSONableTypes) -> JSONableTypes:
         return data
 
 
@@ -76,17 +76,22 @@ class DateConverter(BaseConverter[date]):
         return data.isoformat()
 
 
-class ListConverter(BaseConverter[List[Any]]):
-    def __init__(self, obj_converter: BaseConverter):
+T = TypeVar("T")
+
+
+class ListConverter(Generic[T], BaseConverter[List[T]]):
+    def __init__(self, obj_converter: BaseConverter[T]):
         self._converter = obj_converter
 
     # TODO: Generic type
-    def obj_converter(self, data: Optional[List[Any]]) -> Optional[List[Any]]:
+    def obj_converter(self, data: Optional[List[T]]) -> Optional[List[T]]:
         if data is None:
             return None
-        return [self._converter.obj_converter(element) for element in data]
+        return [  # type: ignore
+            self._converter.obj_converter(element) for element in data
+        ]
 
-    def back_converter(self, data: Optional[List[Any]]) -> Optional[List[Any]]:
+    def back_converter(self, data: Optional[List[T]]) -> Optional[List[JSONableTypes]]:
         if data is None:
             return None
         return [self._converter.back_converter(element) for element in data]

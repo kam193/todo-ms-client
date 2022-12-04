@@ -4,9 +4,10 @@ import webbrowser
 import wsgiref.simple_server
 import wsgiref.util
 from base64 import urlsafe_b64encode
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from furl import furl  # type: ignore
+from requests import Response
 from requests_oauthlib import OAuth2Session  # type: ignore
 
 from .base import AbstractProvider
@@ -15,11 +16,11 @@ from .base import AbstractProvider
 class _LocalRedirectHandlingApp(object):
     """A WSGI app handles redirection from sign-in service."""
 
-    def __init__(self, message):
-        self.callback_url = None
+    def __init__(self, message: str) -> None:
+        self.callback_url: str
         self._message = message
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: Any, start_response: Callable) -> list[bytes]:
         start_response("200 OK", [("Content-type", "text/plain")])
         self.callback_url = wsgiref.util.request_uri(environ)
         return [self._message.encode("utf-8")]
@@ -61,10 +62,10 @@ class WebBrowserProvider(AbstractProvider):
 
         self._session: OAuth2Session
 
-    def _save_token(self, token):
+    def _save_token(self, token: dict) -> None:
         self._token = token
 
-    def _replace_http_into_https(self, url: str):
+    def _replace_http_into_https(self, url: str) -> str:
         """OAuthLib strictly expects HTTPS protocol, even for localhost"""
         if url.startswith("http://"):
             return url.replace("http", "https", 1)
@@ -86,7 +87,7 @@ class WebBrowserProvider(AbstractProvider):
 
         return session
 
-    def authorize(self, local_port: int = 8888, print_message: bool = True):
+    def authorize(self, local_port: int = 8888, print_message: bool = True) -> None:
         """Run authorization workflow. Call webbrowser login, get response and token
 
         'local_port' - on this port we wait for redirection from sing-in page.
@@ -137,26 +138,26 @@ class WebBrowserProvider(AbstractProvider):
             headers=headers,
         )
 
-    def get(self, url: str, params: Optional[dict] = None):
+    def get(self, url: str, params: Optional[dict] = None) -> Response:
         if not self._token:
             raise RequestBeforeAuthenticatedError
 
-        return self._session.get(url=url, params=params)
+        return self._session.get(url=url, params=params)  # type: ignore
 
-    def delete(self, url: str):
+    def delete(self, url: str) -> Response:
         if not self._token:
             raise RequestBeforeAuthenticatedError
 
-        return self._session.delete(url=url)
+        return self._session.delete(url=url)  # type: ignore
 
-    def patch(self, url: str, json_data: dict):
+    def patch(self, url: str, json_data: dict) -> Response:
         if not self._token:
             raise RequestBeforeAuthenticatedError
 
-        return self._session.patch(url=url, json=json_data)
+        return self._session.patch(url=url, json=json_data)  # type: ignore
 
-    def post(self, url: str, json_data: dict):
+    def post(self, url: str, json_data: dict) -> Response:
         if not self._token:
             raise RequestBeforeAuthenticatedError
 
-        return self._session.post(url=url, json=json_data)
+        return self._session.post(url=url, json=json_data)  # type: ignore

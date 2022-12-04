@@ -1,5 +1,4 @@
-from abc import ABC
-from typing import TYPE_CHECKING, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Iterable, Optional, Type, TypeVar
 
 from furl import furl  # type: ignore
 
@@ -15,7 +14,7 @@ from .fields.basic import (
     List,
 )
 from .fields.recurrence import DueDatetime, RecurrenceField
-from .filters import and_, ne
+from .filters import Comparable, and_, ne
 
 if TYPE_CHECKING:
     from .client import ToDoClient
@@ -36,12 +35,14 @@ class UnsupportedOperationError(Exception):
 ResourceType = TypeVar("ResourceType", bound="Resource")
 
 
-class Resource(BaseConvertableFieldsObject, ABC):
+class Resource(BaseConvertableFieldsObject):
     """Base Resource for any other"""
 
     ENDPOINT = ""
 
-    def __init__(self, client: Optional[ToDoClient] = None, *args, **kwargs):
+    def __init__(
+        self, *args: Any, client: Optional["ToDoClient"] = None, **kwargs: Any
+    ):
         super().__init__(*args, **kwargs)
         self._client = client
 
@@ -50,28 +51,38 @@ class Resource(BaseConvertableFieldsObject, ABC):
         if self.id:
             raise ResourceAlreadyCreatedError
         data_dict = {k: v for k, v in self.to_dict().items() if v is not None}
-        result = self._client.raw_post(self.managing_endpoint, data_dict, 201)
+        result = self.client.raw_post(self.managing_endpoint, data_dict, 201)
         self._from_dict(result)
 
     def update(self) -> None:
         """Update resource in API"""
-        response = self._client.patch(self)
+        response = self.client.patch(self)
         self._from_dict(response)
 
     def delete(self) -> None:
         """Delete object in API"""
-        self._client.delete(self)
+        self.client.delete(self)
+
+    @property
+    def client(self) -> "ToDoClient":
+        if not self._client:
+            raise ValueError("Client not set")
+        return self._client
 
     @property
     def managing_endpoint(self) -> str:
-        return (furl(self.ENDPOINT) / (self.id or "")).url
+        return str((furl(self.ENDPOINT) / (self.id or "")).url)
 
     @property
     def id(self) -> Optional[str]:
         return getattr(self, "_id", None)
 
     @classmethod
-    def from_dict(cls, client: ToDoClient, data_dict: dict) -> ConvertableType:
+    def from_dict(  # type: ignore[override]
+        cls: Type[ConvertableType],
+        data_dict: dict,
+        client: Optional["ToDoClient"] = None,
+    ) -> ConvertableType:
         return super().from_dict(data_dict, client=client)
 
     def _clear(self) -> None:
@@ -79,12 +90,12 @@ class Resource(BaseConvertableFieldsObject, ABC):
             delattr(self, field.name)
 
     def refresh(self) -> None:
-        new_data = self._client.raw_get(endpoint=self.managing_endpoint)
+        new_data = self.client.raw_get(endpoint=self.managing_endpoint)
         self._clear()
         self._from_dict(new_data)
 
     @classmethod
-    def handle_list_filters(cls, *args, **kwargs) -> dict:
+    def handle_list_filters(cls, *args: str, **kwargs: Comparable) -> dict:
         not_empty_kwargs = {k: v for k, v in kwargs.items() if v is not None}
         if len(args) + len(not_empty_kwargs) == 0:
             return {}
@@ -92,6 +103,8 @@ class Resource(BaseConvertableFieldsObject, ABC):
         return params
 
     def __eq__(self, other: object) -> bool:
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
         if not self.id or not other.id:
             return False
         return self.id == other.id
@@ -107,34 +120,32 @@ class TaskList(Resource):
     is_owner = Boolean("isOwner", read_only=True)
     well_known_name = Attribute("wellknownListName", read_only=True)
 
-    def get_tasks(self, *args, **kwargs):
+    def get_tasks(self, **kwargs: Any) -> Iterable["Task"]:
         """Iterate over tasks in the list. Default returns only non-completed tasks."""
         tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
-        tasks_gen = self._client.list(
-            Task, endpoint=tasks_endpoint.url, *args, **kwargs
-        )
+        tasks_gen = self.client.list(Task, endpoint=tasks_endpoint.url, **kwargs)
         for task in tasks_gen:
             task.task_list = self
             yield task
 
     @property
-    def open_tasks(self):
+    def open_tasks(self) -> Iterable["Task"]:
         """Iterate over opened tasks"""
         return self.get_tasks(status=ne(Status.COMPLETED))
 
     @property
-    def tasks(self):
+    def tasks(self) -> Iterable["Task"]:
         """Iterate over all tasks in this list"""
         return self.get_tasks(status=None)
 
-    def save_task(self, task):
+    def save_task(self, task: "Task") -> None:
         task.task_list = self
         task.create()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<TaskList '{self.name}'>"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"List '{self.name}'"
 
 
@@ -161,43 +172,45 @@ class Task(Resource):
 
     def __init__(
         self,
-        *args,
+        *args: Any,
         task_list: Optional[TaskList] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self._task_list = task_list
 
-    def create(self):
+    def create(self) -> None:
         if not self._task_list:
             raise TaskListNotSpecifiedError
         return super().create()
 
     @classmethod
-    def handle_list_filters(cls, *args, **kwargs):
+    def handle_list_filters(cls, *args: str, **kwargs: Any) -> dict:
         kwargs.setdefault("status", ne(Status.COMPLETED))
         return super().handle_list_filters(*args, **kwargs)
 
     @property
-    def managing_endpoint(self):
+    def managing_endpoint(self) -> str:
         if not self._task_list:
             raise TaskListNotSpecifiedError
-        return (furl(self._task_list.managing_endpoint) / super().managing_endpoint).url
+        return str(
+            (furl(self._task_list.managing_endpoint) / super().managing_endpoint).url
+        )
 
     @property
-    def task_list(self):
+    def task_list(self) -> Optional[TaskList]:
         return self._task_list
 
     @task_list.setter
-    def task_list(self, value: TaskList):
+    def task_list(self, value: TaskList) -> None:
         if self._task_list and self._task_list.id != value.id:
             raise UnsupportedOperationError(
                 "Moving task between lists is not supported by the API"
             )
         self._task_list = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Task '{self.title}'>"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Task '{self.title}'"

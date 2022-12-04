@@ -26,7 +26,7 @@ def resource_class():
 
 @fixture
 def resource_obj(resource_class):
-    return resource_class(None, name="name-1", _id="id-1")
+    return resource_class(name="name-1", _id="id-1")
 
 
 def test_list_resource_returns_all(client, resource_class, requests_mock):

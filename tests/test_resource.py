@@ -72,7 +72,7 @@ TASK_EXAMPLE_DATA = {
 
 @pytest.fixture
 def task_list(client):
-    return TaskList.from_dict(client, TASK_LIST_EXAMPLE_DATA)
+    return TaskList.from_dict(TASK_LIST_EXAMPLE_DATA, client=client)
 
 
 @pytest.mark.parametrize(
@@ -88,7 +88,7 @@ def test_resource_has_proper_endpoint(resource, endpoint):
     [(TaskList, TASK_LIST_EXAMPLE_DATA, ["isShared"]), (Task, TASK_EXAMPLE_DATA, [])],
 )
 def test_resource_is_proper_converted_back_to_dict(resource, data, to_omit):
-    obj = resource.from_dict(None, data)
+    obj = resource.from_dict(data)
     expected = {k: v for k, v in data.items() if k not in to_omit}
     assert expected == obj.to_dict()
 
@@ -96,7 +96,7 @@ def test_resource_is_proper_converted_back_to_dict(resource, data, to_omit):
 class TestDefaultResource:
     def test_default_resource_create_set_client(self, client, simple_resource_class):
         resource = simple_resource_class.from_dict(
-            client, {"_id": "id-1", "name": "name-1"}
+            {"_id": "id-1", "name": "name-1"}, client=client
         )
 
         assert resource._client == client
@@ -111,7 +111,7 @@ class TestDefaultResource:
             new = ContentField("old")
             last_updated = Attribute("last_updated")
 
-        resource = ComplexResource(client, new=ContentAttr("data"), _id="id-1")
+        resource = ComplexResource(client=client, new=ContentAttr("data"), _id="id-1")
 
         requests_mock.patch(
             f"{API_BASE}/fake/id-1",
@@ -132,7 +132,9 @@ class TestDefaultResource:
             to_clear = Attribute("to_clear")
             last_updated = Attribute("last_updated", read_only=True)
 
-        resource = ComplexResource(client, new="data", _id="id-1", to_clear="data")
+        resource = ComplexResource(
+            client=client, new="data", _id="id-1", to_clear="data"
+        )
 
         requests_mock.get(
             f"{API_BASE}/fake/id-1",
@@ -152,48 +154,42 @@ class TestDefaultResource:
         assert resource.to_clear is None
 
     def test_default_resource_id(self, simple_resource_class):
-        resource = simple_resource_class.from_dict(
-            None, {"id": "id-1", "name": "name-1"}
-        )
+        resource = simple_resource_class.from_dict({"id": "id-1", "name": "name-1"})
 
         assert resource.id == "id-1"
 
     def test_resources_are_equal_when_have_equal_id(self, simple_resource_class):
-        resource_1 = simple_resource_class.from_dict(None, {"id": "id-1"})
-        resource_2 = simple_resource_class.from_dict(None, {"id": "id-1"})
+        resource_1 = simple_resource_class.from_dict({"id": "id-1"})
+        resource_2 = simple_resource_class.from_dict({"id": "id-1"})
 
         assert resource_1 == resource_2
 
     def test_resources_are_not_equal_when_have_different_id(
         self, simple_resource_class
     ):
-        resource_1 = simple_resource_class.from_dict(None, {"id": "id-1"})
-        resource_2 = simple_resource_class.from_dict(None, {"id": "id-2"})
+        resource_1 = simple_resource_class.from_dict({"id": "id-1"})
+        resource_2 = simple_resource_class.from_dict({"id": "id-2"})
 
         assert resource_1 != resource_2
 
     def test_resources_are_not_equal_when_dont_have_id(self, simple_resource_class):
-        resource_1 = simple_resource_class.from_dict(None, {"name": "name-1"})
-        resource_2 = simple_resource_class.from_dict(None, {"name": "name-1"})
+        resource_1 = simple_resource_class.from_dict({"name": "name-1"})
+        resource_2 = simple_resource_class.from_dict({"name": "name-1"})
 
         assert resource_1 != resource_2
 
     def test_default_resource_managing_endpoint(self, simple_resource_class):
-        resource = simple_resource_class.from_dict(
-            None, {"id": "id-1", "name": "name-1"}
-        )
+        resource = simple_resource_class.from_dict({"id": "id-1", "name": "name-1"})
 
         assert resource.managing_endpoint == "endpoint/id-1"
 
     def test_default_resource_id_return_none_when_unset(self, simple_resource_class):
-        resource = simple_resource_class.from_dict(None, {"name": "name-1"})
+        resource = simple_resource_class.from_dict({"name": "name-1"})
 
         assert resource.id is None
 
     def test_default_resource_create_fails_when_id_set(self, simple_resource_class):
-        resource = simple_resource_class.from_dict(
-            None, {"id": "id-1", "name": "name-1"}
-        )
+        resource = simple_resource_class.from_dict({"id": "id-1", "name": "name-1"})
 
         with pytest.raises(ResourceAlreadyCreatedError):
             resource.create()
@@ -201,7 +197,7 @@ class TestDefaultResource:
     def test_default_resource_create_calls_endpoint(
         self, simple_resource_class, client, requests_mock
     ):
-        resource = simple_resource_class(client, name="new-resource")
+        resource = simple_resource_class(client=client, name="new-resource")
         requests_mock.post(
             f"{API_BASE}/endpoint",
             json={"id": "new-id", "name": "new-resource"},
@@ -218,7 +214,7 @@ class TestDefaultResource:
         self, simple_resource_class, client, requests_mock
     ):
         resource = simple_resource_class.from_dict(
-            client, {"id": "id-1", "name": "name-1"}
+            {"id": "id-1", "name": "name-1"}, client=client
         )
         requests_mock.delete(f"{API_BASE}/endpoint/id-1", status_code=204)
 
@@ -252,7 +248,7 @@ class TestTaskListResource:
     def test_create_tasklist_object_from_data(
         self,
     ):
-        task_list = TaskList.from_dict(None, TASK_LIST_EXAMPLE_DATA)
+        task_list = TaskList.from_dict(TASK_LIST_EXAMPLE_DATA)
 
         assert task_list.id == "id-1"
         assert task_list.name == "list-name"
@@ -269,7 +265,7 @@ class TestTaskListResource:
             json={"value": [TASK_EXAMPLE_DATA]},
             complete_qs=True,
         )
-        task_list = TaskList.from_dict(client, TASK_LIST_EXAMPLE_DATA)
+        task_list = TaskList.from_dict(TASK_LIST_EXAMPLE_DATA, client=client)
         tasks = list(task_list.get_tasks())
 
         assert len(tasks) == 1
@@ -283,7 +279,7 @@ class TestTaskListResource:
             json={"value": [TASK_EXAMPLE_DATA]},
             complete_qs=True,
         )
-        task_list = TaskList.from_dict(client, TASK_LIST_EXAMPLE_DATA)
+        task_list = TaskList.from_dict(TASK_LIST_EXAMPLE_DATA, client=client)
         tasks = list(task_list.tasks)
 
         assert len(tasks) == 1
@@ -292,13 +288,13 @@ class TestTaskListResource:
 
     def test_task_list_delete_themselves(self, requests_mock, client):
         requests_mock.delete(f"{API_BASE}/todo/lists/id-1", status_code=204)
-        task_list = TaskList.from_dict(client, TASK_LIST_EXAMPLE_DATA)
+        task_list = TaskList.from_dict(TASK_LIST_EXAMPLE_DATA, client=client)
         task_list.delete()
         assert requests_mock.called is True
 
     def test_task_list_saves_task(self, requests_mock, client):
-        task_list = TaskList.from_dict(client, TASK_LIST_EXAMPLE_DATA)
-        new_task = Task(client, title="Test")
+        task_list = TaskList.from_dict(TASK_LIST_EXAMPLE_DATA, client=client)
+        new_task = Task(client=client, title="Test")
 
         expected_body = {k: v for k, v in new_task.to_dict().items() if v is not None}
         requests_mock.post(
@@ -317,7 +313,7 @@ class TestTaskListResource:
 
 class TestTaskResource:
     def test_minimum_task(self):
-        task = Task(None, title="Title")
+        task = Task(title="Title")
 
         assert task.id is None
         assert task.title == "Title"
@@ -339,7 +335,7 @@ class TestTaskResource:
         assert task.has_attachments is False
 
     def test_create_task_object_from_dict(self):
-        task = Task.from_dict(None, TASK_EXAMPLE_DATA)
+        task = Task.from_dict(TASK_EXAMPLE_DATA)
 
         assert task.id == "task-1"
         assert task.body == ContentAttr("task-body")
@@ -374,7 +370,7 @@ class TestTaskResource:
         requests_mock.delete(
             f"{API_BASE}/todo/lists/id-1/tasks/task-1", status_code=204
         )
-        task = Task.from_dict(client, TASK_EXAMPLE_DATA)
+        task = Task.from_dict(TASK_EXAMPLE_DATA, client=client)
         task.task_list = task_list
 
         task.delete()
@@ -382,24 +378,24 @@ class TestTaskResource:
         assert requests_mock.called is True
 
     def test_task_create_raises_when_no_tasklist_id(self):
-        task = Task(None, title="Test")
+        task = Task(title="Test")
 
         with pytest.raises(TaskListNotSpecifiedError):
             task.create()
 
     def test_task_managing_endpoint_raises_when_no_tasklist_id(self):
-        task = Task(None, title="Test")
+        task = Task(title="Test")
 
         with pytest.raises(TaskListNotSpecifiedError):
             task.managing_endpoint
 
     def test_task_raises_when_try_to_change_list(self, task_list):
-        task = Task.from_dict(None, TASK_EXAMPLE_DATA)
+        task = Task.from_dict(TASK_EXAMPLE_DATA)
         task.task_list = task_list
 
         # Allow assign once more the same
         task.task_list = task_list
 
-        task_list_2 = TaskList.from_dict(None, {"id": "id-2"})
+        task_list_2 = TaskList.from_dict({"id": "id-2"})
         with pytest.raises(UnsupportedOperationError):
             task.task_list = task_list_2
