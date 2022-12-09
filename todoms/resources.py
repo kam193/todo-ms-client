@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Iterable, Optional, Type, TypeVar
 
-from furl import furl
+from furl import furl  # type: ignore
 
-from todoms.converters.basic import ResourceConverter  # type: ignore
+from todoms.converters.basic import ResourceConverter
 
 from .attributes import Importance, Status
 from .convertable import BaseConvertableFieldsObject, ConvertableType
@@ -174,16 +174,24 @@ class Subtask(Resource):
     def __init__(
         self,
         *args: Any,
-        task: Optional["Task"] = None,
+        _task: Optional["Task"] = None,
         client: Optional["ToDoClient"] = None,
         **kwargs: Any,
     ):
         super().__init__(*args, client=client, **kwargs)
-        self._task = task
+        self._task = _task
 
     @property
     def task(self) -> Optional["Task"]:
         return self._task
+
+    @task.setter
+    def task(self, value: "Task") -> None:
+        if self._task and self._task.id != value.id:
+            raise UnsupportedOperationError(
+                "Moving subtask between tasks is not supported by the API"
+            )
+        self._task = value
 
     def create(self) -> None:
         if not self.task:
@@ -195,14 +203,6 @@ class Subtask(Resource):
         if not self._task:
             raise TaskNotSpecifiedError
         return str((furl(self._task.managing_endpoint) / super().managing_endpoint).url)
-
-    @task.setter
-    def task(self, value: "Task") -> None:
-        if self._task and self._task.id != value.id:
-            raise UnsupportedOperationError(
-                "Moving subtask between tasks is not supported by the API"
-            )
-        self._task = value
 
     def check(self) -> None:
         self.is_checked = True
@@ -219,7 +219,7 @@ class Subtask(Resource):
         return f"Subtask '{self.name}'"
 
 
-def _post_subtask_convert(instance: "Task", subtasks: Optional[list[Subtask]]):
+def _post_subtask_convert(instance: "Task", subtasks: list[Subtask]) -> list[Subtask]:
     if subtasks:
         for subtask in subtasks:
             subtask.task = instance

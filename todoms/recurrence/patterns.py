@@ -19,7 +19,7 @@ class Daily(BaseRecurrencePattern):
 
 class Weekly(BaseRecurrencePattern):
     week_start = EnumField("firstDayOfWeek", Weekday)
-    days_of_week = List[Weekday]("daysOfWeek", EnumConverter(Weekday))
+    days_of_week = List("daysOfWeek", EnumConverter(Weekday))
 
     def __init__(self, *args: Any, week_start: Weekday = Weekday.SUNDAY, **kwargs: Any):
         super().__init__(

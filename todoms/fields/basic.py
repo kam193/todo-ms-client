@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any, Callable, Generic, Optional, Type, TypeVar, Union
 
 from ..attributes import Content
-from ..convertable import BaseConvertableFieldsObject
+from ..convertable import BaseConvertableFieldsObject, ConvertableType
 from ..converters import BaseConverter, JSONableTypes
 from ..converters.basic import (
     AttributeConverter,
@@ -63,10 +63,10 @@ class List(Generic[T], Field[list[T], list]):
         inner_field: Union[
             Type[Field[T, JSONableTypes]], BaseConverter[T, JSONableTypes]
         ],
-        default: Optional[T] = None,
+        default: Optional[list[T]] = None,
         read_only: bool = False,
         export: bool = True,
-        post_convert: Callable[["BaseConvertableFieldsObject", T], T] = None,
+        post_convert: Optional[Callable[[ConvertableType, list[T]], list[T]]] = None,
     ) -> None:
         super().__init__(dict_name, default, read_only, export, post_convert)
         if isinstance(inner_field, BaseConverter):
@@ -75,7 +75,10 @@ class List(Generic[T], Field[list[T], list]):
             self._converter = ListConverter[T](inner_field._converter)
 
 
-class EnumField(Field[Enum, str]):
-    def __init__(self, dict_name: str, enum_class: Type[Enum], **kwargs: Any) -> None:
+TEnum = TypeVar("TEnum", bound=Enum)
+
+
+class EnumField(Field[TEnum, str]):
+    def __init__(self, dict_name: str, enum_class: Type[TEnum], **kwargs: Any) -> None:
         super().__init__(dict_name, **kwargs)
         self._converter = EnumConverter(enum_class)

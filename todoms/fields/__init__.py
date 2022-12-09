@@ -19,7 +19,7 @@ class Field(ABC, Generic[T, KSourceType]):
         default: Optional[T] = None,
         read_only: bool = False,
         export: bool = True,
-        post_convert: Callable[["BaseConvertableFieldsObject", T], T] = None,
+        post_convert: Optional[Callable[["ConvertableType", T], T]] = None,
     ) -> None:
         self.dict_name = dict_name
         self._default = default
@@ -56,7 +56,7 @@ class Field(ABC, Generic[T, KSourceType]):
     def __set_name__(self, _: object, name: str) -> None:
         self.name = name
 
-    def from_dict(self, instance: "BaseConvertableFieldsObject", data: dict) -> None:
+    def from_dict(self, instance: "ConvertableType", data: dict) -> None:
         if self.dict_name not in data:
             return None
         value = self.convert_from_dict(data)
