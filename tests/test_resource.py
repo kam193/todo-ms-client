@@ -109,8 +109,8 @@ def test_resource_has_proper_endpoint(resource, endpoint):
         (Subtask, SUBTASK_EXAMPLE_DATA, []),
     ],
 )
-def test_resource_is_proper_converted_back_to_dict(resource, data, to_omit):
-    obj = resource.from_dict(data)
+def test_resource_is_proper_converted_back_to_dict(resource, data, to_omit, client):
+    obj = resource.from_dict(data, client=client)
     expected = {k: v for k, v in data.items() if k not in to_omit}
     assert expected == obj.to_dict()
 

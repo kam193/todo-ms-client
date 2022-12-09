@@ -27,7 +27,7 @@ This is the matrix of main features supported by the official API and this libra
 | My day             | :x:                       | -                           |                                               |
 | Tasks - CRUD       | :heavy_check_mark:        | :heavy_check_mark:          | API doesn't support moving task between lists |
 | Tasks - recurrence | :heavy_check_mark:        | :large_orange_diamond:      | API is a bit unclear here, need testing       |
-| Subtasks - CRUD    | :heavy_check_mark:        | :x:                         |                                               |
+| Subtasks - CRUD    | :heavy_check_mark:        | :heavy_check_mark:                         |                                               |
 | Reminders - CRUD   | :heavy_check_mark:        | :x:                         |                                               |
 | Attachments - CRUD | :heavy_check_mark:        | :x:                         |                                               |
 | Linked resources   | :heavy_check_mark:        | :x:                         | Not planned at the moment                     |
