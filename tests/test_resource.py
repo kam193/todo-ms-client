@@ -356,8 +356,8 @@ class TestTaskResource:
         assert task.categories is None
         assert task.has_attachments is False
 
-    def test_create_task_object_from_dict(self):
-        task = Task.from_dict(TASK_EXAMPLE_DATA)
+    def test_create_task_object_from_dict(self, client):
+        task = Task.from_dict(TASK_EXAMPLE_DATA, client=client)
 
         assert task.id == "task-1"
         assert task.body == ContentAttr("task-body")
@@ -379,6 +379,10 @@ class TestTaskResource:
         assert isinstance(task.recurrence, Recurrence) is True
         assert isinstance(task.recurrence.pattern, patterns.YearlyAbsolute)
         assert isinstance(task.recurrence.range, ranges.NoEnd)
+
+        assert len(task.subtasks) == 1
+        assert task.subtasks[0].name == "Subtask-1"
+        assert task.subtasks[0].task is task
 
     def test_task_handle_filters_default_completed(self):
         filters = Task.handle_list_filters()
@@ -411,8 +415,8 @@ class TestTaskResource:
         with pytest.raises(TaskListNotSpecifiedError):
             task.managing_endpoint
 
-    def test_task_raises_when_try_to_change_list(self, task_list):
-        task = Task.from_dict(TASK_EXAMPLE_DATA)
+    def test_task_raises_when_try_to_change_list(self, task_list, client):
+        task = Task.from_dict(TASK_EXAMPLE_DATA, client=client)
         task.task_list = task_list
 
         # Allow assign once more the same

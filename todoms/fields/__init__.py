@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, Generic, Optional, TypeVar, Union
 
 from ..converters import BaseConverter, KSourceType
 
@@ -19,11 +19,13 @@ class Field(ABC, Generic[T, KSourceType]):
         default: Optional[T] = None,
         read_only: bool = False,
         export: bool = True,
+        post_convert: Callable[["BaseConvertableFieldsObject", T], T] = None,
     ) -> None:
         self.dict_name = dict_name
         self._default = default
         self._read_only = read_only
         self._export = export
+        self._post_convert = post_convert
 
     def _get_value(self, instance: "ConvertableType") -> Optional[T]:
         return instance.__dict__.get(self.name, self._default)
@@ -57,7 +59,10 @@ class Field(ABC, Generic[T, KSourceType]):
     def from_dict(self, instance: "BaseConvertableFieldsObject", data: dict) -> None:
         if self.dict_name not in data:
             return None
-        self._set_value(instance, self.convert_from_dict(data))
+        value = self.convert_from_dict(data)
+        if value and self._post_convert:
+            value = self._post_convert(instance, value)
+        self._set_value(instance, value)
 
     def to_dict(self, instance: "BaseConvertableFieldsObject") -> dict:
         if not self._export:

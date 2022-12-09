@@ -6,6 +6,7 @@ import pytest
 from dateutil import tz
 
 from todoms.attributes import Content, ContentType
+from todoms.convertable import BaseConvertableFieldsObject
 from todoms.converters.basic import (
     AttributeConverter,
     BooleanConverter,
@@ -15,7 +16,9 @@ from todoms.converters.basic import (
     EnumConverter,
     IsoTimeConverter,
     ListConverter,
+    ResourceConverter,
 )
+from todoms.fields.basic import Attribute
 
 
 class TestAttributeConverter:
@@ -195,5 +198,37 @@ class TestListConverter:
     )
     def test_list_converter_back_converting(self, enum_converter, data, expected):
         converter = ListConverter(enum_converter)
+
+        assert converter.back_converter(data) == expected
+
+
+class ExampleConvertable(BaseConvertableFieldsObject):
+    attr1 = Attribute("oldname")
+
+
+class TestResourceConverter:
+    @pytest.mark.parametrize(
+        "data,expected",
+        [
+            (None, None),
+            ({}, None),
+            ({"oldname": "value"}, ExampleConvertable(attr1="value")),
+        ],
+    )
+    def test_obj_convert(self, data, expected):
+        converter = ResourceConverter(ExampleConvertable)
+
+        assert converter.obj_converter(data) == expected
+
+    @pytest.mark.parametrize(
+        "data,expected",
+        [
+            (None, None),
+            (ExampleConvertable(attr1="value"), {"oldname": "value"}),
+            (ExampleConvertable(), {"oldname": None}),
+        ],
+    )
+    def test_back_convert(self, data, expected):
+        converter = ResourceConverter(ExampleConvertable)
 
         assert converter.back_converter(data) == expected

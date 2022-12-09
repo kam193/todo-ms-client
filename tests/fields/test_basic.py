@@ -29,8 +29,12 @@ class DummyField(Field):
 
 
 class ExampleClass:
+    SOME_VALUE = "VAL"
     f1 = DummyField("f1", default="default")
     f2 = DummyField("another_name")
+    f3 = DummyField(
+        "add_val", post_convert=lambda instance, value: f"{instance.SOME_VALUE}_{value}"
+    )
 
 
 class TestField:
@@ -49,9 +53,11 @@ class TestField:
 
         ExampleClass.f1.from_dict(obj, {"f1": 1, "another_name": 2})
         ExampleClass.f2.from_dict(obj, {"f1": 1, "another_name": 2})
+        ExampleClass.f3.from_dict(obj, {"add_val": 3})
 
         assert obj.f1 == "some_object+1"
         assert obj.f2 == "some_object+2"
+        assert obj.f3 == "VAL_some_object+3"
 
     def test_field_from_dict_with_none(self):
         obj = ExampleClass()

@@ -7,6 +7,7 @@ from dateutil import parser, tz
 
 from todoms.attributes import Content, ContentType
 
+from ..convertable import BaseConvertableFieldsObject
 from . import BaseConverter, JSONableTypes
 
 
@@ -120,3 +121,24 @@ class EnumConverter(BaseConverter[TEnum, str], ABC):
         if not data:
             return None
         return str(data.value)
+
+
+TConvertable = TypeVar("TConvertable", bound=BaseConvertableFieldsObject)
+
+
+class ResourceConverter(BaseConverter[TConvertable, dict]):
+    _TYPE: Type[TConvertable]
+
+    def __init__(self, resource_class: Type[TConvertable]) -> None:
+        self._TYPE = resource_class
+        super().__init__()
+
+    def obj_converter(self, data: Optional[dict]) -> Optional[TConvertable]:
+        if not data:
+            return None
+        return self._TYPE.from_dict(data)
+
+    def back_converter(self, data: Optional[TConvertable]) -> Optional[dict]:
+        if not data:
+            return None
+        return data.to_dict()

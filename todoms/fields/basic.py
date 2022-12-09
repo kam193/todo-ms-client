@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, Generic, Type, TypeVar, Union
+from typing import Any, Callable, Generic, Optional, Type, TypeVar, Union
 
 from ..attributes import Content
 from ..convertable import BaseConvertableFieldsObject
@@ -63,8 +63,12 @@ class List(Generic[T], Field[list[T], list]):
         inner_field: Union[
             Type[Field[T, JSONableTypes]], BaseConverter[T, JSONableTypes]
         ],
+        default: Optional[T] = None,
+        read_only: bool = False,
+        export: bool = True,
+        post_convert: Callable[["BaseConvertableFieldsObject", T], T] = None,
     ) -> None:
-        super().__init__(dict_name)
+        super().__init__(dict_name, default, read_only, export, post_convert)
         if isinstance(inner_field, BaseConverter):
             self._converter = ListConverter[T](inner_field)
         else:
