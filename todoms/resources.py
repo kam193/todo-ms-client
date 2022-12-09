@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Iterable, Optional, Type, TypeVar
 
 from furl import furl  # type: ignore
@@ -26,6 +27,10 @@ class ResourceAlreadyCreatedError(Exception):
 
 class TaskListNotSpecifiedError(Exception):
     """TaskList id must be set before create task"""
+
+
+class TaskNotSpecifiedError(Exception):
+    """Task id must be set before creating subtask"""
 
 
 class UnsupportedOperationError(Exception):
@@ -122,7 +127,7 @@ class TaskList(Resource):
 
     def get_tasks(self, **kwargs: Any) -> Iterable["Task"]:
         """Iterate over tasks in the list. Default returns only non-completed tasks."""
-        tasks_endpoint = furl(self.ENDPOINT) / self.id / "tasks"
+        tasks_endpoint = furl(self.ENDPOINT) / self.id / Task.ENDPOINT
         tasks_gen = self.client.list(Task, endpoint=tasks_endpoint.url, **kwargs)
         for task in tasks_gen:
             task.task_list = self
@@ -214,3 +219,64 @@ class Task(Resource):
 
     def __str__(self) -> str:
         return f"Task '{self.title}'"
+
+    # save subtask, add subtask, list subtasks
+
+
+class Subtask(Resource):
+    """Represents a subtask element"""
+
+    ENDPOINT = "checklistItems"
+
+    _id = Attribute("id")
+    created_datetime = IsoTime("createdDateTime", read_only=True)
+    checked_datetime = IsoTime("checkedDateTime")
+    name = Attribute("displayName")
+    is_checked = Boolean("isChecked", default=False)
+
+    def __init__(
+        self,
+        *args: Any,
+        task: Optional[Task] = None,
+        client: Optional["ToDoClient"] = None,
+        **kwargs: Any,
+    ):
+        super().__init__(*args, client=client, **kwargs)
+        self._task = task
+
+    @property
+    def task(self) -> Optional[Task]:
+        return self._task
+
+    def create(self) -> None:
+        if not self.task:
+            raise TaskNotSpecifiedError
+        return super().create()
+
+    @property
+    def managing_endpoint(self) -> str:
+        if not self._task:
+            raise TaskNotSpecifiedError
+        return str((furl(self._task.managing_endpoint) / super().managing_endpoint).url)
+
+    @task.setter
+    def task(self, value: Task) -> None:
+        if self._task and self._task.id != value.id:
+            raise UnsupportedOperationError(
+                "Moving subtask between tasks is not supported by the API"
+            )
+        self._task = value
+
+    def check(self) -> None:
+        self.is_checked = True
+        self.checked_datetime = datetime.utcnow()
+
+    def uncheck(self) -> None:
+        self.is_checked = False
+        self.checked_datetime = None
+
+    def __repr__(self) -> str:
+        return f"<Subtask '{self.name}'>"
+
+    def __str__(self) -> str:
+        return f"Subtask '{self.name}'"

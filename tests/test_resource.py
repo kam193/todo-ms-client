@@ -12,9 +12,11 @@ from todoms.resources import (
     ContentField,
     Resource,
     ResourceAlreadyCreatedError,
+    Subtask,
     Task,
     TaskList,
     TaskListNotSpecifiedError,
+    TaskNotSpecifiedError,
     UnsupportedOperationError,
 )
 
@@ -42,6 +44,14 @@ TASK_LIST_EXAMPLE_DATA = {
     "id": "id-1",
 }
 
+SUBTASK_EXAMPLE_DATA = {
+    "displayName": "Subtask-1",
+    "createdDateTime": "2022-12-09T14:03:33Z",
+    "isChecked": True,
+    "checkedDateTime": "2022-12-09T16:13:52Z",
+    "id": "sub-1",
+}
+
 TASK_EXAMPLE_DATA = {
     # "@odata.etag": "W/\"SRqIGuHKgEaeKjdSMmaZRwADcFhrVA==\"",
     "importance": "high",
@@ -67,6 +77,7 @@ TASK_EXAMPLE_DATA = {
     "categories": ["category-1", "category-2"],
     "hasAttachments": False,
     "startDateTime": {"dateTime": "2020-03-02T00:00:00.000000", "timeZone": "UTC"},
+    "checklistItems": [SUBTASK_EXAMPLE_DATA],
 }
 
 
@@ -75,9 +86,16 @@ def task_list(client):
     return TaskList.from_dict(TASK_LIST_EXAMPLE_DATA, client=client)
 
 
+@pytest.fixture
+def task(client, task_list):
+    t = Task.from_dict(TASK_EXAMPLE_DATA, client=client)
+    t.task_list = task_list
+    return t
+
+
 @pytest.mark.parametrize(
     "resource,endpoint",
-    [(TaskList, "todo/lists"), (Task, "tasks")],
+    [(TaskList, "todo/lists"), (Task, "tasks"), (Subtask, "checklistItems")],
 )
 def test_resource_has_proper_endpoint(resource, endpoint):
     assert resource.ENDPOINT == endpoint
@@ -85,7 +103,11 @@ def test_resource_has_proper_endpoint(resource, endpoint):
 
 @pytest.mark.parametrize(
     "resource,data,to_omit",
-    [(TaskList, TASK_LIST_EXAMPLE_DATA, ["isShared"]), (Task, TASK_EXAMPLE_DATA, [])],
+    [
+        (TaskList, TASK_LIST_EXAMPLE_DATA, ["isShared"]),
+        (Task, TASK_EXAMPLE_DATA, []),
+        (Subtask, SUBTASK_EXAMPLE_DATA, []),
+    ],
 )
 def test_resource_is_proper_converted_back_to_dict(resource, data, to_omit):
     obj = resource.from_dict(data)
@@ -399,3 +421,72 @@ class TestTaskResource:
         task_list_2 = TaskList.from_dict({"id": "id-2"})
         with pytest.raises(UnsupportedOperationError):
             task.task_list = task_list_2
+
+
+class TestSubtaskResource:
+    def test_create_from_dict(self):
+        subtask = Subtask.from_dict(SUBTASK_EXAMPLE_DATA)
+
+        assert subtask.name == "Subtask-1"
+        assert subtask.is_checked is True
+        assert subtask.created_datetime == datetime(
+            2022, 12, 9, 14, 3, 33, tzinfo=timezone.utc
+        )
+        assert subtask.id == "sub-1"
+        assert subtask.checked_datetime == datetime(
+            2022, 12, 9, 16, 13, 52, tzinfo=timezone.utc
+        )
+
+    def test_minimum_subtask(self):
+        subtask = Subtask(name="My sub-1")
+
+        assert subtask.name == "My sub-1"
+        assert subtask.is_checked is False
+
+    def test_delete_themselves(self, requests_mock, client, task):
+        requests_mock.delete(
+            f"{API_BASE}/todo/lists/id-1/tasks/task-1/checklistItems/sub-1",
+            status_code=204,
+        )
+        subtask = Subtask.from_dict(SUBTASK_EXAMPLE_DATA, client=client)
+        subtask.task = task
+
+        subtask.delete()
+
+        assert requests_mock.called is True
+
+    def test_create_raises_when_no_task(self):
+        subtask = Subtask(name="Test")
+
+        with pytest.raises(TaskNotSpecifiedError):
+            subtask.create()
+
+    def test_managing_endpoint_raises_when_no_tas(self):
+        subtask = Subtask(name="Test")
+
+        with pytest.raises(TaskNotSpecifiedError):
+            subtask.managing_endpoint
+
+    def test_raises_when_try_to_change_task(self, task):
+        subtask = Subtask.from_dict(SUBTASK_EXAMPLE_DATA)
+        subtask.task = task
+
+        # Allow assign once more the same
+        subtask.task = task
+
+        task_2 = Task.from_dict({"id": "id-2"})
+        with pytest.raises(UnsupportedOperationError):
+            subtask.task = task_2
+
+    def test_check_and_uncheck(self):
+        subtask = Subtask(name="Test")
+
+        subtask.check()
+
+        assert subtask.is_checked is True
+        assert isinstance(subtask.checked_datetime, datetime)
+
+        subtask.uncheck()
+
+        assert subtask.is_checked is False
+        assert subtask.checked_datetime is None
