@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Iterable, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Iterable, Optional, Type, TypeVar, Union
 
 from furl import furl  # type: ignore
 
@@ -292,10 +292,20 @@ class Task(Resource):
             )
         self._task_list = value
 
+    def save_subtask(self, subtask: Subtask) -> None:
+        self.add_subtask(subtask)
+        subtask.create()
+
+    def add_subtask(self, subtask: Union[Subtask, str]) -> None:
+        if isinstance(subtask, str):
+            subtask = Subtask(name=subtask)
+        subtask.task = self
+        subtask.client = self.client
+        if subtask not in self.subtasks:
+            self.subtasks.append(subtask)
+
     def __repr__(self) -> str:
         return f"<Task '{self.title}'>"
 
     def __str__(self) -> str:
         return f"Task '{self.title}'"
-
-    # save subtask, add subtask, list subtasks

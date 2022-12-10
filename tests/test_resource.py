@@ -426,6 +426,40 @@ class TestTaskResource:
         with pytest.raises(UnsupportedOperationError):
             task.task_list = task_list_2
 
+    def test_saving_subtask(self, task, requests_mock):
+        subtask = Subtask(name="To Do")
+        requests_mock.post(
+            f"{API_BASE}/todo/lists/id-1/tasks/task-1/checklistItems",
+            status_code=201,
+            json={"id": "new-id", "displayName": "To Do"},
+            additional_matcher=match_body({"displayName": "To Do", "isChecked": False}),
+        )
+
+        task.save_subtask(subtask)
+
+        assert subtask.task is task
+        assert subtask.client is task.client
+        assert subtask in task.subtasks
+        assert subtask.id == "new-id"
+
+    def test_adding_subtask_from_object(self, task):
+        subtask = Subtask(name="To Do")
+
+        task.add_subtask(subtask)
+
+        assert subtask.task is task
+        assert subtask.client is task.client
+        assert subtask in task.subtasks
+        assert subtask.id is None
+
+    def test_adding_subtask_from_string(self, task):
+        task.add_subtask("My test")
+
+        subtask = next(filter(lambda s: s.name == "My test", task.subtasks))
+        assert subtask.task is task
+        assert subtask.client is task.client
+        assert subtask.id is None
+
 
 class TestSubtaskResource:
     def test_create_from_dict(self):
