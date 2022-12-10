@@ -214,8 +214,8 @@ class Subtask(Resource):
 
     def delete(self) -> None:
         super().delete()
-        if self.task.subtasks and self in self.task.subtasks:
-            self.task.subtasks.remove(self)
+        if self.task.subtasks and self in self.task.subtasks:  # type: ignore
+            self.task.subtasks.remove(self)  # type: ignore
 
     def __repr__(self) -> str:
         return f"<Subtask '{self.name}'>"
@@ -308,8 +308,8 @@ class Task(Resource):
         subtask.client = self.client
         if self.subtasks is None:
             self.subtasks = list()
-        if subtask not in self.subtasks:
-            self.subtasks.append(subtask)
+        if subtask not in self.subtasks:  # type: ignore
+            self.subtasks.append(subtask)  # type: ignore
 
     def __repr__(self) -> str:
         return f"<Task '{self.title}'>"
