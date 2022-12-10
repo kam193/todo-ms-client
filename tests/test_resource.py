@@ -528,3 +528,28 @@ class TestSubtaskResource:
 
         assert subtask.is_checked is False
         assert subtask.checked_datetime is None
+
+    def test_deleting_removes_from_task(self, task, requests_mock):
+        subtask = Subtask(name="aa", _id="test-1")
+
+        task.add_subtask(subtask)
+
+        assert len(task.subtasks) == 2
+        assert subtask in task.subtasks
+
+        requests_mock.delete(
+            f"{API_BASE}/todo/lists/id-1/tasks/task-1/checklistItems/test-1",
+            status_code=204,
+        )
+
+        subtask.delete()
+
+        assert len(task.subtasks) == 1
+        assert subtask not in task.subtasks
+
+    def test_adding_subtask_to_empty_task(self, client):
+        task = Task(title="test", client=client)
+
+        task.add_subtask("Test 2")
+
+        assert len(task.subtasks) == 1

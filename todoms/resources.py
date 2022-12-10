@@ -212,6 +212,11 @@ class Subtask(Resource):
         self.is_checked = False
         self.checked_datetime = None
 
+    def delete(self) -> None:
+        super().delete()
+        if self.task.subtasks and self in self.task.subtasks:
+            self.task.subtasks.remove(self)
+
     def __repr__(self) -> str:
         return f"<Subtask '{self.name}'>"
 
@@ -301,6 +306,8 @@ class Task(Resource):
             subtask = Subtask(name=subtask)
         subtask.task = self
         subtask.client = self.client
+        if self.subtasks is None:
+            self.subtasks = list()
         if subtask not in self.subtasks:
             self.subtasks.append(subtask)
 
