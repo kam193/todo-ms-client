@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class ResponseError(Exception):
     """Response returned an error"""
 
-    MESSAGE: str
+    MESSAGE: Optional[str] = None
 
     def __init__(self, response: Response) -> None:
         self.response = response

@@ -5,6 +5,7 @@ import pytest
 
 from todoms.attributes import Content as ContentAttr
 from todoms.attributes import Importance, Status
+from todoms.client import ToDoClient
 from todoms.fields.basic import Attribute
 from todoms.filters import and_, eq
 from todoms.recurrence import Recurrence, patterns, ranges
@@ -105,8 +106,8 @@ def test_resource_has_proper_endpoint(resource, endpoint):
     "resource,data,to_omit",
     [
         (TaskList, TASK_LIST_EXAMPLE_DATA, ["isShared"]),
-        (Task, TASK_EXAMPLE_DATA, []),
-        (Subtask, SUBTASK_EXAMPLE_DATA, []),
+        (Task, TASK_EXAMPLE_DATA, ["checklistItems"]),
+        (Subtask, SUBTASK_EXAMPLE_DATA, ["createdDateTime"]),
     ],
 )
 def test_resource_is_proper_converted_back_to_dict(resource, data, to_omit, client):
@@ -383,6 +384,114 @@ class TestTaskResource:
         assert len(task.subtasks) == 1
         assert task.subtasks[0].name == "Subtask-1"
         assert task.subtasks[0].task is task
+
+    @staticmethod
+    def _default_task_body(title: str, id: str = None):
+        data = {
+            "title": title,
+            "hasAttachments": False,
+            "importance": "normal",
+            "isReminderOn": False,
+            "status": "notStarted",
+        }
+        if id:
+            data["id"] = id
+        return data
+
+    def test_create_task_with_subtasks(
+        self, client: ToDoClient, requests_mock, task_list: TaskList
+    ):
+        task = Task(title="Task-1", task_list=task_list, client=client)
+        task.add_subtask("Sub-1")
+
+        requests_mock.post(
+            f"{API_BASE}/todo/lists/{task_list.id}/tasks",
+            status_code=201,
+            json={"id": "new-id", "title": "Task-1"},
+            additional_matcher=match_body(self._default_task_body("Task-1")),
+        )
+        requests_mock.post(
+            f"{API_BASE}/todo/lists/{task_list.id}/tasks/new-id/checklistItems",
+            status_code=201,
+            json={"id": "s-1", "displayName": "Sub-1"},
+            additional_matcher=match_body({"displayName": "Sub-1", "isChecked": False}),
+        )
+
+        task.create()
+
+        assert task.subtasks[0].id == "s-1"
+
+    def test_create_task_without_subtasks(
+        self, client: ToDoClient, requests_mock, task_list: TaskList
+    ):
+        task = Task(title="Task-1", task_list=task_list, client=client)
+
+        requests_mock.post(
+            f"{API_BASE}/todo/lists/{task_list.id}/tasks",
+            status_code=201,
+            json={"id": "new-id", "title": "Task-1"},
+            additional_matcher=match_body(self._default_task_body("Task-1")),
+        )
+
+        task.create()
+
+        assert task.id == "new-id"
+
+    def test_updating_tasks_updates_and_creates_subtasks(
+        self, client: ToDoClient, requests_mock, task_list: TaskList
+    ):
+        task = Task(title="Task-1", _id="id-1", task_list=task_list, client=client)
+        task.add_subtask(
+            Subtask(name="Existing", _id="sub-1", task=task, client=client)
+        )
+        task.add_subtask("new subtask")
+
+        requests_mock.patch(
+            f"{API_BASE}/todo/lists/{task_list.id}/tasks/id-1",
+            status_code=200,
+            json={"id": "id-1", "title": "Task-1"},
+        )
+        # The already created subtask should be updated
+        requests_mock.patch(
+            f"{API_BASE}/todo/lists/{task_list.id}/tasks/id-1/checklistItems/sub-1",
+            status_code=200,
+            json={"id": "sub-1", "displayName": "Existing"},
+            additional_matcher=match_body(
+                {
+                    "displayName": "Existing",
+                    "isChecked": False,
+                    "id": "sub-1",
+                    "checkedDateTime": None,
+                }
+            ),
+        )
+        # The new subtask should be created
+        requests_mock.post(
+            f"{API_BASE}/todo/lists/{task_list.id}/tasks/id-1/checklistItems",
+            status_code=201,
+            json={"id": "sub-2", "displayName": "new subtask"},
+            additional_matcher=match_body(
+                {
+                    "displayName": "new subtask",
+                    "isChecked": False,
+                }
+            ),
+        )
+
+        task.update()
+
+        assert task.subtasks[1].id == "sub-2"
+
+    def test_updating_task_without_subtasks(
+        self, client: ToDoClient, requests_mock, task_list: TaskList
+    ):
+        task = Task(title="Task-1", _id="id-1", task_list=task_list, client=client)
+        requests_mock.patch(
+            f"{API_BASE}/todo/lists/{task_list.id}/tasks/id-1",
+            status_code=200,
+            json={"id": "new-id", "title": "Task-1"},
+        )
+        task.update()
 
     def test_task_handle_filters_default_completed(self):
         filters = Task.handle_list_filters()

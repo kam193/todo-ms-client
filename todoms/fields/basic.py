@@ -64,11 +64,14 @@ class List(Generic[T], Field[list[T], list]):
             Type[Field[T, JSONableTypes]], BaseConverter[T, JSONableTypes]
         ],
         default: Optional[list[T]] = None,
+        default_factory: Optional[Callable[[], Optional[list[T]]]] = None,
         read_only: bool = False,
         export: bool = True,
         post_convert: Optional[Callable[[ConvertableType, list[T]], list[T]]] = None,
     ) -> None:
-        super().__init__(dict_name, default, read_only, export, post_convert)
+        super().__init__(
+            dict_name, default, default_factory, read_only, export, post_convert
+        )
         if isinstance(inner_field, BaseConverter):
             self._converter = ListConverter[T](inner_field)
         else:

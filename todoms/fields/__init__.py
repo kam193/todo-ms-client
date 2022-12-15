@@ -17,18 +17,31 @@ class Field(ABC, Generic[T, KSourceType]):
         self,
         dict_name: str,
         default: Optional[T] = None,
+        default_factory: Optional[Callable[[], Optional[T]]] = None,
         read_only: bool = False,
         export: bool = True,
         post_convert: Optional[Callable[["ConvertableType", T], T]] = None,
     ) -> None:
         self.dict_name = dict_name
-        self._default = default
         self._read_only = read_only
         self._export = export
         self._post_convert = post_convert
 
+        self._default_factory: Callable[[], Optional[T]]
+        if not default_factory:
+            self._default_factory = lambda: default
+        else:
+            self._default_factory = default_factory
+
+    def _set_value(
+        self, instance: "BaseConvertableFieldsObject", value: Optional[T]
+    ) -> None:
+        instance.__dict__[self.name] = value
+
     def _get_value(self, instance: "ConvertableType") -> Optional[T]:
-        return instance.__dict__.get(self.name, self._default)
+        if self.name not in instance.__dict__:
+            self._set_value(instance, self._default_factory())
+        return instance.__dict__.get(self.name)
 
     def __get__(
         self, instance: "BaseConvertableFieldsObject", _: object = None
@@ -36,11 +49,6 @@ class Field(ABC, Generic[T, KSourceType]):
         if not instance:
             return self
         return self._get_value(instance)
-
-    def _set_value(
-        self, instance: "BaseConvertableFieldsObject", value: Optional[T]
-    ) -> None:
-        instance.__dict__[self.name] = value
 
     def __set__(
         self, instance: "BaseConvertableFieldsObject", value: Optional[T]

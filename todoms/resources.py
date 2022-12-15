@@ -166,7 +166,7 @@ class Subtask(Resource):
     ENDPOINT = "checklistItems"
 
     _id = Attribute("id")
-    created_datetime = IsoTime("createdDateTime", read_only=True)
+    created_datetime = IsoTime("createdDateTime", read_only=True, export=False)
     checked_datetime = IsoTime("checkedDateTime")
     name = Attribute("displayName")
     is_checked = Boolean("isChecked", default=False)
@@ -256,6 +256,8 @@ class Task(Resource):
         "checklistItems",
         ResourceConverter(Subtask),
         post_convert=_post_subtask_convert,
+        export=False,
+        default_factory=list,
     )
 
     def __init__(
@@ -267,10 +269,25 @@ class Task(Resource):
         super().__init__(*args, **kwargs)
         self._task_list = task_list
 
+    def _update_or_create_subtasks(self, subtasks: list[Subtask]) -> None:
+        for subtask in subtasks:
+            subtask.task = self
+            subtask.client = self.client
+            if not subtask.id:
+                subtask.create()
+            else:
+                subtask.update()
+
     def create(self) -> None:
         if not self._task_list:
             raise TaskListNotSpecifiedError
-        return super().create()
+        subtasks = self.subtasks
+        super().create()
+        self._update_or_create_subtasks(subtasks=subtasks)  # type: ignore
+
+    def update(self) -> None:
+        self._update_or_create_subtasks(subtasks=self.subtasks)  # type: ignore
+        return super().update()
 
     @classmethod
     def handle_list_filters(cls, *args: str, **kwargs: Any) -> dict:

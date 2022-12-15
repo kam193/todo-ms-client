@@ -35,6 +35,7 @@ class ExampleClass:
     f3 = DummyField(
         "add_val", post_convert=lambda instance, value: f"{instance.SOME_VALUE}_{value}"
     )
+    f4 = DummyField("f4", default_factory=list)
 
 
 class TestField:
@@ -67,6 +68,17 @@ class TestField:
 
         assert obj.f1 == "default"
         assert obj.f2 is None
+        assert obj.f4 == []
+
+    def test_default_factory_saves_data(self):
+        obj = ExampleClass()
+        assert obj.f4 == []
+        obj.f4.append(1)
+        assert obj.f4 == [1]
+        obj.f4 = None
+        assert obj.f4 is None
+        del obj.f4
+        assert obj.f4 == []
 
     def test_field_to_dict_when_no_data(self):
         obj = ExampleClass()
