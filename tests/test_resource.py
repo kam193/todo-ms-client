@@ -298,7 +298,7 @@ class TestTaskListResource:
 
     def test_tasklist_prop_all_tasks_returns_all(self, client, requests_mock):
         requests_mock.get(
-            f"{API_BASE}/todo/lists/id-1/tasks",
+            f"{API_BASE}/todo/lists/id-1/tasks/delta",
             json={"value": [TASK_EXAMPLE_DATA]},
             complete_qs=True,
         )

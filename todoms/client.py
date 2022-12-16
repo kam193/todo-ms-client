@@ -65,11 +65,18 @@ class ToDoClient:
         self,
         resource_class: Type[ResourceType],
         endpoint: Optional[str] = None,
+        delta: bool = True,
         **kwargs: Any,
     ) -> Iterable[ResourceType]:
-        url = (self._url / (endpoint or resource_class.ENDPOINT)).url
+        url = self._url / (endpoint or resource_class.ENDPOINT)
         params = resource_class.handle_list_filters(**kwargs)
 
+        if delta and not params:
+            url = url / "delta"
+        if delta and params:
+            logger.info("Requested delta query with filter, skipping delta")
+
+        url = url.url  # Translate furl to str
         while url:
             logger.debug("Listing %s", url)
             response = self._provider.get(url, params=params)

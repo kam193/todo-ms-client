@@ -31,7 +31,7 @@ def resource_obj(resource_class):
 
 def test_list_resource_returns_all(client, resource_class, requests_mock):
     requests_mock.get(
-        f"{API_BASE}/{resource_class.ENDPOINT}",
+        f"{API_BASE}/{resource_class.ENDPOINT}/delta",
         json={"value": [{"name": "res-1"}, {"name": "res-2"}]},
     )
     results = list(client.list(resource_class))
@@ -43,7 +43,7 @@ def test_list_resource_returns_all(client, resource_class, requests_mock):
 
 def test_list_resource_returns_all_when_parted(client, resource_class, requests_mock):
     requests_mock.get(
-        f"{API_BASE}/{resource_class.ENDPOINT}",
+        f"{API_BASE}/{resource_class.ENDPOINT}/delta",
         json={"value": [{"name": "res-1"}], "@odata.nextLink": "http://next/part/1"},
     )
     requests_mock.get(
@@ -64,7 +64,7 @@ def test_list_resource_returns_all_when_parted(client, resource_class, requests_
 
 def test_list_use_custom_endpoint(client, resource_class, requests_mock):
     requests_mock.get(
-        f"{API_BASE}/my-endpoint/all",
+        f"{API_BASE}/my-endpoint/all/delta",
         json={"value": [{"name": "res-1"}]},
     )
 
@@ -74,7 +74,7 @@ def test_list_use_custom_endpoint(client, resource_class, requests_mock):
 
 def test_client_task_lists_property_works(client, requests_mock):
     requests_mock.get(
-        f"{API_BASE}/{TaskList.ENDPOINT}",
+        f"{API_BASE}/{TaskList.ENDPOINT}/delta",
         json={"value": [{"id": "list-1"}, {"id": "list-2"}]},
     )
     results = list(client.task_lists)
@@ -118,7 +118,9 @@ def test_list_resources_sends_filters(client, resource_class, requests_mock):
 def test_list_resource_raises_on_http_error(
     client, resource_class, requests_mock, error_code, exception
 ):
-    requests_mock.get(f"{API_BASE}/{resource_class.ENDPOINT}", status_code=error_code)
+    requests_mock.get(
+        f"{API_BASE}/{resource_class.ENDPOINT}/delta", status_code=error_code
+    )
 
     with raises(exception):
         list(client.list(resource_class))
