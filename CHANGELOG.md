@@ -4,6 +4,46 @@ Changes in a project.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.1.0] - 2022-12-16
+
+### Added
+
+- Added comparing resources using their ID
+- Added default values for fields in Task
+- Objects are refreshed after creating or updating
+- Added `refresh` method to reload objects
+- Added helper methods for client and resources to handle sub-objects
+- Added support for subtasks
+
+- [dev] Added CodeQL check to the CI
+- [dev] Added pre-commit hooks to check formatting
+- [dev] Added optional functional tests to validate library against real server
+- [dev] Added sorting methods using `ssort`
+- [dev] Added experimental strict typing
+
+### Changed
+
+- Redesigned way how fields of resources are defined
+- Declared only minimal direct dependencies for the library, CI configured to run tests
+  against minimal and newest dependencies.
+- Fields like creation date are now read-only.
+- The task's body supports now both types
+- Fields missed previously are added
+
+### Removed
+
+- Removed support for Python older than 3.9
+
+### Fixed
+
+- Fixed listing task lists due to wrong API responses on simple request
+
+### Known issue
+
+- Example file may be outdated, use `tests/functional/test_crud.py` as reference
+- Documentation is outdated, use tests as reference
+- Type hints for fields may create confusions
+
 ## [0.0.4]
 
 ### Added

@@ -18,10 +18,12 @@ provider = WebBrowserProvider(APP_ID, APP_SECRET)
 provider.authorize(local_port=8000)
 
 client = ToDoClient(provider)
+
+# For most up-to-date examples, see tests/functional/test_crud.py
+
 # task_lists = client.list(TaskList, name="name>")
+
 task_lists = client.list(TaskList)
-
-
 print(task_lists)
 
 list_1 = client.get(TaskList, task_lists[1].id)
