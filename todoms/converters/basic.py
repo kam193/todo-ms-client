@@ -8,14 +8,14 @@ from dateutil import parser, tz
 from todoms.attributes import Content, ContentType
 
 from ..convertable import ConvertableType
-from . import BaseConverter, JSONableTypes
+from . import BaseConverter, JSONableTypes, VBasicType
 
 
-class AttributeConverter(BaseConverter[JSONableTypes, JSONableTypes]):
-    def obj_converter(self, data: Optional[JSONableTypes]) -> JSONableTypes:
+class AttributeConverter(BaseConverter[VBasicType, VBasicType]):
+    def obj_converter(self, data: Optional[VBasicType]) -> Optional[VBasicType]:
         return data
 
-    def back_converter(self, data: JSONableTypes) -> Optional[JSONableTypes]:
+    def back_converter(self, data: Optional[VBasicType]) -> Optional[VBasicType]:
         return data
 
 

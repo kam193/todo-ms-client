@@ -3,6 +3,7 @@ from typing import Generic, Optional, TypeVar, Union
 
 T = TypeVar("T")
 JSONableTypes = Union[dict, list, str, int, bool, None]
+VBasicType = TypeVar("VBasicType", str, int, bool)
 KSourceType = TypeVar(
     "KSourceType", dict, list, str, int, bool, None, JSONableTypes, covariant=True
 )

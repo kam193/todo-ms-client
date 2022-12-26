@@ -27,7 +27,7 @@ class NoEnd(BaseRecurrenceRange):
 
 
 class Numbered(BaseRecurrenceRange):
-    occurrences = Attribute("numberOfOccurrences")
+    occurrences = Attribute[int]("numberOfOccurrences")
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(_range_type=RecurrenceRangeType.NUMBERED, *args, **kwargs)

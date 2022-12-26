@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any, Callable, Generic, Optional, Type, TypeVar, Union
 
 from ..attributes import Content
-from ..convertable import BaseConvertableFieldsObject, ConvertableType
+from ..convertable import BaseConvertableFieldsObject
 from ..converters import BaseConverter, JSONableTypes
 from ..converters.basic import (
     AttributeConverter,
@@ -17,8 +17,10 @@ from ..converters.basic import (
 )
 from . import Field
 
+VBasicType = TypeVar("VBasicType", str, int, bool)
 
-class Attribute(Field[JSONableTypes, JSONableTypes]):
+
+class Attribute(Generic[VBasicType], Field[VBasicType, VBasicType]):
     _converter = AttributeConverter()
 
 
@@ -67,7 +69,9 @@ class List(Generic[T], Field[list[T], list]):
         default_factory: Optional[Callable[[], Optional[list[T]]]] = None,
         read_only: bool = False,
         export: bool = True,
-        post_convert: Optional[Callable[[ConvertableType, list[T]], list[T]]] = None,
+        post_convert: Optional[
+            Callable[[BaseConvertableFieldsObject, list[T]], list[T]]
+        ] = None,
     ) -> None:
         super().__init__(
             dict_name, default, default_factory, read_only, export, post_convert

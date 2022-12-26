@@ -14,8 +14,8 @@ EXPECTED_ERRORS = [(404, ResourceNotFoundError), (500, ResponseError)]
 def resource_class():
     class FakeResource(Resource):
         ENDPOINT = "fake"
-        _id = Attribute("id")
-        name = Attribute("name")
+        _id = Attribute[str]("id")
+        name = Attribute[str]("name")
 
         @classmethod
         def handle_list_filters(cls, **kwargs):

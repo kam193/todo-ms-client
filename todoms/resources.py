@@ -125,11 +125,11 @@ class TaskList(Resource):
     """Represent a list of tasks"""
 
     ENDPOINT = "todo/lists"
-    _id = Attribute("id", read_only=True)
-    name = Attribute("displayName")
+    _id = Attribute[str]("id", read_only=True)
+    name = Attribute[str]("displayName")
     is_shared = Boolean("isShared", read_only=True, export=False)
     is_owner = Boolean("isOwner", read_only=True)
-    well_known_name = Attribute("wellknownListName", read_only=True)
+    well_known_name = Attribute[str]("wellknownListName", read_only=True)
 
     def get_tasks(self, **kwargs: Any) -> Iterable["Task"]:
         """Iterate over tasks in the list. Default returns only non-completed tasks."""
@@ -165,10 +165,10 @@ class Subtask(Resource):
 
     ENDPOINT = "checklistItems"
 
-    _id = Attribute("id")
+    _id = Attribute[str]("id")
     created_datetime = IsoTime("createdDateTime", read_only=True, export=False)
     checked_datetime = IsoTime("checkedDateTime")
-    name = Attribute("displayName")
+    name = Attribute[str]("displayName")
     is_checked = Boolean("isChecked", default=False)
 
     def __init__(
@@ -237,9 +237,9 @@ class Task(Resource):
 
     ENDPOINT = "tasks"
 
-    _id = Attribute("id")
+    _id = Attribute[str]("id")
     body = ContentField("body")
-    title = Attribute("title")
+    title = Attribute[str]("title")
     status = EnumField("status", Status, default=Status.NOT_STARTED)
     importance = EnumField("importance", Importance, default=Importance.NORMAL)
     recurrence = RecurrenceField("recurrence")
@@ -255,7 +255,7 @@ class Task(Resource):
     subtasks = List(
         "checklistItems",
         ResourceConverter(Subtask),
-        post_convert=_post_subtask_convert,
+        post_convert=_post_subtask_convert,  # type: ignore
         export=False,
         default_factory=list,
     )

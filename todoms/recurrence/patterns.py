@@ -8,7 +8,7 @@ from ..fields.basic import Attribute, EnumField, List
 
 
 class BaseRecurrencePattern(BaseConvertableFieldsObject):
-    interval = Attribute("interval")
+    interval = Attribute[int]("interval")
     _pattern_type = EnumField("type", RecurrencePatternType)
 
 
@@ -31,7 +31,7 @@ class Weekly(BaseRecurrencePattern):
 
 
 class MonthlyAbsolute(BaseRecurrencePattern):
-    day_of_month = Attribute("dayOfMonth")
+    day_of_month = Attribute[int]("dayOfMonth")
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(
@@ -49,8 +49,8 @@ class MonthlyRelative(BaseRecurrencePattern):
 
 
 class YearlyAbsolute(BaseRecurrencePattern):
-    day_of_month = Attribute("dayOfMonth")
-    month = Attribute("month")
+    day_of_month = Attribute[int]("dayOfMonth")
+    month = Attribute[int]("month")
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(
@@ -60,7 +60,7 @@ class YearlyAbsolute(BaseRecurrencePattern):
 
 class YearlyRelative(BaseRecurrencePattern):
     days_of_week = List("daysOfWeek", EnumConverter(Weekday))
-    month = Attribute("month")
+    month = Attribute[int]("month")
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(

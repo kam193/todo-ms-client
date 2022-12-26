@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Callable, Generic, Optional, TypeVar, Union
 from ..converters import BaseConverter, KSourceType
 
 if TYPE_CHECKING:
-    from ..convertable import BaseConvertableFieldsObject, ConvertableType
+    from ..convertable import BaseConvertableFieldsObject
 
 
 T = TypeVar("T")
@@ -20,7 +20,7 @@ class Field(ABC, Generic[T, KSourceType]):
         default_factory: Optional[Callable[[], Optional[T]]] = None,
         read_only: bool = False,
         export: bool = True,
-        post_convert: Optional[Callable[["ConvertableType", T], T]] = None,
+        post_convert: Optional[Callable[["BaseConvertableFieldsObject", T], T]] = None,
     ) -> None:
         self.dict_name = dict_name
         self._read_only = read_only
@@ -38,7 +38,7 @@ class Field(ABC, Generic[T, KSourceType]):
     ) -> None:
         instance.__dict__[self.name] = value
 
-    def _get_value(self, instance: "ConvertableType") -> Optional[T]:
+    def _get_value(self, instance: "BaseConvertableFieldsObject") -> Optional[T]:
         if self.name not in instance.__dict__:
             self._set_value(instance, self._default_factory())
         return instance.__dict__.get(self.name)
@@ -64,7 +64,7 @@ class Field(ABC, Generic[T, KSourceType]):
     def __set_name__(self, _: object, name: str) -> None:
         self.name = name
 
-    def from_dict(self, instance: "ConvertableType", data: dict) -> None:
+    def from_dict(self, instance: "BaseConvertableFieldsObject", data: dict) -> None:
         if self.dict_name not in data:
             return None
         value = self.convert_from_dict(data)
