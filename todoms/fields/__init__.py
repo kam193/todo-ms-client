@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import TYPE_CHECKING, Callable, Generic, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, Generic, Optional, TypeVar
 
 from ..converters import BaseConverter, KSourceType
 
@@ -45,9 +45,9 @@ class Field(ABC, Generic[T, KSourceType]):
 
     def __get__(
         self, instance: "BaseConvertableFieldsObject", _: object = None
-    ) -> "Union[Optional[T], Field[T, KSourceType]]":
+    ) -> "Optional[T]":
         if not instance:
-            return self
+            return self  # type: ignore
         return self._get_value(instance)
 
     def __set__(

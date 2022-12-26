@@ -325,8 +325,8 @@ class Task(Resource):
         subtask.client = self.client
         if self.subtasks is None:
             self.subtasks = list()
-        if subtask not in self.subtasks:  # type: ignore
-            self.subtasks.append(subtask)  # type: ignore
+        if subtask not in self.subtasks:
+            self.subtasks.append(subtask)
 
     def __repr__(self) -> str:
         return f"<Task '{self.title}'>"
