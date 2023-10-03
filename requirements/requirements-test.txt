@@ -96,7 +96,7 @@ types-urllib3==1.26.25.4
     # via types-requests
 typing-extensions==4.4.0
     # via mypy
-urllib3==1.26.12
+urllib3==1.26.17
     # via requests
 virtualenv==20.16.7
     # via tox
